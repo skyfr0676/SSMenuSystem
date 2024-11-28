@@ -120,7 +120,6 @@
         <Compile Include="Plugin.cs" />
         <Compile Include="PrevalidateResponsePatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Test\SubMenuTest.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>
