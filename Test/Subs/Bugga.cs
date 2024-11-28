@@ -1,3 +1,4 @@
+using System;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
 using UnityEngine;
@@ -17,6 +18,6 @@ namespace ServerSpecificSyncer.Test.Subs
         };
         public override string Name { get; set; } = "Sub-Menu related";
         public override int Id { get; set; } = -1;
-        public override int? MenuRelated { get; set; } = -1;
+        public override Type? MenuRelated { get; set; } = typeof(SubMenuTest);
     }
 }

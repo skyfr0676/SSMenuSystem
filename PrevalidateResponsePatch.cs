@@ -3,10 +3,13 @@ using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer
 {
+    /// <summary>
+    /// Patch <see cref="ServerSpecificSettingsSync.ServerPrevalidateClientResponse"/> to avoid checking <see cref="ServerSpecificSettingsSync.DefinedSettings"/>.
+    /// </summary>
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.ServerPrevalidateClientResponse))]
-    public class PrevalidateResponsePatch
+    internal class PrevalidateResponsePatch
     {
-        public static bool Prefix(SSSClientResponse msg, ref bool __result)
+        private static bool Prefix(SSSClientResponse msg, ref bool __result)
         {
             __result = true;
             return false;

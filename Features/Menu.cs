@@ -7,17 +7,36 @@ using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Features
 {
+    /// <summary>
+    /// The Menu system.
+    /// </summary>
     public abstract class Menu
     {
         private static Dictionary<ReferenceHub, Menu> _menuSync = new();
         private static readonly List<Menu> LoadedMenus = new();
+
+        /// <summary>
+        /// All menus loaded.
+        /// </summary>
         public static List<Menu> Menus => LoadedMenus;
         private static readonly Dictionary<Menu, Keybind> GlobalKeybindingSync = new();
         
+        /// <summary>
+        /// This is used to see if <see cref="hub"/> can use <see cref="Menu"/> or not.
+        /// </summary>
+        /// <param name="hub">The target <see cref="ReferenceHub"/></param>
+        /// <returns>bool</returns>
         public virtual bool CheckAccess(ReferenceHub hub) => true;
 
+        /// <summary>
+        /// Register all menus in the <see cref="Assembly.GetCallingAssembly"/>.
+        /// </summary>
         public static void RegisterAll() => Register(Assembly.GetCallingAssembly());
 
+        /// <summary>
+        /// Register all menus of indicated assembly.
+        /// </summary>
+        /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         public static void Register(Assembly assembly)
         {
             foreach (var type in assembly.GetTypes())
@@ -29,6 +48,11 @@ namespace ServerSpecificSyncer.Features
             }
         }
         
+        /// <summary>
+        /// Register specific menu.
+        /// </summary>
+        /// <param name="menu">The target menu.</param>
+        /// <exception cref="ArgumentException">One of parameters of target menu is invalid. please check the <see cref="Exception.Message"/> to find the invalid parameter.</exception>
         public static void Register(Menu menu)
         {
             Log.Debug($"loading Server Specific menu {menu.Name}...");
@@ -52,11 +76,17 @@ namespace ServerSpecificSyncer.Features
                 if (setting is Keybind bind && bind.IsGlobal)
                     GlobalKeybindingSync[menu] = bind;
             }
+
+            if (menu.MenuRelated != null)
+            {
+                if (!LoadedMenus.Any(m => m.GetType() == menu.MenuRelated))
+                    throw new ArgumentException($"menu {menu.Name} has a invalid related menu ({menu.MenuRelated.FullName} has not been loaded.");
+            }
             
             LoadedMenus.Add(menu);
             Log.Info($"Server Specific menu {menu.Name} is now registered!");
         }
-
+        
         private static bool CheckSameId(Menu menu)
         {
             if (menu.MenuRelated == null)
@@ -64,6 +94,10 @@ namespace ServerSpecificSyncer.Features
             return LoadedMenus.Where(x => x.MenuRelated == menu.MenuRelated).Any(x => x.Id == menu.Id);
         }
 
+        /// <summary>
+        /// Unload a menu.
+        /// </summary>
+        /// <param name="menu">The target menu.</param>
         public static void Unregister(Menu menu)
         {
             foreach (var sync in _menuSync)
@@ -74,6 +108,10 @@ namespace ServerSpecificSyncer.Features
             if (LoadedMenus.Contains(menu))
                 LoadedMenus.Remove(menu);
         }
+        
+        /// <summary>
+        /// Unload all menus loaded.
+        /// </summary>
         public static void UnregisterAll()
         {
             foreach (var sync in _menuSync)
@@ -81,50 +119,74 @@ namespace ServerSpecificSyncer.Features
             LoadedMenus.Clear();
         }
         
-        // TODO: DOCS
-        public virtual int? MenuRelated { get; set; } = null;
+        /// <summary>
+        /// Gets or Sets if this menu is related to a <see cref="MenuRelated"/> (will be shown as a SubMenu).
+        /// </summary>
+        public virtual Type? MenuRelated { get; set; } = null;
         
+        /// <summary>
+        /// Gets In-Build Settings.
+        /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
+        /// <summary>
+        /// Gets or Sets the the name of Menu.
+        /// </summary>
         public abstract string Name { get; set; }
+        
+        /// <summary>
+        /// Gets or Sets the description of Menu. Will be shown as <see cref="ServerSpecificSettingBase.HintDescription"/>.
+        /// </summary>
         public virtual string Description { get; set; }
 
+        /// <summary>
+        /// Gets or Sets the id of Menu. Must be above 0 and must not be equal to 0. 
+        /// </summary>
         public abstract int Id { get; set; }
 
-        public static void RegisterAll(Menu[] menus)
-        {
-            LoadedMenus.Clear();
-            LoadedMenus.AddRange(menus);
-        }
-
+        /// <summary>
+        /// Get the main menu for target hub.
+        /// </summary>
+        /// <param name="hub">The target referenceHub</param>
+        /// <returns>In-build parameters that will be shown to hub.</returns>
         public static ServerSpecificSettingBase[] GetMainMenu(ReferenceHub hub)
         {
             List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
             foreach (var menu in LoadedMenus)
             {
-                if (!menu.MenuRelated.HasValue)
+                if (menu.MenuRelated == null)
                     mainMenu.Add(new SSButton(menu.Id, menu.Name, "Open", null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
             
-            mainMenu.AddRange(GetGlboalKeybindings(hub));
+            mainMenu.AddRange(GetGlobalKeybindings(hub, null));
 
             return mainMenu.ToArray();
         }
 
-        public static ServerSpecificSettingBase[] GetGlboalKeybindings(ReferenceHub hub)
+        /// <summary>
+        /// Gets global keybindings for hub.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        /// <param name="menu">The loaded menu of ReferenceHub, so keys will not been duplicated.</param>
+        /// <returns>In-build parameters that will be shown to hub.</returns>
+        public static ServerSpecificSettingBase[] GetGlobalKeybindings(ReferenceHub hub, Menu menu)
         {
             List<ServerSpecificSettingBase> keybindings = new();
             
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub)))
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinds", hint:"don't take a look at this (nah seriously it's just to make some keybinds global)"));
-                foreach (var globalKeybindings in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub)))
-                    keybindings.Add(new SSKeybindSetting(globalKeybindings.Value.SettingId, globalKeybindings.Value.Label, globalKeybindings.Value.SuggestedKey, globalKeybindings.Value.PreventInteractionOnGUI, globalKeybindings.Value.HintDescription));
+                keybindings.AddRange(GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu).Select(globalKeybindings => new SSKeybindSetting(globalKeybindings.Value.SettingId, globalKeybindings.Value.Label, globalKeybindings.Value.SuggestedKey, globalKeybindings.Value.PreventInteractionOnGUI, globalKeybindings.Value.HintDescription)).Cast<ServerSpecificSettingBase>());
             }
 
             return keybindings.ToArray();
         }
         
+        /// <summary>
+        /// Executed when action is executed on
+        /// </summary>
+        /// <param name="hub"></param>
+        /// <param name="setting"></param>
         public virtual void OnInput(ReferenceHub hub, ServerSpecificSettingBase setting) {}
         public virtual void ProperlyEnable(ReferenceHub hub) {}
         public virtual void ProperlyDisable(ReferenceHub hub) {}
@@ -143,11 +205,11 @@ namespace ServerSpecificSyncer.Features
 
             List<ServerSpecificSettingBase> settings = new()
             {
-                new SSButton(0, "Retourner au menu", "Ouvrir"),
+                new SSButton(0, "Return to menu", "Open"),
             };
-            if (LoadedMenus.Count(x => x.MenuRelated == menu.Id && x != menu) > 0)
+            if (LoadedMenus.Count(x => x.MenuRelated == menu.GetType() && x != menu) > 0)
                 settings.Add(new SSGroupHeader("Sub-Menus"));
-            foreach (var s in LoadedMenus.Where(x => x.MenuRelated == menu.Id && x != menu))
+            foreach (var s in LoadedMenus.Where(x => x.MenuRelated == menu.GetType() && x != menu))
                 settings.Add(new SSButton(s.Id, menu.Name, "Open", null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             settings.Add(new SSGroupHeader(menu.Name, false, menu.Description));
             foreach (var t in menu.Settings)
@@ -157,7 +219,7 @@ namespace ServerSpecificSyncer.Features
                 else
                     settings.Add(t);
             }
-            settings.AddRange(GetGlboalKeybindings(hub));
+            settings.AddRange(GetGlobalKeybindings(hub, menu));
             ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
             _menuSync[hub] = menu;
             menu.ProperlyEnable(hub);
@@ -169,7 +231,7 @@ namespace ServerSpecificSyncer.Features
             _menuSync.Remove(hub);
         }
 
-        public Menu TryGetSubMenu(int id) => LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == Id && x != this);
+        public Menu TryGetSubMenu(int id) => LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == GetType() && x != this);
 
         public static Keybind TryGetKeybind(ReferenceHub hub, ServerSpecificSettingBase ss, Menu menu = null)
         {
@@ -181,5 +243,7 @@ namespace ServerSpecificSyncer.Features
                 return null;
             return menu.Settings.FirstOrDefault(x => x.SettingId == ss.SettingId) as Keybind;
         }
+
+        public static Menu GetMenu(Type type) => LoadedMenus.FirstOrDefault(x => x.GetType() == type);
     }
 }

@@ -12,13 +12,35 @@ using Log = PluginAPI.Core.Log;
 
 namespace ServerSpecificSyncer
 {
+    /// <summary>
+    /// Load the plugin to send datas to player
+    /// </summary>
     public class Plugin : Plugin<Config>
     {
+        /// <summary>
+        /// Gets the author of the plugin.
+        /// </summary>
         public override string Author => "Sky";
+
+        /// <summary>
+        /// Gets the name shown in the Loader.
+        /// </summary>
         public override string Name => "ServerSpecificSyncer";
+        
+        /// <summary>
+        /// Gets the version of the plugin.
+        /// </summary>
         public override Version Version => new Version(1, 0, 0);
+        
+        /// <summary>
+        /// Gets the prefix used for configs.
+        /// </summary>
         public override string Prefix => "ss_syncer";
         private Harmony _harmony;
+        
+        /// <summary>
+        /// When the plugin is enabled.
+        /// </summary>
         public override void OnEnabled()
         {
             Exiled.Events.Handlers.Player.Verified += Verified;
@@ -37,6 +59,7 @@ namespace ServerSpecificSyncer
             try
             {
                 Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+                // global/local keybinds
                 if (ss.SettingId > 100000 && ss is SSKeybindSetting setting)
                 {
                     Keybind loadedKeybind = Menu.TryGetKeybind(hub, ss, menu);
@@ -47,8 +70,14 @@ namespace ServerSpecificSyncer
                         return;
                     }
                 }
+                // load main menu
                 if (ss.SettingId == 0 && menu != null)
-                    Menu.LoadForPlayer(hub, null);
+                {
+                    // return to upper menu (or main menu)
+                    Menu m = Menu.GetMenu(menu.MenuRelated);
+                    Menu.LoadForPlayer(hub, m);
+                }
+                // load method when input is used on specific menu.
                 else if (menu != null)
                 {
                     if (ss.SettingId < 0)
@@ -56,6 +85,7 @@ namespace ServerSpecificSyncer
                     else
                         menu.OnInput(hub, ss);
                 }
+                // load selected menu.
                 else
                 {
                     if (!Menu.Menus.Any(x => x.Id == ss.SettingId))
