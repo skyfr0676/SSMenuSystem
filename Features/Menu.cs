@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using HarmonyLib;
 using PluginAPI.Core;
 using UserSettings.ServerSpecific;
 
@@ -39,16 +40,25 @@ namespace ServerSpecificSyncer.Features
         /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         private static void Register(Assembly assembly)
         {
+            Log.Debug($"loading assembly {assembly.GetName().Name}...", Plugin.StaticConfig.Debug);
+            List<Menu> loadedMenus = new();
             foreach (var type in assembly.GetTypes())
             {
                 if (type.IsAbstract || type.IsInterface)
                     continue;
                 if (type.BaseType != typeof(Menu))
-                    return;
+                    continue;
                 Menu menu = Activator.CreateInstance(type) as Menu;
+                loadedMenus.Add(menu);
+            }
+            var orderedMenus = loadedMenus.OrderBy(x => x.MenuRelated == null ? 0 : 1).ThenBy(x => x.Id);
+            List<Menu> registeredMenus = new();
+            foreach (var menu in orderedMenus)
+            {
                 try
                 {
                     Register(menu);
+                    registeredMenus.Add(menu);
                 }
                 catch (Exception e)
                 {
@@ -56,10 +66,11 @@ namespace ServerSpecificSyncer.Features
 #if DEBUG
                     Log.Error(e.ToString());
 #else
-                    Log.Debug(e.ToString());
+                    Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
 #endif
                 }
             }
+            Log.Debug($"loaded assembly {assembly.GetName().Name} with {registeredMenus.Count} menus. A total of {LoadedMenus.Count} menus.", Plugin.StaticConfig.Debug);
         }
         
         /// <summary>
@@ -67,9 +78,11 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="menu">The target menu.</param>
         /// <exception cref="ArgumentException">One of parameters of target menu is invalid. please check the <see cref="Exception.Message"/> to find the invalid parameter.</exception>
-        private static void Register(Menu menu)
+        internal static void Register(Menu menu)
         {
-            Log.Debug($"loading Server Specific menu {menu.Name}...");
+            if (menu == null)
+                return;
+            Log.Debug($"loading Server Specific menu {menu.Name}...", Plugin.StaticConfig.Debug);
             if (CheckSameId(menu))
                 throw new ArgumentException($"another menu with id {menu.Id} is already registered. can't load {menu.Name}.");
             if (menu.Id >= 0)
@@ -89,7 +102,7 @@ namespace ServerSpecificSyncer.Features
                 
                 if (setting is Keybind bind && bind.IsGlobal)
                     GlobalKeybindingSync[menu] = bind;
-                if (setting.GetType().BaseType == typeof(SSKeybindSetting))
+                if (setting is SSKeybindSetting && setting is not Keybind)
                     Log.Warning($"setting {setting.SettingId} (label {setting.Label}) is registered has {nameof(SSKeybindSetting)}. it's recommended to use {typeof(Keybind).FullName} (especially if you want to create global keybindings) !");
             }
 
@@ -100,7 +113,7 @@ namespace ServerSpecificSyncer.Features
             }
             
             LoadedMenus.Add(menu);
-            Log.Info($"Server Specific menu {menu.Name} is now registered!");
+            Log.Debug($"Server Specific menu {menu.Name} is now registered!", Plugin.StaticConfig.Debug);
         }
         
         private static bool CheckSameId(Menu menu)
@@ -167,11 +180,14 @@ namespace ServerSpecificSyncer.Features
         /// <returns>In-build parameters that will be shown to hub.</returns>
         private static ServerSpecificSettingBase[] GetMainMenu(ReferenceHub hub)
         {
+            if (LoadedMenus.IsEmpty())
+                return Array.Empty<ServerSpecificSettingBase>();
+            
             List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
             foreach (var menu in LoadedMenus)
             {
                 if (menu.MenuRelated == null)
-                    mainMenu.Add(new SSButton(menu.Id, menu.Name, "Open", null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
+                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
             
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
@@ -189,7 +205,7 @@ namespace ServerSpecificSyncer.Features
         {
             List<ServerSpecificSettingBase> keybindings = new();
             
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub)))
+            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu))
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
                 keybindings.AddRange(GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu).Select(globalKeybindings => new SSKeybindSetting(globalKeybindings.Value.SettingId, globalKeybindings.Value.Label, globalKeybindings.Value.SuggestedKey, globalKeybindings.Value.PreventInteractionOnGUI, globalKeybindings.Value.HintDescription)));
@@ -220,14 +236,18 @@ namespace ServerSpecificSyncer.Features
                 return;
             }
 
-            List<ServerSpecificSettingBase> settings = new()
-            {
-                new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label, Plugin.GetTranslation().ReturnToMenu.ButtonText),
-            };
+            List<ServerSpecificSettingBase> settings = new();
+            if (menu.MenuRelated != null)
+                settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(menu.MenuRelated)?.Name ?? "Unkown"),
+                    Plugin.GetTranslation().ReturnTo.ButtonText));
+            else
+                settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
+                    Plugin.GetTranslation().ReturnToMenu.ButtonText));
+            
             if (LoadedMenus.Count(x => x.MenuRelated == menu.GetType() && x != menu) > 0)
                 settings.Add(new SSGroupHeader("Sub-Menus"));
             foreach (var s in LoadedMenus.Where(x => x.MenuRelated == menu.GetType() && x != menu))
-                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenButton, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
+                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             settings.Add(new SSGroupHeader(menu.Name, false, menu.Description));
             foreach (var t in menu.Settings)
             {

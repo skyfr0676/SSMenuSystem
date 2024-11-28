@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Test;
-using ServerSpecificSyncer.Test.Subs;
 using UserSettings.ServerSpecific;
-using Log = PluginAPI.Core.Log;
+using PluginAPI.Core;
 #if EXILED
 using Exiled.API.Features;
 #endif
@@ -41,7 +36,9 @@ namespace ServerSpecificSyncer
         /// Gets the prefix used for configs.
         /// </summary>
         public override string Prefix => "ss_syncer";
+
 #endif
+        public static Config StaticConfig { get; set; }
         
         public static Plugin Instance { get; private set; }
         
@@ -83,6 +80,10 @@ namespace ServerSpecificSyncer
         private void GenericEnable()
         {
             Instance = this;
+            StaticConfig = Config;
+#if DEBUG
+            StaticConfig.Debug = true;
+#endif
             _harmony = new Harmony("fr.sky.patches");
             _harmony.PatchAll();
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;

@@ -23,7 +23,7 @@
       <OutputPath>bin\Release NWAPI\</OutputPath>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <DocumentationFile>bin\Release NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
       <OutputPath>bin\Release EXILED\</OutputPath>
@@ -32,7 +32,7 @@
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <DebugType>pdbonly</DebugType>
       <DocumentationFile>bin\Release EXILED\ServerSpecificSyncer.xml</DocumentationFile>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
       <OutputPath>bin\Debug EXILED\</OutputPath>
@@ -120,9 +120,7 @@
         <Compile Include="Plugin.cs" />
         <Compile Include="PrevalidateResponsePatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Test\PrimitiveTest.cs" />
         <Compile Include="Test\SubMenuTest.cs" />
-        <Compile Include="Test\Subs\Bugga.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>

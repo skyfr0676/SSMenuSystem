@@ -12,13 +12,13 @@ using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer;
-
-internal class EventHandler
+namespace ServerSpecificSyncer
 {
+    internal class EventHandler
+    {
 #if EXILED
-    internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
-    internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
+        internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
+        internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
 
 #elif NWAPI
     [PluginEvent(ServerEventType.PlayerJoined)]
@@ -28,56 +28,68 @@ internal class EventHandler
     public static void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
 #endif
     
-    public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
-    {
-        try
+        public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
-            Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
-            // global/local keybinds
-            if (ss.SettingId > 100000 && ss is SSKeybindSetting setting)
+            try
             {
-                Keybind loadedKeybind = Menu.TryGetKeybinding(hub, ss, menu);
-                if (loadedKeybind != null)
+                if (ss.SettingId == -999)
                 {
-                    if (setting.SyncIsPressed)
-                        loadedKeybind.OnUsed?.Invoke(hub);
+                    Menu.LoadForPlayer(hub, null);
                     return;
                 }
-            }
-            // load main menu
-            if (ss.SettingId == 0 && menu != null)
-            {
-                // return to upper menu (or main menu)
-                Menu m = Menu.GetMenu(menu.MenuRelated);
-                Menu.LoadForPlayer(hub, m);
-            }
-            // load method when input is used on specific menu.
-            else if (menu != null)
-            {
-                if (ss.SettingId < 0)
-                    Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
-                else
-                    menu.OnInput(hub, ss);
-            }
-            // load selected menu.
-            else
-            {
-                if (!Menu.Menus.Any(x => x.Id == ss.SettingId))
-                    throw new KeyNotFoundException("invalid loaded id. please report this bug to developers.");
-                Menu m = Menu.Menus.FirstOrDefault(x => x.Id == ss.SettingId);
-                Menu.LoadForPlayer(hub, m);
-            }
-        }
-        catch (Exception e)
-        {
-            if (Plugin.GetTranslation().ShowErrorToClient)
-            {
-                ServerSpecificSettingsSync.SendToPlayer(hub, new ServerSpecificSettingBase[]
+                Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+                // global/local keybinds
+                if (ss.SettingId > 100000 && ss is SSKeybindSetting setting)
                 {
-                    new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.GetTranslation().ShowFullErrorToClient) && Plugin.GetTranslation().ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError)
-                });
+                    Keybind loadedKeybind = Menu.TryGetKeybinding(hub, ss, menu);
+                    if (loadedKeybind != null)
+                    {
+                        if (setting.SyncIsPressed)
+                            loadedKeybind.OnUsed?.Invoke(hub);
+                        return;
+                    }
+                }
+                // load main menu
+                if (ss.SettingId == 0 && menu != null)
+                {
+                    // return to upper menu (or main menu)
+                    Menu m = Menu.GetMenu(menu.MenuRelated);
+                    Menu.LoadForPlayer(hub, m);
+                }
+                // load method when input is used on specific menu.
+                else if (menu != null)
+                {
+                    if (ss.SettingId < 0)
+                        Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
+                    else
+                        menu.OnInput(hub, ss);
+                }
+                // load selected menu.
+                else
+                {
+                    if (!Menu.Menus.Any(x => x.Id == ss.SettingId))
+                        throw new KeyNotFoundException("invalid loaded id. please report this bug to developers.");
+                    Menu m = Menu.Menus.FirstOrDefault(x => x.Id == ss.SettingId);
+                    Menu.LoadForPlayer(hub, m);
+                }
             }
-            Log.Error(e.ToString());
+            catch (Exception e)
+            {
+                if (Plugin.StaticConfig.ShowErrorToClient)
+                {
+                    ServerSpecificSettingsSync.SendToPlayer(hub, new ServerSpecificSettingBase[]
+                    {
+                        new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.StaticConfig.ShowFullErrorToClient) && Plugin.StaticConfig.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
+                        new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)
+                    });
+                }
+                Log.Error($"there is a error while receiving input {ss.SettingId} ({ss.Label}): {e.Message}\nActivate Debugger to show full details.");
+#if DEBUG
+                Log.Error(e.ToString());
+#else
+                Log.Debug(e.ToString());
+#endif
+            }
         }
     }
 }
