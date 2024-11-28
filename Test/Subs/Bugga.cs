@@ -8,7 +8,7 @@ namespace ServerSpecificSyncer.Test.Subs
 {
     public class Bugga : Menu
     {
-        public override ServerSpecificSettingBase[] Settings => new ServerSpecificSettingBase[]
+        protected override ServerSpecificSettingBase[] Settings => new ServerSpecificSettingBase[]
         {
             //new SSPlaintextSetting(2, "franchement"), //TODO: COMPRENDRE L'ERREUR
             new SSSliderSetting(2, "Are you ready ?", -5f, 5, 0, true),

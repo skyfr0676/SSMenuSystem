@@ -14,24 +14,43 @@
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release NWAPI|AnyCPU' ">
+      <DebugType>pdbonly</DebugType>
+      <Optimize>true</Optimize>
+      <DefineConstants>TRACE;NWAPI</DefineConstants>
+      <ErrorReport>prompt</ErrorReport>
+      <WarningLevel>4</WarningLevel>
+      <OutputPath>bin\Release NWAPI\</OutputPath>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Release NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
+      <OutputPath>bin\Release EXILED\</OutputPath>
+      <DefineConstants>TRACE;EXILED</DefineConstants>
+      <Optimize>true</Optimize>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DebugType>pdbonly</DebugType>
+      <DocumentationFile>bin\Release EXILED\ServerSpecificSyncer.xml</DocumentationFile>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
+      <OutputPath>bin\Debug EXILED\</OutputPath>
+      <DefineConstants>DEBUG;TRACE;EXILED</DefineConstants>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Debug EXILED\ServerSpecificSyncer.xml</DocumentationFile>
+      <WarningLevel>0</WarningLevel>
+    </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug NWAPI|AnyCPU' ">
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
         <Optimize>false</Optimize>
-        <OutputPath>bin\Debug\</OutputPath>
-        <DefineConstants>DEBUG;TRACE</DefineConstants>
+        <DefineConstants>DEBUG;TRACE;NWAPI</DefineConstants>
         <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-        <PlatformTarget>AnyCPU</PlatformTarget>
-        <DebugType>pdbonly</DebugType>
-        <Optimize>true</Optimize>
-        <OutputPath>bin\Release\</OutputPath>
-        <DefineConstants>TRACE</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>4</WarningLevel>
+        <WarningLevel>0</WarningLevel>
+      <OutputPath>bin\Debug NWAPI\</OutputPath>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+      <DocumentationFile>bin\Debug NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
     </PropertyGroup>
     <PropertyGroup>
       <PreBuildEvent>    </PreBuildEvent>
@@ -95,6 +114,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Config.cs" />
+        <Compile Include="EventHandler.cs" />
         <Compile Include="Features\Keybind.cs" />
         <Compile Include="Features\Menu.cs" />
         <Compile Include="Plugin.cs" />
@@ -103,6 +123,7 @@
         <Compile Include="Test\PrimitiveTest.cs" />
         <Compile Include="Test\SubMenuTest.cs" />
         <Compile Include="Test\Subs\Bugga.cs" />
+        <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />

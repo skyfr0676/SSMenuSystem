@@ -6,8 +6,7 @@ namespace ServerSpecificSyncer.Test
 {
     public class SubMenuTest : Menu
     {
-        
-        public override ServerSpecificSettingBase[] Settings => new ServerSpecificSettingBase[]
+        protected override ServerSpecificSettingBase[] Settings => new ServerSpecificSettingBase[]
         {
             new SSButton(2, "Black", "This button is not black ?"),
             new SSDropdownSetting(3, "test", new[]{"opt1", "opt2"}),
@@ -16,7 +15,7 @@ namespace ServerSpecificSyncer.Test
         public override string Name { get; set; } = "Sub menus test";
         public override int Id { get; set; } = -1;
 
-        public override string Description { get; set; } = "Ceci est un test pour voir si tout foncitonne.";
+        protected override string Description { get; set; } = "Ceci est un test pour voir si tout foncitonne.";
 
         public override void OnInput(ReferenceHub hub, ServerSpecificSettingBase setting)
         {
