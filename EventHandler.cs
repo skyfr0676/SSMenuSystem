@@ -22,10 +22,10 @@ namespace ServerSpecificSyncer
 
 #elif NWAPI
     [PluginEvent(ServerEventType.PlayerJoined)]
-    public static void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
-    
+    public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
+
     [PluginEvent(ServerEventType.PlayerLeft)]
-    public static void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
+    public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
 #endif
     
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)

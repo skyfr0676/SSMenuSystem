@@ -1,4 +1,5 @@
-﻿#if EXILED
+﻿using ServerSpecificSyncer.Configs;
+#if EXILED
 using Exiled.API.Interfaces;
 #endif
 
@@ -15,17 +16,5 @@ namespace ServerSpecificSyncer
         public LabelButton ReloadButton { get; set; } = new("Reload menus", "Reload");
         public string ServerError { get; set; } = "INTERNAL SERVER ERROR";
         public string NoPermission { get; set; } = "insufficient permissions to see the full errors";
-    }
-
-    public class LabelButton
-    {
-        public string Label { get; set; }
-        public string ButtonText { get; set; }
-
-        public LabelButton(string label, string buttonText)
-        {
-            Label = label;
-            ButtonText = buttonText;
-        }
     }
 }

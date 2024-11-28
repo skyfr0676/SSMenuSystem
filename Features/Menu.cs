@@ -70,7 +70,7 @@ namespace ServerSpecificSyncer.Features
 #endif
                 }
             }
-            Log.Debug($"loaded assembly {assembly.GetName().Name} with {registeredMenus.Count} menus. A total of {LoadedMenus.Count} menus.", Plugin.StaticConfig.Debug);
+            Log.Info($"loaded assembly {assembly.GetName().Name} with {registeredMenus.Count} menus. A total of {LoadedMenus.Count} menus.");
         }
         
         /// <summary>
@@ -225,7 +225,7 @@ namespace ServerSpecificSyncer.Features
         protected virtual void ProperlyDisable(ReferenceHub hub) {}
 
         public static Menu TryGetCurrentPlayerMenu(ReferenceHub hub) => MenuSync.TryGetValue(hub, out Menu menu) ? menu : null;
-
+        
         public static void LoadForPlayer(ReferenceHub hub, Menu menu)
         {
             TryGetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);

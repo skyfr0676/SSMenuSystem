@@ -114,6 +114,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Config.cs" />
+        <Compile Include="Configs\LabelButton.cs" />
         <Compile Include="EventHandler.cs" />
         <Compile Include="Features\Keybind.cs" />
         <Compile Include="Features\Menu.cs" />

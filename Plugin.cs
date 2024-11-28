@@ -1,9 +1,11 @@
 ﻿using HarmonyLib;
 using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
-using PluginAPI.Core;
 #if EXILED
+using System;
 using Exiled.API.Features;
+#elif NWAPI
+using PluginAPI.Core;
 #endif
 
 namespace ServerSpecificSyncer
@@ -87,7 +89,6 @@ namespace ServerSpecificSyncer
             _harmony = new Harmony("fr.sky.patches");
             _harmony.PatchAll();
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;
-            Menu.RegisterAll();
         }
 
         public static Translation GetTranslation()
