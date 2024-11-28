@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features
+namespace ServerSpecificSyncer.Features.Wrappers
 {
     /// <summary>
     /// Keybind system, to make keybinds global (or local, if <see cref="IsGlobal"/> is defined to false.
@@ -14,7 +14,7 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="id">The id of <see cref="SSKeybindSetting"/> (up by 10.000).</param>
         /// <param name="label">The label of <see cref="SSKeybindSetting"/>.</param>
-        /// <param name="onUsed"><inheritdoc cref="OnUsed"/></param>
+        /// <param name="onUsed"><inheritdoc cref="Action"/></param>
         /// <param name="suggestedKey">The suggested key of <see cref="SSKeybindSetting"/>.</param>
         /// <param name="preventInteractionOnGui">The parameter used to block interaction when UI is opened in <see cref="SSKeybindSetting"/>.</param>
         /// <param name="hint">The hint of <see cref="SSKeybindSetting"/>.</param>
@@ -23,8 +23,9 @@ namespace ServerSpecificSyncer.Features
             string hint = null, bool isGlobal = true) : base(id+100000, label, suggestedKey, preventInteractionOnGui, hint)
         {
             IsGlobal = isGlobal;
-            OnUsed = onUsed;
-        }
+            Action = onUsed;
+            Base = new(id, label, suggestedKey, preventInteractionOnGui, hint);
+;        }
         
         /// <summary>
         /// Gets or Sets whether the <see cref="SSKeybindSetting"/> would be shown and enabled on all pages or not.
@@ -34,6 +35,8 @@ namespace ServerSpecificSyncer.Features
         /// <summary>
         /// The action will be executed when the button is pressed.
         /// </summary>
-        public Action<ReferenceHub> OnUsed { get; }
+        public Action<ReferenceHub> Action { get; }
+
+        public SSKeybindSetting Base { get; }
     }
 }

@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Exiled.API.Interfaces;
 using HarmonyLib;
 using PluginAPI.Core;
+using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Features
@@ -156,7 +158,7 @@ namespace ServerSpecificSyncer.Features
         /// <summary>
         /// Gets In-Build Settings.
         /// </summary>
-        protected abstract ServerSpecificSettingBase[] Settings { get; }
+        public abstract ServerSpecificSettingBase[] Settings { get; }
 
         /// <summary>
         /// Gets or Sets the name of Menu.
@@ -252,9 +254,11 @@ namespace ServerSpecificSyncer.Features
             foreach (var t in menu.Settings)
             {
                 if (t is Keybind bind)
-                    settings.Add(new SSKeybindSetting(bind.SettingId, bind.Label, bind.SuggestedKey, bind.PreventInteractionOnGUI, bind.HintDescription));
+                    settings.Add(bind.Base);
                 else
+                {
                     settings.Add(t);
+                }
             }
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());

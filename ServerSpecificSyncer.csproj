@@ -116,16 +116,25 @@
         <Compile Include="Config.cs" />
         <Compile Include="Configs\LabelButton.cs" />
         <Compile Include="EventHandler.cs" />
-        <Compile Include="Features\Keybind.cs" />
         <Compile Include="Features\Menu.cs" />
+        <Compile Include="Features\Wrappers\Button.cs" />
+        <Compile Include="Features\Wrappers\Dropdown.cs" />
+        <Compile Include="Features\Wrappers\Keybind.cs" />
+        <Compile Include="Features\Wrappers\Plaintext.cs" />
+        <Compile Include="Features\Wrappers\Slider.cs" />
+        <Compile Include="Features\Wrappers\YesNoButton.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="PrevalidateResponsePatch.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
+        <Compile Include="Test.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
       <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Features\Interfaces\" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

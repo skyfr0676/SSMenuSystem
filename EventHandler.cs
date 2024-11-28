@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
+using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer
@@ -45,7 +46,7 @@ namespace ServerSpecificSyncer
                     if (loadedKeybind != null)
                     {
                         if (setting.SyncIsPressed)
-                            loadedKeybind.OnUsed?.Invoke(hub);
+                            loadedKeybind.Action?.Invoke(hub);
                         return;
                     }
                 }
@@ -62,7 +63,20 @@ namespace ServerSpecificSyncer
                     if (ss.SettingId < 0)
                         Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
                     else
+                    {
+                        ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
+                        if (s is Button wBtn)
+                            wBtn.Action?.Invoke(hub, wBtn);
+                        else if (s is Dropdown wDropdown)
+                            wDropdown.Action?.Invoke(hub, wDropdown, wDropdown.SyncSelectionText);
+                        else if (s is Plaintext wPlaintext)
+                            wPlaintext.OnChanged?.Invoke(hub, wPlaintext.SyncInputText, wPlaintext);
+                        else if (s is Slider wSlider)
+                            wSlider.Action?.Invoke(hub, wSlider.SyncFloatValue, wSlider);
+                        else if (s is YesNoButton wYesNo)
+                            wYesNo.Action?.Invoke(hub, wYesNo.SyncIsB, wYesNo);
                         menu.OnInput(hub, ss);
+                    }
                 }
                 // load selected menu.
                 else
