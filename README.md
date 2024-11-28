@@ -1,5 +1,7 @@
 # ServerSpecificsSyncer
 
+[![Downloads](https://img.shields.io/github/downloads/skyfr0676/ServerSpecificsSyncer/total)](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest)
+
 Server Specific Syncer is used to sync all server specifics menus on one thing, to avoid compatibilty errors
 
 ## how to use ServerSpecificSyncer as:
