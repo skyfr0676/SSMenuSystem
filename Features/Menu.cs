@@ -5,6 +5,7 @@ using System.Reflection;
 using Exiled.API.Interfaces;
 using HarmonyLib;
 using PluginAPI.Core;
+using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
@@ -253,18 +254,8 @@ namespace ServerSpecificSyncer.Features
             settings.Add(new SSGroupHeader(menu.Name, false, menu.Description));
             foreach (var t in menu.Settings)
             {
-                if (t is Keybind bind)
-                    settings.Add(bind.Base);
-                else if (t is Button btn)
-                    settings.Add(btn.Base);
-                else if (t is Dropdown dropdown)
-                    settings.Add(dropdown.Base);
-                else if (t is Plaintext plaintext)
-                    settings.Add(plaintext.Base);
-                else if (t is Slider slider)
-                    settings.Add(slider.Base);
-                else if (t is YesNoButton yesNoButton)
-                    settings.Add(yesNoButton.Base);
+                if (t is ISetting setting)
+                    settings.Add(setting.Base);
                 else
                     settings.Add(t);
             }
