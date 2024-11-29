@@ -66,15 +66,15 @@ namespace ServerSpecificSyncer
                     {
                         ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
                         if (s is Button wBtn)
-                            wBtn.Action?.Invoke(hub, wBtn);
+                            wBtn.Action?.Invoke(hub, (SSButton)ss);
                         else if (s is Dropdown wDropdown)
-                            wDropdown.Action?.Invoke(hub, wDropdown, ((SSDropdownSetting)ss).SyncSelectionText);
+                            wDropdown.Action?.Invoke(hub, (SSDropdownSetting)ss, ((SSDropdownSetting)ss).SyncSelectionText);
                         else if (s is Plaintext wPlaintext)
-                            wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, wPlaintext);
+                            wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, (SSPlaintextSetting)ss);
                         else if (s is Slider wSlider)
-                            wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, wSlider);
+                            wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, (SSSliderSetting)ss);
                         else if (s is YesNoButton wYesNo)
-                            wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, wYesNo);
+                            wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
                         else
                             menu.OnInput(hub, ss);
                     }

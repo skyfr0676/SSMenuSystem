@@ -83,8 +83,8 @@ namespace ServerSpecificSyncer
         {
             Instance = this;
             StaticConfig = Config;
-            Menu.RegisterAll();
 #if DEBUG
+            Menu.RegisterAll();
             StaticConfig.Debug = true;
 #endif
             _harmony = new Harmony("fr.sky.patches");

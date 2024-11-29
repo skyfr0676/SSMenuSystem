@@ -1,4 +1,5 @@
 using System;
+using ServerSpecificSyncer.Features.Interfaces;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 
@@ -7,7 +8,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
     /// <summary>
     /// Keybind system, to make keybinds global (or local, if <see cref="IsGlobal"/> is defined to false.
     /// </summary>
-    public class Keybind : SSKeybindSetting
+    public class Keybind : SSKeybindSetting, ISetting
     {
         /// <summary>
         /// Initialize instance of <see cref="Keybind"/>
@@ -24,7 +25,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
         {
             IsGlobal = isGlobal;
             Action = onUsed;
-            Base = new(id, label, suggestedKey, preventInteractionOnGui, hint);
+            Base = new SSKeybindSetting(id, label, suggestedKey, preventInteractionOnGui, hint);
 ;        }
         
         /// <summary>
@@ -37,6 +38,6 @@ namespace ServerSpecificSyncer.Features.Wrappers
         /// </summary>
         public Action<ReferenceHub> Action { get; }
 
-        public SSKeybindSetting Base { get; }
+        public ServerSpecificSettingBase Base { get; }
     }
 }

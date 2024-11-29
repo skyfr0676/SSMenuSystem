@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using ServerSpecificSyncer.Features;
+using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
@@ -15,15 +16,18 @@ namespace ServerSpecificSyncer.Patchs
             {
                 if (ss.SettingId == __instance.SettingId)
                 {
-                    if (ss is Plaintext plaintext)
+                    if (ss is ISetting setting)
                     {
-                        __result = plaintext.Base;
+                        __result = setting.Base;
                         return false;
                     }
+                    __result = ss;
+                    return false;
                 }
             }
-
-            return true;
+            
+            __result = null;
+            return false;
         }
     }
 }
