@@ -68,14 +68,15 @@ namespace ServerSpecificSyncer
                         if (s is Button wBtn)
                             wBtn.Action?.Invoke(hub, wBtn);
                         else if (s is Dropdown wDropdown)
-                            wDropdown.Action?.Invoke(hub, wDropdown, wDropdown.SyncSelectionText);
+                            wDropdown.Action?.Invoke(hub, wDropdown, ((SSDropdownSetting)ss).SyncSelectionText);
                         else if (s is Plaintext wPlaintext)
-                            wPlaintext.OnChanged?.Invoke(hub, wPlaintext.SyncInputText, wPlaintext);
+                            wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, wPlaintext);
                         else if (s is Slider wSlider)
-                            wSlider.Action?.Invoke(hub, wSlider.SyncFloatValue, wSlider);
+                            wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, wSlider);
                         else if (s is YesNoButton wYesNo)
-                            wYesNo.Action?.Invoke(hub, wYesNo.SyncIsB, wYesNo);
-                        menu.OnInput(hub, ss);
+                            wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, wYesNo);
+                        else
+                            menu.OnInput(hub, ss);
                     }
                 }
                 // load selected menu.

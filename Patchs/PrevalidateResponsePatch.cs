@@ -1,7 +1,7 @@
 using HarmonyLib;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer
+namespace ServerSpecificSyncer.Patchs
 {
     /// <summary>
     /// Patch <see cref="ServerSpecificSettingsSync.ServerPrevalidateClientResponse"/> to avoid checking <see cref="ServerSpecificSettingsSync.DefinedSettings"/>.

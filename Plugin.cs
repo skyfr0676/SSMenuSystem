@@ -83,6 +83,7 @@ namespace ServerSpecificSyncer
         {
             Instance = this;
             StaticConfig = Config;
+            Menu.RegisterAll();
 #if DEBUG
             StaticConfig.Debug = true;
 #endif
