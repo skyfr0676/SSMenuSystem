@@ -9,23 +9,41 @@
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
         <RootNamespace>ServerSpecificSyncer</RootNamespace>
-        <AssemblyName>ServerSpecificSyncer</AssemblyName>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <AssemblyName>ServerSpecificSyncer</AssemblyName>
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release NWAPI|AnyCPU' ">
-      <DebugType>pdbonly</DebugType>
-      <Optimize>true</Optimize>
-      <DefineConstants>TRACE;NWAPI</DefineConstants>
-      <ErrorReport>prompt</ErrorReport>
-      <WarningLevel>4</WarningLevel>
-      <OutputPath>bin\Release NWAPI\</OutputPath>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DocumentationFile>bin\Release NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
-      <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <AssemblyName>ServerSpecificSyncer-NWAPI</AssemblyName>
+        <PostBuildEvent>cp "$(AssemblyName).dll" "/home/sky/.config/SCP Secret Laboratory/PluginAPI/plugins/7777";</PostBuildEvent>
+        <DebugType>pdbonly</DebugType>
+        <Optimize>true</Optimize>
+        <DefineConstants>TRACE;NWAPI</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>4</WarningLevel>
+        <OutputPath>bin\Release NWAPI\</OutputPath>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DocumentationFile>bin\Release NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
+        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
+    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug NWAPI|AnyCPU' ">
+        <AssemblyName>ServerSpecificSyncer-NWAPI</AssemblyName>
+        <PostBuildEvent>cp "$(AssemblyName).dll" "/home/sky/.config/SCP Secret Laboratory/PluginAPI/plugins/7777";</PostBuildEvent>
+        <DebugSymbols>true</DebugSymbols>
+        <DebugType>full</DebugType>
+        <Optimize>false</Optimize>
+        <DefineConstants>DEBUG;TRACE;NWAPI</DefineConstants>
+        <ErrorReport>prompt</ErrorReport>
+        <WarningLevel>0</WarningLevel>
+        <OutputPath>bin\Debug NWAPI\</OutputPath>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DocumentationFile>bin\Debug NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
+    </PropertyGroup>
+    
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
+        <AssemblyName>ServerSpecificSyncer-EXILED</AssemblyName>
+        <PostBuildEvent>cp "$(AssemblyName).dll" "$EXILED_DEV_REFERENCES/Plugins/";</PostBuildEvent>
       <OutputPath>bin\Release EXILED\</OutputPath>
       <DefineConstants>TRACE;EXILED</DefineConstants>
       <Optimize>true</Optimize>
@@ -35,29 +53,15 @@
       <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
+        <AssemblyName>ServerSpecificSyncer-EXILED</AssemblyName>
+        <PostBuildEvent>cp "$(AssemblyName).dll" "$EXILED_DEV_REFERENCES/Plugins/";</PostBuildEvent>
       <OutputPath>bin\Debug EXILED\</OutputPath>
       <DefineConstants>DEBUG;TRACE;EXILED</DefineConstants>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <DocumentationFile>bin\Debug EXILED\ServerSpecificSyncer.xml</DocumentationFile>
       <WarningLevel>0</WarningLevel>
     </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug NWAPI|AnyCPU' ">
-        <DebugSymbols>true</DebugSymbols>
-        <DebugType>full</DebugType>
-        <Optimize>false</Optimize>
-        <DefineConstants>DEBUG;TRACE;NWAPI</DefineConstants>
-        <ErrorReport>prompt</ErrorReport>
-        <WarningLevel>0</WarningLevel>
-      <OutputPath>bin\Debug NWAPI\</OutputPath>
-      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DocumentationFile>bin\Debug NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
-    </PropertyGroup>
-    <PropertyGroup>
-      <PreBuildEvent>    </PreBuildEvent>
-    </PropertyGroup>
-    <PropertyGroup>
-      <PostBuildEvent>cp "$(AssemblyName).dll" "$EXILED_DEV_REFERENCES/Plugins/";</PostBuildEvent>
-    </PropertyGroup>
+    
     <ItemGroup>
         <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
           <HintPath>packages\ExMod.Exiled.9.0.0-alpha.1\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
@@ -85,6 +89,9 @@
         </Reference>
         <Reference Include="Exiled.Permissions, Version=9.0.0.0, Culture=neutral, processorArchitecture=Amd64">
           <HintPath>packages\ExMod.Exiled.9.0.0-alpha.1\lib\net48\Exiled.Permissions.dll</HintPath>
+        </Reference>
+        <Reference Include="Assembly-CSharp-firstpass">
+            <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
         </Reference>
         <Reference Include="Mirror">
             <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
@@ -118,17 +125,20 @@
         <Compile Include="EventHandler.cs" />
         <Compile Include="Features\Interfaces\ISetting.cs" />
         <Compile Include="Features\Menu.cs" />
+        <Compile Include="Features\Parameters.cs" />
         <Compile Include="Features\Wrappers\Button.cs" />
         <Compile Include="Features\Wrappers\Dropdown.cs" />
         <Compile Include="Features\Wrappers\Keybind.cs" />
         <Compile Include="Features\Wrappers\Plaintext.cs" />
         <Compile Include="Features\Wrappers\Slider.cs" />
         <Compile Include="Features\Wrappers\YesNoButton.cs" />
+        <Compile Include="Patchs\NWAPISetGroup.cs" />
         <Compile Include="Patchs\OriginalDefinitionPatch.cs" />
         <Compile Include="Patchs\PrevalidateResponsePatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
         <Compile Include="Test.cs" />
+        <Compile Include="TestBis.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>

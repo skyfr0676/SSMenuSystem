@@ -10,6 +10,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
     /// </summary>
     public class Keybind : SSKeybindSetting, ISetting
     {
+        public const int Increment = 100000;
         /// <summary>
         /// Initialize instance of <see cref="Keybind"/>
         /// </summary>
@@ -21,11 +22,11 @@ namespace ServerSpecificSyncer.Features.Wrappers
         /// <param name="hint">The hint of <see cref="SSKeybindSetting"/>.</param>
         /// <param name="isGlobal"><inheritdoc cref="IsGlobal"/></param>
         public Keybind(int? id, string label, Action<ReferenceHub> onUsed, KeyCode suggestedKey = KeyCode.None, bool preventInteractionOnGui = true,
-            string hint = null, bool isGlobal = true) : base(id+100000, label, suggestedKey, preventInteractionOnGui, hint)
+            string hint = null, bool isGlobal = true) : base(id+Increment, label, suggestedKey, preventInteractionOnGui, hint)
         {
             IsGlobal = isGlobal;
             Action = onUsed;
-            Base = new SSKeybindSetting(id, label, suggestedKey, preventInteractionOnGui, hint);
+            Base = new SSKeybindSetting(id + Increment, label, suggestedKey, preventInteractionOnGui, hint);
 ;        }
         
         /// <summary>

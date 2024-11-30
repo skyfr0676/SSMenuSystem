@@ -1,14 +1,15 @@
 ﻿#if EXILED
 using Exiled.Events.EventArgs.Player;
+using MEC;
 #elif NWAPI
-using PluginAPI.Core;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 #endif
+
+using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
@@ -20,13 +21,22 @@ namespace ServerSpecificSyncer
 #if EXILED
         internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
         internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
+        internal static void ChangingGroup(ChangingGroupEventArgs ev)
+        {
+            Timing.CallDelayed(0.01f, () =>
+            {
+                Menu menu = Menu.TryGetCurrentPlayerMenu(ev.Player.ReferenceHub);
+                if (menu == null || !menu.CheckAccess(ev.Player.ReferenceHub))
+                    Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
+            });
+        }
 
 #elif NWAPI
-    [PluginEvent(ServerEventType.PlayerJoined)]
-    public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
+        [PluginEvent(ServerEventType.PlayerJoined)]
+        public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
 
-    [PluginEvent(ServerEventType.PlayerLeft)]
-    public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
+        [PluginEvent(ServerEventType.PlayerLeft)]
+        public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
 #endif
     
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
@@ -39,8 +49,15 @@ namespace ServerSpecificSyncer
                     return;
                 }
                 Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+                if (!menu?.CheckAccess(hub) ?? false)
+                {
+                    Log.Warning($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} wich is disabled for him.");
+                    Menu.LoadForPlayer(hub, null);
+                    return;
+                }
+                
                 // global/local keybinds
-                if (ss.SettingId > 100000 && ss is SSKeybindSetting setting)
+                if (ss.SettingId > Keybind.Increment && ss is SSKeybindSetting setting)
                 {
                     Keybind loadedKeybind = Menu.TryGetKeybinding(hub, ss, menu);
                     if (loadedKeybind != null)

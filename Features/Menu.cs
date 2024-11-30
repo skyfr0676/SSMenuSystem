@@ -30,7 +30,7 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="hub">The target <see cref="ReferenceHub"/></param>
         /// <returns>bool</returns>
-        protected virtual bool CheckAccess(ReferenceHub hub) => true;
+        public virtual bool CheckAccess(ReferenceHub hub) => true;
 
         /// <summary>
         /// Register all menus in the <see cref="Assembly.GetCallingAssembly"/>.
@@ -183,11 +183,11 @@ namespace ServerSpecificSyncer.Features
         /// <returns>In-build parameters that will be shown to hub.</returns>
         private static ServerSpecificSettingBase[] GetMainMenu(ReferenceHub hub)
         {
-            if (LoadedMenus.IsEmpty())
+            if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
                 return Array.Empty<ServerSpecificSettingBase>();
             
             List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
-            foreach (var menu in LoadedMenus)
+            foreach (var menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
                     mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
@@ -275,15 +275,21 @@ namespace ServerSpecificSyncer.Features
 
         public static Keybind TryGetKeybinding(ReferenceHub hub, ServerSpecificSettingBase ss, Menu menu = null)
         {
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Value.SettingId == ss.SettingId))
-                return GlobalKeybindingSync.First(x => x.Key.CheckAccess(hub) && x.Value.SettingId == ss.SettingId).Value;
+            int id = ss.SettingId;
+            if (ss is Keybind)
+                id -= 10000;
+            
+            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Value.SettingId == id))
+                return GlobalKeybindingSync.First(x => x.Key.CheckAccess(hub) && x.Value.SettingId == id).Value;
             if (menu == null)
                 return null;
             if (!menu.CheckAccess(hub))
                 return null;
-            return menu.Settings.FirstOrDefault(x => x.SettingId == ss.SettingId) as Keybind;
+            return menu.Settings.FirstOrDefault(x => x.SettingId == id) as Keybind;
         }
 
         public static Menu GetMenu(Type type) => LoadedMenus.FirstOrDefault(x => x.GetType() == type);
+
+        public void Reload(ReferenceHub hub) => LoadForPlayer(hub, this);
     }
 }

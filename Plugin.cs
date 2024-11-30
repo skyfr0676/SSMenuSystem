@@ -54,6 +54,7 @@ namespace ServerSpecificSyncer
         {
             Exiled.Events.Handlers.Player.Verified += EventHandler.Verified;
             Exiled.Events.Handlers.Player.Left += EventHandler.Left;
+            Exiled.Events.Handlers.Player.ChangingGroup += EventHandler.ChangingGroup;
             GenericEnable();
             base.OnEnabled();
         }
