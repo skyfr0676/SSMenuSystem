@@ -116,4 +116,3 @@ ss_syncer:
 ```
 
 # if you see a bug, please report this [here](https://github.com/skyfr0676/ServerSpecificsSyncer/issues)
-## i have no idea if **NWAPI** work, so don't worry if there is any bug, please open a issue and i will fix this (for EXILED too don't worry kekw)
