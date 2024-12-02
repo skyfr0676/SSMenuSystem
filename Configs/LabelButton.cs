@@ -10,5 +10,11 @@ namespace ServerSpecificSyncer.Configs
             Label = label;
             ButtonText = buttonText;
         }
+
+        public LabelButton()
+        {
+            Label = "MISSING_LABEL";
+            ButtonText = "MISSING_VALUE";
+        }
     }
 }

@@ -22,8 +22,6 @@ namespace ServerSpecificSyncer
         public bool ShowFullErrorToModerators { get; set; } = true;
 
 #if NWAPI
-        //public Translation Translation { get; set; } = new();
-        [YamlIgnore]
         public Translation Translation { get; set; } = new();
 #endif
     }
