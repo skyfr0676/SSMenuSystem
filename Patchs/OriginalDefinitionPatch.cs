@@ -12,7 +12,7 @@ namespace ServerSpecificSyncer.Patchs
     {
         public static bool Prefix(ServerSpecificSettingBase __instance, ref ServerSpecificSettingBase __result)
         {
-            foreach (var ss in Menu.Menus.Select(x => x.Settings).SelectMany(x => x))
+            foreach (ServerSpecificSettingBase ss in Menu.Menus.Select(x => x.Settings).SelectMany(x => x))
             {
                 if (ss.SettingId == __instance.SettingId)
                 {

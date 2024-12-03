@@ -2,8 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Exiled.API.Interfaces;
-using HarmonyLib;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
@@ -22,7 +20,7 @@ namespace ServerSpecificSyncer.Features
         /// <summary>
         /// All menus loaded.
         /// </summary>
-        public static List<Menu> Menus => LoadedMenus;
+        public static IReadOnlyList<Menu> Menus => LoadedMenus.AsReadOnly();
         private static readonly Dictionary<Menu, Keybind> GlobalKeybindingSync = new();
         
         /// <summary>
@@ -36,44 +34,60 @@ namespace ServerSpecificSyncer.Features
         /// Register all menus in the <see cref="Assembly.GetCallingAssembly"/>.
         /// </summary>
         public static void RegisterAll() => Register(Assembly.GetCallingAssembly());
-
+        
         /// <summary>
         /// Register all menus of indicated assembly.
         /// </summary>
         /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         private static void Register(Assembly assembly)
         {
-            Log.Debug($"loading assembly {assembly.GetName()?.Name}...", Plugin.StaticConfig.Debug);
-            List<Menu> loadedMenus = new();
-            foreach (var type in assembly.GetTypes())
+            try
             {
-                if (type.IsAbstract || type.IsInterface)
-                    continue;
-                if (type.BaseType != typeof(Menu))
-                    continue;
-                Menu menu = Activator.CreateInstance(type) as Menu;
-                loadedMenus.Add(menu);
-            }
-            var orderedMenus = loadedMenus.OrderBy(x => x.MenuRelated == null ? 0 : 1).ThenBy(x => x.Id);
-            List<Menu> registeredMenus = new();
-            foreach (var menu in orderedMenus)
-            {
-                try
+                Log.Debug($"loading assembly {assembly.GetName().Name}...", Plugin.StaticConfig?.Debug ?? false);
+                List<Menu> loadedMenus = new();
+                foreach (Type type in assembly.GetTypes())
                 {
-                    Register(menu);
-                    registeredMenus.Add(menu);
+                    if (type.IsAbstract || type.IsInterface)
+                        continue;
+                    if (type.BaseType != typeof(Menu))
+                        continue;
+                    Menu menu = Activator.CreateInstance(type) as Menu;
+                    loadedMenus.Add(menu);
                 }
-                catch (Exception e)
+
+                IOrderedEnumerable<Menu> orderedMenus = loadedMenus.OrderBy(x => x.MenuRelated == null ? 0 : 1).ThenBy(x => x.Id);
+                List<Menu> registeredMenus = new();
+                foreach (Menu menu in orderedMenus)
                 {
-                    Log.Error($"there is a error while loading menu {menu?.Name ?? "NULL"}: {e.Message}\nActivate Debugger to show full details.");
+                    try
+                    {
+                        Register(menu);
+                        registeredMenus.Add(menu);
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error(
+                            $"there is a error while loading menu {menu.Name}: {e.Message}\nEnable Debugger to show full details.");
 #if DEBUG
-                    Log.Error(e.ToString());
+                        Log.Error(e.ToString());
 #else
-                    Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
+                        Log.Debug(e.ToString(), Plugin.StaticConfig?.Debug ?? false);
 #endif
+                    }
                 }
+
+                Log.Info(
+                    $"loaded assembly {assembly.GetName().Name} with {registeredMenus.Count} menus. A total of {LoadedMenus.Count} menus.");
             }
-            Log.Info($"loaded assembly {assembly.GetName().Name} with {registeredMenus.Count} menus. A total of {LoadedMenus.Count} menus.");
+            catch (Exception e)
+            {
+                Log.Error($"failed to load assembly {assembly.GetName().Name}: {e.Message}");
+#if DEBUG
+                Log.Error(e.ToString());
+#else
+                Log.Debug(e.ToString(), Plugin.StaticConfig?.Debug ?? false);
+#endif
+            }
         }
         
         /// <summary>
@@ -81,7 +95,7 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="menu">The target menu.</param>
         /// <exception cref="ArgumentException">One of parameters of target menu is invalid. please check the <see cref="Exception.Message"/> to find the invalid parameter.</exception>
-        internal static void Register(Menu menu)
+        private static void Register(Menu menu)
         {
             if (menu == null)
                 return;
@@ -94,7 +108,7 @@ namespace ServerSpecificSyncer.Features
                 throw new ArgumentException($"menus name cannot be null or empty.");
 
             List<int> ids = new();
-            foreach (var setting in menu.Settings)
+            foreach (ServerSpecificSettingBase setting in menu.Settings)
             {
                 if (ids.Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
@@ -132,7 +146,7 @@ namespace ServerSpecificSyncer.Features
         /// <param name="menu">The target menu.</param>
         public static void Unregister(Menu menu)
         {
-            foreach (var sync in MenuSync)
+            foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
             {
                 if (sync.Value == menu)
                     LoadForPlayer(sync.Key, null);
@@ -146,15 +160,17 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         public static void UnregisterAll()
         {
-            foreach (var sync in MenuSync)
+            foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
                 LoadForPlayer(sync.Key, null);
             LoadedMenus.Clear();
         }
-        
+
+#nullable enable
         /// <summary>
         /// Gets or Sets if this menu is related to a <see cref="MenuRelated"/> (will be shown as a SubMenu).
         /// </summary>
         public virtual Type? MenuRelated { get; set; } = null;
+#nullable disable
         
         /// <summary>
         /// Gets In-Build Settings.
@@ -187,7 +203,7 @@ namespace ServerSpecificSyncer.Features
                 return Array.Empty<ServerSpecificSettingBase>();
             
             List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
-            foreach (var menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
+            foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
                     mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
@@ -224,12 +240,26 @@ namespace ServerSpecificSyncer.Features
         /// <param name="setting"></param>
         public virtual void OnInput(ReferenceHub hub, ServerSpecificSettingBase setting) {}
 
+        /// <summary>
+        /// Executed when <see cref="hub"/> opened the menu.
+        /// </summary>
+        /// <param name="hub">the target hub.</param>
         protected virtual void ProperlyEnable(ReferenceHub hub) {}
+        
+        /// <summary>
+        /// Executed when <see cref="hub"/> closed the menu.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
         protected virtual void ProperlyDisable(ReferenceHub hub) {}
 
+        /// <summary>
+        /// Gets the loaded <see cref="hub"/> menu. (menu that been displayed on the <see cref="hub"/>).
+        /// </summary>
+        /// <param name="hub">The target hub</param>
+        /// <returns><see cref="Menu"/> if <see cref="hub"/> opened a menu, null if he was on the main menu.</returns>
         public static Menu TryGetCurrentPlayerMenu(ReferenceHub hub) => MenuSync.TryGetValue(hub, out Menu menu) ? menu : null;
         
-        public static void LoadForPlayer(ReferenceHub hub, Menu menu)
+        internal static void LoadForPlayer(ReferenceHub hub, Menu menu)
         {
             TryGetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);
             if (menu == null)
@@ -249,10 +279,10 @@ namespace ServerSpecificSyncer.Features
             
             if (LoadedMenus.Count(x => x.MenuRelated == menu.GetType() && x != menu) > 0)
                 settings.Add(new SSGroupHeader("Sub-Menus"));
-            foreach (var s in LoadedMenus.Where(x => x.MenuRelated == menu.GetType() && x != menu))
+            foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == menu.GetType() && x != menu))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             settings.Add(new SSGroupHeader(menu.Name, false, menu.Description));
-            foreach (var t in menu.Settings)
+            foreach (ServerSpecificSettingBase t in menu.Settings)
             {
                 if (t is ISetting setting)
                     settings.Add(setting.Base);
@@ -265,14 +295,30 @@ namespace ServerSpecificSyncer.Features
             menu.ProperlyEnable(hub);
         }
 
-        public static void DeletePlayer(ReferenceHub hub)
+        /// <summary>
+        /// Only used when player has left the server
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        internal static void DeletePlayer(ReferenceHub hub)
         {
             TryGetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);
             MenuSync.Remove(hub);
         }
 
+        /// <summary>
+        /// Try get sub menu related to this menu.
+        /// </summary>
+        /// <param name="id">The sub menu id.</param>
+        /// <returns>the sub-<see cref="Menu"/> if found.</returns>
         public Menu TryGetSubMenu(int id) => LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == GetType() && x != this);
 
+        /// <summary>
+        /// Gets the first keybind linked to <see cref="ss"/>.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        /// <param name="ss">The specified <see cref="SSKeybindSetting"/> or <see cref="Keybind"/>.</param>
+        /// <param name="menu">The <see cref="hub"/> current loaded menu, to get global or local keybinds.</param>
+        /// <returns><see cref="Keybind"/> if found or not.</returns>
         public static Keybind TryGetKeybinding(ReferenceHub hub, ServerSpecificSettingBase ss, Menu menu = null)
         {
             int id = ss.SettingId;
@@ -288,8 +334,17 @@ namespace ServerSpecificSyncer.Features
             return menu.Settings.FirstOrDefault(x => x.SettingId == id) as Keybind;
         }
 
+        /// <summary>
+        /// Get a menu by <see cref="Type"/>.
+        /// </summary>
+        /// <param name="type">The type</param>
+        /// <returns><see cref="Menu"/> if found.</returns>
         public static Menu GetMenu(Type type) => LoadedMenus.FirstOrDefault(x => x.GetType() == type);
 
+        /// <summary>
+        /// Reload the menu of the specified <see cref="ReferenceHub"/>.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
         public void Reload(ReferenceHub hub) => LoadForPlayer(hub, this);
     }
 }

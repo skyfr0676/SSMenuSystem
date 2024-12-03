@@ -40,8 +40,17 @@ namespace ServerSpecificSyncer
         public override string Prefix => "ss_syncer";
 
 #endif
-        public static Config StaticConfig { get; set; }
+
+        private static Config _staticConfig;
         
+        /// <summary>
+        /// Gets the <see cref="Config"/> instance. Can be null if the plugin is not enabled.
+        /// </summary>
+        public static Config StaticConfig => _staticConfig ??= Instance?.Config;
+        
+        /// <summary>
+        /// Gets the <see cref="Plugin"/> instance. can be null if the plugin is not enabled.
+        /// </summary>
         public static Plugin Instance { get; private set; }
         
         private Harmony _harmony;
@@ -83,7 +92,6 @@ namespace ServerSpecificSyncer
         private void GenericEnable()
         {
             Instance = this;
-            StaticConfig = Config;
 #if DEBUG
             Menu.RegisterAll();
             StaticConfig.Debug = true;
@@ -93,12 +101,16 @@ namespace ServerSpecificSyncer
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;
         }
 
+        /// <summary>
+        /// Get the loaded Translations, depending on using EXILED or NWAPI.
+        /// </summary>
+        /// <returns>The loaded translation. Can be null if the plugin is not enabled.</returns>
         public static Translation GetTranslation()
         {
 #if EXILED
-            return Instance.Translation;
+            return Instance?.Translation;
 #elif NWAPI
-            return Instance.Config.Translation;
+            return StaticConfig?.Translation;
 #endif
         }
     }
