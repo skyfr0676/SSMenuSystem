@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿using Exiled.API.Enums;
+using HarmonyLib;
 using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
 #if EXILED
@@ -38,6 +39,11 @@ namespace ServerSpecificSyncer
         /// Gets the prefix used for configs.
         /// </summary>
         public override string Prefix => "ss_syncer";
+
+        /// <summary>
+        /// Gets the plugin priority.
+        /// </summary>
+        public override PluginPriority Priority => PluginPriority.First;
 
 #endif
 
