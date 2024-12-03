@@ -213,7 +213,7 @@ namespace ServerSpecificSyncer.Features
         {
             if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
                 return Array.Empty<ServerSpecificSettingBase>();
-            
+
             List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
@@ -224,6 +224,35 @@ namespace ServerSpecificSyncer.Features
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
 
             return mainMenu.ToArray();
+        }
+
+        public List<ServerSpecificSettingBase> GetSettings(bool isDefault)
+        {
+            List<ServerSpecificSettingBase> settings = new();
+
+            if (!isDefault)
+            {
+                if (MenuRelated != null)
+                    settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unkown"),
+                        Plugin.GetTranslation().ReturnTo.ButtonText));
+                else
+                    settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
+                        Plugin.GetTranslation().ReturnToMenu.ButtonText));
+            }
+            
+            if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
+                settings.Add(new SSGroupHeader("Sub-Menus"));
+            foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
+                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
+            settings.Add(new SSGroupHeader(Name, false, Description));
+            foreach (ServerSpecificSettingBase t in Settings)
+            {
+                if (t is ISetting setting)
+                    settings.Add(setting.Base);
+                else
+                    settings.Add(t);
+            }
+            return settings;
         }
 
         /// <summary>
@@ -278,33 +307,29 @@ namespace ServerSpecificSyncer.Features
         internal static void LoadForPlayer(ReferenceHub hub, Menu menu)
         {
             TryGetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);
+
+            if (!menu?.CheckAccess(hub) ?? true)
+                menu = null;
+            
             if (menu == null)
             {
+                if (LoadedMenus.Count(x => x.CheckAccess(hub)) == 1 && !Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne)
+                {
+                    Menu m = LoadedMenus.First(x => x.CheckAccess(hub));
+                    List<ServerSpecificSettingBase> s = m.GetSettings(true);
+                    s.AddRange(GetGlobalKeybindings(hub, m));
+                    ServerSpecificSettingsSync.SendToPlayer(hub, s.ToArray());
+                    MenuSync[hub] = m;
+                    m.ProperlyEnable(hub);
+                    return;
+                }
+
                 ServerSpecificSettingsSync.SendToPlayer(hub, GetMainMenu(hub));
                 MenuSync[hub] = null;
                 return;
             }
 
-            List<ServerSpecificSettingBase> settings = new();
-            if (menu.MenuRelated != null)
-                settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(menu.MenuRelated)?.Name ?? "Unkown"),
-                    Plugin.GetTranslation().ReturnTo.ButtonText));
-            else
-                settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
-                    Plugin.GetTranslation().ReturnToMenu.ButtonText));
-            
-            if (LoadedMenus.Count(x => x.MenuRelated == menu.GetType() && x != menu) > 0)
-                settings.Add(new SSGroupHeader("Sub-Menus"));
-            foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == menu.GetType() && x != menu))
-                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
-            settings.Add(new SSGroupHeader(menu.Name, false, menu.Description));
-            foreach (ServerSpecificSettingBase t in menu.Settings)
-            {
-                if (t is ISetting setting)
-                    settings.Add(setting.Base);
-                else
-                    settings.Add(t);
-            }
+            List<ServerSpecificSettingBase> settings = menu.GetSettings(false);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
             MenuSync[hub] = menu;

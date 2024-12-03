@@ -1,4 +1,4 @@
-using YamlDotNet.Serialization;
+using System.ComponentModel;
 #if EXILED
 using Exiled.API.Interfaces;
 #endif
@@ -20,6 +20,9 @@ namespace ServerSpecificSyncer
         public bool ShowErrorToClient { get; set; } = true;
         public bool ShowFullErrorToClient { get; set; } = false;
         public bool ShowFullErrorToModerators { get; set; } = true;
+
+        [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed.")]
+        public bool ForceMainMenuEventIfOnlyOne { get; set; }
 
 #if NWAPI
         public Translation Translation { get; set; } = new();

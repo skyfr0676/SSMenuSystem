@@ -22,15 +22,7 @@ namespace ServerSpecificSyncer
 #if EXILED
         internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
         internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
-        internal static void ChangingGroup(ChangingGroupEventArgs ev)
-        {
-            Timing.CallDelayed(0.01f, () =>
-            {
-                Menu menu = Menu.TryGetCurrentPlayerMenu(ev.Player.ReferenceHub);
-                if (menu == null || !menu.CheckAccess(ev.Player.ReferenceHub))
-                    Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
-            });
-        }
+        internal static void ChangingGroup(ChangingGroupEventArgs ev) => SyncChangedGroup(ev.Player.ReferenceHub);
 
 #elif NWAPI
         [PluginEvent(ServerEventType.PlayerJoined)]
@@ -40,6 +32,20 @@ namespace ServerSpecificSyncer
         public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
 #endif
     
+        
+        public static void SyncChangedGroup(ReferenceHub hub)
+        {
+            Timing.CallDelayed(0.1f, () =>
+            {
+                if (Parameters.SyncCache.ContainsKey(hub))
+                    return;
+                Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+                menu?.Reload(hub);
+                if (menu == null)
+                    Menu.LoadForPlayer(hub, null);
+            });
+        }
+        
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
             if (Parameters.SyncCache.TryGetValue(hub, out var value))

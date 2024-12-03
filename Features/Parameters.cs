@@ -70,13 +70,28 @@ namespace ServerSpecificSyncer.Features
                     Log.Error($"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
                     break;
                 }
+
+                foreach (var setting in SyncCache[hub])
+                {
+                    if (sendSettings.Any(s => s.SettingId == setting.SettingId))
+                    {
+                        var set = sendSettings.First(s => s.SettingId == setting.SettingId);
+                        setting.Label = set.Label;
+                        setting.HintDescription = set.HintDescription;
+                    }
+                }
                 menu.InternalSettingsSync[hub] = new(SyncCache[hub]);
                 SyncCache[hub].Clear();
                 sendSettings.Clear();
                 Log.Debug($"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
             }
             SyncCache.Remove(hub);
-            Menu.LoadForPlayer(hub, null);
+            if (Menu.Menus.Where(x => x.CheckAccess(hub)).IsEmpty())
+                yield break;
+            if (Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
+                Menu.LoadForPlayer(hub, null);
+            else
+                Menu.LoadForPlayer(hub, Menu.Menus.First());
         }
         
         internal static readonly Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> SyncCache = new();
