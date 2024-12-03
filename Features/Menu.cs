@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using PluginAPI.Core;
@@ -20,8 +21,12 @@ namespace ServerSpecificSyncer.Features
         /// <summary>
         /// All menus loaded.
         /// </summary>
-        public static IReadOnlyList<Menu> Menus => LoadedMenus.AsReadOnly();
-        private static readonly Dictionary<Menu, Keybind> GlobalKeybindingSync = new();
+        public static List<Menu> Menus => LoadedMenus;
+        private static readonly Dictionary<Menu, List<Keybind>> GlobalKeybindingSync = new();
+        
+        internal Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> InternalSettingsSync = new();
+        
+        public ReadOnlyDictionary<ReferenceHub, List<ServerSpecificSettingBase>> SettingsSync => new(InternalSettingsSync);
         
         /// <summary>
         /// This is used to see if <see cref="hub"/> can use <see cref="Menu"/> or not.
@@ -116,9 +121,13 @@ namespace ServerSpecificSyncer.Features
                     throw new ArgumentException($"id above and equal to 0 is reserved for menus and main menu.");
                     
                 ids.Add(setting.SettingId);
-                
+
                 if (setting is Keybind bind && bind.IsGlobal)
-                    GlobalKeybindingSync[menu] = bind;
+                {
+                    if (!GlobalKeybindingSync.ContainsKey(menu))
+                        GlobalKeybindingSync[menu] = new List<Keybind>();
+                    GlobalKeybindingSync[menu].Add(bind);
+                }
                 if (setting is SSKeybindSetting && setting is not Keybind)
                     Log.Warning($"setting {setting.SettingId} (label {setting.Label}) is registered has {nameof(SSKeybindSetting)}. it's recommended to use {typeof(Keybind).FullName} (especially if you want to create global keybindings) !");
             }
@@ -146,13 +155,14 @@ namespace ServerSpecificSyncer.Features
         /// <param name="menu">The target menu.</param>
         public static void Unregister(Menu menu)
         {
+            if (LoadedMenus.Contains(menu))
+                LoadedMenus.Remove(menu);
+            GlobalKeybindingSync.Remove(menu);
             foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
             {
                 if (sync.Value == menu)
                     LoadForPlayer(sync.Key, null);
             }
-            if (LoadedMenus.Contains(menu))
-                LoadedMenus.Remove(menu);
         }
         
         /// <summary>
@@ -163,6 +173,8 @@ namespace ServerSpecificSyncer.Features
             foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
                 LoadForPlayer(sync.Key, null);
             LoadedMenus.Clear();
+            foreach (var menu in LoadedMenus.ToList())
+                Unregister(menu);
         }
 
 #nullable enable
@@ -227,7 +239,11 @@ namespace ServerSpecificSyncer.Features
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu))
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
-                keybindings.AddRange(GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu).Select(globalKeybindings => new SSKeybindSetting(globalKeybindings.Value.SettingId, globalKeybindings.Value.Label, globalKeybindings.Value.SuggestedKey, globalKeybindings.Value.PreventInteractionOnGUI, globalKeybindings.Value.HintDescription)));
+                foreach (var menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
+                {
+                    foreach (var keybind in menuKeybinds.Value)
+                        keybindings.Add(new SSKeybindSetting(keybind.SettingId, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
+                }
             }
 
             return keybindings.ToArray();
@@ -324,9 +340,16 @@ namespace ServerSpecificSyncer.Features
             int id = ss.SettingId;
             if (ss is Keybind)
                 id -= 10000;
+
+            foreach (var bind in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub)))
+            {
+                foreach (var key in bind.Value)
+                {
+                    if (key.SettingId == id)
+                        return key;
+                }
+            }
             
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Value.SettingId == id))
-                return GlobalKeybindingSync.First(x => x.Key.CheckAccess(hub) && x.Value.SettingId == id).Value;
             if (menu == null)
                 return null;
             if (!menu.CheckAccess(hub))

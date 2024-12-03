@@ -10,6 +10,7 @@ using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using MEC;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
@@ -33,7 +34,7 @@ namespace ServerSpecificSyncer
 
 #elif NWAPI
         [PluginEvent(ServerEventType.PlayerJoined)]
-        public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
+        public void Verified(Player player) => Timing.RunCoroutine(Parameters.SyncAll(player.ReferenceHub));
 
         [PluginEvent(ServerEventType.PlayerLeft)]
         public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
@@ -41,6 +42,11 @@ namespace ServerSpecificSyncer
     
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
+            if (Parameters.SyncCache.TryGetValue(hub, out var value))
+            {
+                value.Add(ss);
+                return;
+            }
             try
             {
                 if (ss.SettingId == -999)

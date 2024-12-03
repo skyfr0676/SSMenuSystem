@@ -39,8 +39,10 @@ namespace ServerSpecificSyncer.Patchs
             ReferenceHub hub = Player.Get(gameObject)?.ReferenceHub;
             if (hub != null)
             {
-                Timing.CallDelayed(0.01f, () =>
+                Timing.CallDelayed(0.1f, () =>
                 {
+                    if (Parameters.SyncCache.ContainsKey(hub))
+                        return;
                     Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
                     if (menu == null || !menu.CheckAccess(hub))
                         Menu.LoadForPlayer(hub, null);
