@@ -129,6 +129,7 @@
         <Compile Include="Features\Wrappers\Button.cs" />
         <Compile Include="Features\Wrappers\Dropdown.cs" />
         <Compile Include="Features\Wrappers\Keybind.cs" />
+        <Compile Include="Features\Wrappers\ParameterSync.cs" />
         <Compile Include="Features\Wrappers\Plaintext.cs" />
         <Compile Include="Features\Wrappers\Slider.cs" />
         <Compile Include="Features\Wrappers\YesNoButton.cs" />
@@ -137,8 +138,9 @@
         <Compile Include="Patchs\PrevalidateResponsePatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Test.cs" />
-        <Compile Include="TestBis.cs" />
+        <Compile Include="Tests\Test.cs" />
+        <Compile Include="Tests\TestBis.cs" />
+        <Compile Include="Tests\TestCommand.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>

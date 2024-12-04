@@ -5,7 +5,7 @@ using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer
+namespace ServerSpecificSyncer.Tests
 {
     public class Test : Menu
     {

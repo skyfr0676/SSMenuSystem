@@ -21,8 +21,10 @@ namespace ServerSpecificSyncer
         public bool ShowFullErrorToClient { get; set; } = false;
         public bool ShowFullErrorToModerators { get; set; } = true;
 
+#if DEBUG
         [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed.")]
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
+#endif
 
 #if NWAPI
         public Translation Translation { get; set; } = new();

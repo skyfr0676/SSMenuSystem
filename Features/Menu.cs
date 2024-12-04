@@ -6,6 +6,7 @@ using System.Reflection;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
+using UnityEngine;
 using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Features
@@ -111,15 +112,24 @@ namespace ServerSpecificSyncer.Features
                 throw new ArgumentException($"menus ids must be < 0  (to let space for parameters and 0 is only for Main Menu).");
             if (string.IsNullOrEmpty(menu.Name))
                 throw new ArgumentException($"menus name cannot be null or empty.");
-
+            if (Menus.Any(x => x.Name == menu.Name))
+                throw new ArgumentException($"two menus can't have the same name.");
+                
+            
             List<int> ids = new();
-            foreach (ServerSpecificSettingBase setting in menu.Settings)
+            
+            foreach (ServerSpecificSettingBase action in menu.Settings)
             {
+                ServerSpecificSettingBase setting = action;
+                if (setting is ISetting isSetting)
+                    setting = isSetting.Base;
+                
+                setting.SettingId += menu.Hash;
                 if (ids.Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
                 if (setting.SettingId < 0)
                     throw new ArgumentException($"id above and equal to 0 is reserved for menus and main menu.");
-                    
+                
                 ids.Add(setting.SettingId);
 
                 if (setting is Keybind bind && bind.IsGlobal)
@@ -189,6 +199,8 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
+        public int Hash => Mathf.Abs(Name.GetHashCode());
+        
         /// <summary>
         /// Gets or Sets the name of Menu.
         /// </summary>
@@ -245,6 +257,7 @@ namespace ServerSpecificSyncer.Features
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
             settings.Add(new SSGroupHeader(Name, false, Description));
+
             foreach (ServerSpecificSettingBase t in Settings)
             {
                 if (t is ISetting setting)
@@ -313,16 +326,20 @@ namespace ServerSpecificSyncer.Features
             
             if (menu == null)
             {
+                #if DEBUG
                 if (LoadedMenus.Count(x => x.CheckAccess(hub)) == 1 && !Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne)
                 {
                     Menu m = LoadedMenus.First(x => x.CheckAccess(hub));
                     List<ServerSpecificSettingBase> s = m.GetSettings(true);
                     s.AddRange(GetGlobalKeybindings(hub, m));
-                    ServerSpecificSettingsSync.SendToPlayer(hub, s.ToArray());
                     MenuSync[hub] = m;
+                    Parameters.SyncCache.Add(hub, new());
+                    ServerSpecificSettingsSync.SendToPlayer(hub, s.ToArray());
+                    Parameters.WaitUntilDone(hub, s);
                     m.ProperlyEnable(hub);
                     return;
                 }
+                #endif
 
                 ServerSpecificSettingsSync.SendToPlayer(hub, GetMainMenu(hub));
                 MenuSync[hub] = null;
@@ -331,8 +348,9 @@ namespace ServerSpecificSyncer.Features
 
             List<ServerSpecificSettingBase> settings = menu.GetSettings(false);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
-            ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
             MenuSync[hub] = menu;
+            Parameters.SyncCache.Add(hub, new());
+            ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
             menu.ProperlyEnable(hub);
         }
 
