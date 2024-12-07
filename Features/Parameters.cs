@@ -13,35 +13,32 @@ namespace ServerSpecificSyncer.Features
 {
     public static class Parameters
     {
-        public static ServerSpecificSettingBase GetParameter<T>(this ReferenceHub hub, string label) where T : Menu
+        public static ParameterSync<TSs> GetParameter<TMenu, TSs>(this ReferenceHub hub, int settingId)
+            where TMenu : Menu
+            where TSs : ServerSpecificSettingBase
         {
-            if (int.TryParse(label, out var value))
-                return hub.GetParameter<T>(value);
-
-            foreach (var menu in Menu.Menus.Where(m => m is T))
+            foreach (Menu menu in Menu.Menus.Where(x => x is TMenu))
             {
-                if (menu.SettingsSync.TryGetValue(hub, out var settings))
-                    return settings.FirstOrDefault(x => x.Label == label);
-            }
-
-            return null;
-        }
-
-        public static ParameterSync GetParameter<T>(this ReferenceHub hub, int settingId) where T : Menu
-        {
-            foreach (var menu in Menu.Menus.Where(x => x is T))
-            {
-                if (menu.SettingsSync.TryGetValue(hub, out var settings))
+                if (menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings))
                 {
-                    
-                    ServerSpecificSettingBase t = settings.FirstOrDefault(x => x.SettingId == settingId);
-                    if (t is SSKeybindSetting keybind)
-                        return new ParameterSync<KeyCode>(t, t.SettingId - menu.Hash, t.Label, t.HintDescription, keybind.AssignedKeyCode);
-                    return new ParameterSync<ServerSpecificSettingBase>(t, t.SettingId - menu.Hash, t.Label, t.HintDescription);
+                    ServerSpecificSettingBase t = settings.Where(x => x is TSs).FirstOrDefault(x => x.SettingId == settingId);
+                    switch (t)
+                    {
+                        case SSKeybindSetting keybind:
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, keyValue:keybind.AssignedKeyCode);
+                        case SSPlaintextSetting plaintext:
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, plaintext.SyncInputText);
+                        case SSDropdownSetting dropdown:
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, dropdown.SyncSelectionText, dropdown.SyncSelectionIndexRaw);
+                        case SSTwoButtonsSetting twoButtons:
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, boolValue:twoButtons.SyncIsA);
+                        case SSSliderSetting slider:
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, intValue:slider.SyncFloatValue);
+                    }
                 }
             }
 
-            return null;
+            return default;
         }
 
 
@@ -118,7 +115,8 @@ namespace ServerSpecificSyncer.Features
                 toReturn.AddRange(menu.InternalSettingsSync[referenceHub]);
             return toReturn;
         }
-
+        
+#if DEBUG
         public static void WaitUntilDone(ReferenceHub hub, List<ServerSpecificSettingBase> sendSettings)
         {
             Timing.RunCoroutine(EnumWaitUntilDone(hub, sendSettings));
@@ -166,5 +164,6 @@ finish:
             else
                 Menu.LoadForPlayer(hub, Menu.Menus.First());
         }
+#endif
     }
 }

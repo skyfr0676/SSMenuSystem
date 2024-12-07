@@ -20,7 +20,7 @@ namespace ServerSpecificSyncer
     internal class EventHandler
     {
 #if EXILED
-        internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(player.ReferenceHub));
+        internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
         internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
         internal static void ChangingGroup(ChangingGroupEventArgs ev) => SyncChangedGroup(ev.Player.ReferenceHub);
 

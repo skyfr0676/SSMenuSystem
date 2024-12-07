@@ -18,6 +18,7 @@ namespace ServerSpecificSyncer.Features
     {
         private static readonly Dictionary<ReferenceHub, Menu> MenuSync = new();
         private static readonly List<Menu> LoadedMenus = new();
+        private static readonly Dictionary<Assembly, ServerSpecificSettingBase[]> Pinned = new();
 
         /// <summary>
         /// All menus loaded.
@@ -226,7 +227,8 @@ namespace ServerSpecificSyncer.Features
             if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
                 return Array.Empty<ServerSpecificSettingBase>();
 
-            List<ServerSpecificSettingBase> mainMenu = new() { new SSGroupHeader("Main Menu") };
+            List<ServerSpecificSettingBase> mainMenu = Pinned.Values.SelectMany(pin => pin).ToList();
+            mainMenu.Add(new SSGroupHeader("Main Menu"));
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
@@ -412,5 +414,9 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="hub">The target hub.</param>
         public void Reload(ReferenceHub hub) => LoadForPlayer(hub, this);
+        
+        public static void RegisterPin(ServerSpecificSettingBase[] toPin) => Pinned[Assembly.GetCallingAssembly()] = toPin;
+
+        public static void UnregisterPin() => Pinned.Remove(Assembly.GetCallingAssembly());
     }
 }
