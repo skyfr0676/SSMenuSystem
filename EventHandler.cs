@@ -20,13 +20,21 @@ namespace ServerSpecificSyncer
     internal class EventHandler
     {
 #if EXILED
+#if DEBUG
         internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
+#else
+        internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
+#endif
         internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
         internal static void ChangingGroup(ChangingGroupEventArgs ev) => SyncChangedGroup(ev.Player.ReferenceHub);
 
 #elif NWAPI
         [PluginEvent(ServerEventType.PlayerJoined)]
+#if DEBUG
         public void Verified(Player player) => Timing.RunCoroutine(Parameters.SyncAll(player.ReferenceHub));
+#else
+        public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
+#endif
 
         [PluginEvent(ServerEventType.PlayerLeft)]
         public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
@@ -37,8 +45,10 @@ namespace ServerSpecificSyncer
         {
             Timing.CallDelayed(0.1f, () =>
             {
+#if DEBUG
                 if (Parameters.SyncCache.ContainsKey(hub))
                     return;
+#endif
                 Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
                 menu?.Reload(hub);
                 if (menu == null)
@@ -48,11 +58,13 @@ namespace ServerSpecificSyncer
         
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
+#if DEBUG
             if (Parameters.SyncCache.TryGetValue(hub, out var value))
             {
                 value.Add(ss);
                 return;
             }
+#endif
             try
             {
                 if (ss.SettingId == -999)

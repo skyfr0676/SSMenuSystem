@@ -3,6 +3,8 @@ using System;
 using CommandSystem;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
+using ServerSpecificSyncer.Features.Wrappers;
+using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Tests
 {
@@ -16,14 +18,14 @@ namespace ServerSpecificSyncer.Tests
                 sender.Respond($"PING: {mrc.Label} ({mrc.SettingId}) => {mrc.DebugValue}");
             if (!arguments.IsEmpty())
             {
-                var get = hub.GetParameter<Test>(arguments.At(0));
-                if (get == null)
+                var get = hub.GetParameter<Test, ServerSpecificSettingBase>(int.Parse(arguments.At(0)));
+                if (get.Equals(default))
                 {
                     response = "null";
                     return false;
                 }
                 
-                response = $"PING: {get.Label} ({get.SettingId}) => {get.DebugValue}";
+                response = $"PING: {get.Label} ({get.SettingId}) => {get.StrValue}";
                 return true;
             }
             response = "ok";

@@ -5,7 +5,7 @@ using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer
+namespace ServerSpecificSyncer.Tests
 {
     public class TestBis : Menu
     {
@@ -17,6 +17,8 @@ namespace ServerSpecificSyncer
             new Slider(8, "dadadaddetest",-5, 5, (hub, newValue, _) => ShowHint(hub, $"x2 Boost -> {newValue}")),
             new YesNoButton(9, "dadadaddetest","A", "B", (hub, isB, _) => ShowHint(hub, $"x2 Boost -> {isB}")),
             new Keybind(11, "test global perms", (hub) => Log.Info("global perms"), preventInteractionOnGui:false, isGlobal:true),
+            new Keybind(12, "another local test", (hub) => Log.Info("local test"), preventInteractionOnGui:false, isGlobal:true),
+            new Keybind(13, "another global test", (hub) => Log.Info("global test"), preventInteractionOnGui:false, isGlobal:true),
         };
 
         public override bool CheckAccess(ReferenceHub hub) => hub.serverRoles.RemoteAdmin;

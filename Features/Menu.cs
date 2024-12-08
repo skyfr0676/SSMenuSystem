@@ -124,8 +124,10 @@ namespace ServerSpecificSyncer.Features
                 ServerSpecificSettingBase setting = action;
                 if (setting is ISetting isSetting)
                     setting = isSetting.Base;
-                
+
+#if DEBUG                
                 setting.SettingId += menu.Hash;
+#endif
                 if (ids.Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
                 if (setting.SettingId < 0)
@@ -133,14 +135,14 @@ namespace ServerSpecificSyncer.Features
                 
                 ids.Add(setting.SettingId);
 
-                if (setting is Keybind bind && bind.IsGlobal)
+                if (action is Keybind bind && bind.IsGlobal)
                 {
                     if (!GlobalKeybindingSync.ContainsKey(menu))
                         GlobalKeybindingSync[menu] = new List<Keybind>();
                     GlobalKeybindingSync[menu].Add(bind);
                 }
-                if (setting is SSKeybindSetting && setting is not Keybind)
-                    Log.Warning($"setting {setting.SettingId} (label {setting.Label}) is registered has {nameof(SSKeybindSetting)}. it's recommended to use {typeof(Keybind).FullName} (especially if you want to create global keybindings) !");
+                if (action is SSKeybindSetting && action is not Keybind)
+                    Log.Warning($"setting {action.SettingId} (label {action.Label}) is registered has {nameof(SSKeybindSetting)}. it's recommended to use {typeof(Keybind).FullName} (especially if you want to create global keybindings) !");
             }
 
             if (menu.MenuRelated != null)
@@ -200,7 +202,9 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
+#if DEBUG
         public int Hash => Mathf.Abs(Name.GetHashCode());
+#endif
         
         /// <summary>
         /// Gets or Sets the name of Menu.
@@ -351,7 +355,9 @@ namespace ServerSpecificSyncer.Features
             List<ServerSpecificSettingBase> settings = menu.GetSettings(false);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             MenuSync[hub] = menu;
+#if DEBUG
             Parameters.SyncCache.Add(hub, new());
+#endif
             ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
             menu.ProperlyEnable(hub);
         }

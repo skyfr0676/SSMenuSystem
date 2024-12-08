@@ -2,6 +2,7 @@
 using HarmonyLib;
 using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
+using Log = PluginAPI.Core.Log;
 #if EXILED
 using System;
 using Exiled.API.Features;
@@ -99,9 +100,11 @@ namespace ServerSpecificSyncer
         {
             Instance = this;
 #if DEBUG
+            Log.Warning("EXPERMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
             Menu.RegisterAll();
             StaticConfig.Debug = true;
 #endif
+
             _harmony = new Harmony("fr.sky.patches");
             _harmony.PatchAll();
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;

@@ -1,3 +1,4 @@
+#if DEBUG
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -31,7 +32,7 @@ namespace ServerSpecificSyncer.Features
                         case SSDropdownSetting dropdown:
                             return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, dropdown.SyncSelectionText, dropdown.SyncSelectionIndexRaw);
                         case SSTwoButtonsSetting twoButtons:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, boolValue:twoButtons.SyncIsA);
+                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, twoButtons.SyncIsA ? twoButtons.OptionA : twoButtons.OptionB, boolValue:twoButtons.SyncIsA);
                         case SSSliderSetting slider:
                             return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, intValue:slider.SyncFloatValue);
                     }
@@ -167,3 +168,4 @@ finish:
 #endif
     }
 }
+#endif
