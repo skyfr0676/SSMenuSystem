@@ -125,9 +125,6 @@ namespace ServerSpecificSyncer.Features
                 if (setting is ISetting isSetting)
                     setting = isSetting.Base;
 
-#if DEBUG                
-                setting.SettingId += menu.Hash;
-#endif
                 if (ids.Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
                 if (setting.SettingId < 0)
@@ -203,7 +200,7 @@ namespace ServerSpecificSyncer.Features
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
 #if DEBUG
-        public int Hash => Mathf.Abs(Name.GetHashCode());
+        public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
 #endif
         
         /// <summary>

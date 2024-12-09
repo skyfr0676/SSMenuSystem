@@ -55,10 +55,18 @@ namespace ServerSpecificSyncer.Features
                 {
                     if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
                         continue;
+                    ServerSpecificSettingBase @base = null;
                     if (t is ISetting setting)
-                        sendSettings.Add(setting.Base);
+                        @base = setting.Base;
                     else
-                        sendSettings.Add(t);
+                        @base = t;
+
+                    if (@base.SettingId < menu.Hash)
+                        @base.SettingId += menu.Hash;
+
+                    sendSettings.Add(@base);
+                    
+                    Log.Error(@base.SettingId.ToString());
                 }
                 
                 ServerSpecificSettingsSync.SendToPlayer(hub, sendSettings.ToArray());
@@ -79,7 +87,9 @@ namespace ServerSpecificSyncer.Features
                     if (sendSettings.Any(s => s.SettingId == setting.SettingId))
                     {
                         var set = sendSettings.First(s => s.SettingId == setting.SettingId);
+                        Log.Debug(set.SettingId.ToString());
                         setting.Label = set.Label;
+                        //setting.SettingId -= menu.Hash;
                         setting.HintDescription = set.HintDescription;
                     }
                 }

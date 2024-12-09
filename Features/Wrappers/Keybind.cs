@@ -10,7 +10,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
     /// </summary>
     public class Keybind : SSKeybindSetting, ISetting
     {
-        public const int Increment = 100000;
+        public const int Increment = 0;
         /// <summary>
         /// Initialize instance of <see cref="Keybind"/>
         /// </summary>

@@ -58,15 +58,17 @@ namespace ServerSpecificSyncer
         
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
-#if DEBUG
-            if (Parameters.SyncCache.TryGetValue(hub, out var value))
-            {
-                value.Add(ss);
-                return;
-            }
-#endif
             try
             {
+#if DEBUG
+                Log.Info(ss.SettingId.ToString());
+                if (Parameters.SyncCache.TryGetValue(hub, out var value))
+                {
+                    value.Add(ss);
+                    Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.");
+                    return;
+                }
+#endif
                 if (ss.SettingId == -999)
                 {
                     Menu.LoadForPlayer(hub, null);
