@@ -25,7 +25,7 @@ namespace ServerSpecificSyncer.Tests
                     return false;
                 }
                 
-                response = $"PING: {get.Label} ({get.SettingId}) => {get.StrValue}";
+                response = $"PING: {get.Label} ({get.SettingId}) => {get.DebugValue}";
                 return true;
             }
             response = "ok";

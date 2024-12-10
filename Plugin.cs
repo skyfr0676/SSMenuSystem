@@ -99,9 +99,11 @@ namespace ServerSpecificSyncer
         private void GenericEnable()
         {
             Instance = this;
+
 #if DEBUG
-            Log.Warning("EXPERMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
+            Log.Warning("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
             Menu.RegisterAll();
+            Menu.RegisterPin(new ServerSpecificSettingBase[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
             StaticConfig.Debug = true;
 #endif
 

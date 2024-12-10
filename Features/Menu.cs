@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
+using Mirror;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
@@ -117,7 +118,7 @@ namespace ServerSpecificSyncer.Features
                 throw new ArgumentException($"two menus can't have the same name.");
                 
             
-            List<int> ids = new();
+            Dictionary<Type, List<int>> ids = new();
             
             foreach (ServerSpecificSettingBase action in menu.Settings)
             {
@@ -125,12 +126,16 @@ namespace ServerSpecificSyncer.Features
                 if (setting is ISetting isSetting)
                     setting = isSetting.Base;
 
-                if (ids.Contains(setting.SettingId))
+                Type type = setting.GetType();
+                
+                ids.GetOrAdd(type, () => new());
+
+                if (ids[type].Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
                 if (setting.SettingId < 0)
                     throw new ArgumentException($"id above and equal to 0 is reserved for menus and main menu.");
                 
-                ids.Add(setting.SettingId);
+                ids[type].Add(setting.SettingId);
 
                 if (action is Keybind bind && bind.IsGlobal)
                 {
@@ -200,7 +205,8 @@ namespace ServerSpecificSyncer.Features
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
 #if DEBUG
-        public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
+        //public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
+        public int Hash => Name.GetStableHashCode();
 #endif
         
         /// <summary>
@@ -225,10 +231,14 @@ namespace ServerSpecificSyncer.Features
         /// <returns>In-build parameters that will be shown to hub.</returns>
         private static ServerSpecificSettingBase[] GetMainMenu(ReferenceHub hub)
         {
-            if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
-                return Array.Empty<ServerSpecificSettingBase>();
+            List<ServerSpecificSettingBase> mainMenu = new();
 
-            List<ServerSpecificSettingBase> mainMenu = Pinned.Values.SelectMany(pin => pin).ToList();
+            if (Plugin.StaticConfig.AllowPinnedContent)
+                mainMenu.AddRange(Pinned.Values.SelectMany(pin => pin));
+
+            if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
+                return mainMenu.ToArray();
+            
             mainMenu.Add(new SSGroupHeader("Main Menu"));
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
@@ -244,6 +254,9 @@ namespace ServerSpecificSyncer.Features
         public List<ServerSpecificSettingBase> GetSettings(bool isDefault)
         {
             List<ServerSpecificSettingBase> settings = new();
+
+            if (Plugin.StaticConfig.AllowPinnedContent)
+                settings.AddRange(Pinned.Values.SelectMany(pin => pin));
 
             if (!isDefault)
             {
@@ -417,6 +430,12 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="hub">The target hub.</param>
         public void Reload(ReferenceHub hub) => LoadForPlayer(hub, this);
+
+        public void ReloadAll()
+        {
+            foreach (ReferenceHub hub in MenuSync.Where(x => x.Value == this).Select(x => x.Key))
+                LoadForPlayer(hub, this);
+        }
         
         public static void RegisterPin(ServerSpecificSettingBase[] toPin) => Pinned[Assembly.GetCallingAssembly()] = toPin;
 

@@ -123,13 +123,14 @@
         <Compile Include="Config.cs" />
         <Compile Include="Configs\LabelButton.cs" />
         <Compile Include="EventHandler.cs" />
+        <Compile Include="Examples\LightSpawnerExample.cs" />
+        <Compile Include="Examples\PrimitiveSpawnerExample.cs" />
         <Compile Include="Features\Interfaces\ISetting.cs" />
         <Compile Include="Features\Menu.cs" />
         <Compile Include="Features\Parameters.cs" />
         <Compile Include="Features\Wrappers\Button.cs" />
         <Compile Include="Features\Wrappers\Dropdown.cs" />
         <Compile Include="Features\Wrappers\Keybind.cs" />
-        <Compile Include="Features\Wrappers\ParameterSync.cs" />
         <Compile Include="Features\Wrappers\Plaintext.cs" />
         <Compile Include="Features\Wrappers\Slider.cs" />
         <Compile Include="Features\Wrappers\YesNoButton.cs" />

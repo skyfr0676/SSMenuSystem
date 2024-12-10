@@ -17,6 +17,7 @@ namespace ServerSpecificSyncer
         /// <inheritdoc/>
         public bool Debug { get; set; }
         
+        public bool AllowPinnedContent { get; set; } = true;
         public bool ShowErrorToClient { get; set; } = true;
         public bool ShowFullErrorToClient { get; set; } = false;
         public bool ShowFullErrorToModerators { get; set; } = true;

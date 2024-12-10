@@ -14,29 +14,16 @@ namespace ServerSpecificSyncer.Features
 {
     public static class Parameters
     {
-        public static ParameterSync<TSs> GetParameter<TMenu, TSs>(this ReferenceHub hub, int settingId)
+        public static TSs GetParameter<TMenu, TSs>(this ReferenceHub hub, int settingId)
             where TMenu : Menu
             where TSs : ServerSpecificSettingBase
         {
             foreach (Menu menu in Menu.Menus.Where(x => x is TMenu))
             {
-                if (menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings))
-                {
-                    ServerSpecificSettingBase t = settings.Where(x => x is TSs).FirstOrDefault(x => x.SettingId == settingId);
-                    switch (t)
-                    {
-                        case SSKeybindSetting keybind:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, keyValue:keybind.AssignedKeyCode);
-                        case SSPlaintextSetting plaintext:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, plaintext.SyncInputText);
-                        case SSDropdownSetting dropdown:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, dropdown.SyncSelectionText, dropdown.SyncSelectionIndexRaw);
-                        case SSTwoButtonsSetting twoButtons:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, twoButtons.SyncIsA ? twoButtons.OptionA : twoButtons.OptionB, boolValue:twoButtons.SyncIsA);
-                        case SSSliderSetting slider:
-                            return new ParameterSync<TSs>(t as TSs, t.SettingId - menu.Hash, t.Label, t.HintDescription, intValue:slider.SyncFloatValue);
-                    }
-                }
+                if (!menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings)) continue;
+                
+                ServerSpecificSettingBase t = settings.Where(x => x is TSs).FirstOrDefault(x => x.SettingId == settingId);
+                return t as TSs;
             }
 
             return default;
@@ -68,7 +55,6 @@ namespace ServerSpecificSyncer.Features
                     
                     Log.Error(@base.SettingId.ToString());
                 }
-                
                 ServerSpecificSettingsSync.SendToPlayer(hub, sendSettings.ToArray());
                 while (SyncCache[hub].Count < sendSettings.Count && timeout < 10)
                 {
@@ -101,7 +87,8 @@ namespace ServerSpecificSyncer.Features
             SyncCache.Remove(hub);
             if (Menu.Menus.Where(x => x.CheckAccess(hub)).IsEmpty())
                 yield break;
-            #if DEBUG
+
+#if DEBUG
             if (Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
                 Menu.LoadForPlayer(hub, null);
             else
