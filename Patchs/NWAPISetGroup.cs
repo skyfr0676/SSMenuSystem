@@ -23,6 +23,7 @@ namespace ServerSpecificSyncer.Patchs
             
             newInstructions.InsertRange(index, new[]
             {
+                // NwapiSetGroup.OnChangingGroup(this.gameObject);
                 new CodeInstruction(OpCodes.Ldarg_0).MoveLabelsFrom(newInstructions[index]),
                 new(OpCodes.Call, PropertyGetter(typeof(ServerRoles), nameof(ServerRoles.gameObject))),
                 new(OpCodes.Call, Method(typeof(NwapiSetGroup), nameof(OnChangingGroup))),

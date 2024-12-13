@@ -34,7 +34,7 @@ namespace ServerSpecificSyncer
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new Version(1, 0, 1);
+        public override Version Version => new(1, 0, 3);
         
         /// <summary>
         /// Gets the prefix used for configs.
@@ -79,7 +79,7 @@ namespace ServerSpecificSyncer
         [PluginAPI.Core.Attributes.PluginConfig("config.yml")]
         public Config Config;
         
-        [PluginAPI.Core.Attributes.PluginEntryPoint("ServerSpecificSyncer", "1.0.1", "sync all plugins to one server specific", "sky")]
+        [PluginAPI.Core.Attributes.PluginEntryPoint("ServerSpecificSyncer", "1.0.3", "sync all plugins to one server specific", "sky")]
         public void OnEnabled()
         {
             if (Config == null)

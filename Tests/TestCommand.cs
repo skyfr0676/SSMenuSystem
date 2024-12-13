@@ -14,11 +14,11 @@ namespace ServerSpecificSyncer.Tests
         public bool Execute(ArraySegment<string> arguments, ICommandSender sender, out string response)
         {
             ReferenceHub hub = Player.Get(sender).ReferenceHub;
-            foreach (var mrc in Parameters.GetMenuSpecificSyncedParameters<Test>(hub))
+            foreach (ServerSpecificSettingBase mrc in Parameters.GetMenuSpecificSyncedParameters<Test>(hub))
                 sender.Respond($"PING: {mrc.Label} ({mrc.SettingId}) => {mrc.DebugValue}");
             if (!arguments.IsEmpty())
             {
-                var get = hub.GetParameter<Test, ServerSpecificSettingBase>(int.Parse(arguments.At(0)));
+                ServerSpecificSettingBase get = hub.GetParameter<Test, ServerSpecificSettingBase>(int.Parse(arguments.At(0)));
                 if (get.Equals(default))
                 {
                     response = "null";

@@ -26,20 +26,20 @@ internal class PrimitiveSpawnerExample : Menu
         {
             if (_settings != null) return _settings.ToArray();
             
-            _presets = new()
+            _presets = new List<ColorPreset>
             {
-                new ColorPreset("White", Color.white),
-                new ColorPreset("Black", Color.black),
-                new ColorPreset("Gray", Color.gray),
-                new ColorPreset("Red", Color.red),
-                new ColorPreset("Green", Color.green),
-                new ColorPreset("Blue", Color.blue),
-                new ColorPreset("Yellow", Color.yellow),
-                new ColorPreset("Cyan", Color.cyan),
-                new ColorPreset("Magenta", Color.magenta),
+                new("White", Color.white),
+                new("Black", Color.black),
+                new("Gray", Color.gray),
+                new("Red", Color.red),
+                new("Green", Color.green),
+                new("Blue", Color.blue),
+                new("Yellow", Color.yellow),
+                new("Cyan", Color.cyan),
+                new("Magenta", Color.magenta),
             };
                 
-            _settings = new();
+            _settings = new List<ServerSpecificSettingBase>();
             _settings.Add(new Dropdown(ExampleId.Type, "Type", EnumUtils<PrimitiveType>.Values.Select(x => x.ToString()).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)));
             _settings.Add(new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)));
             _settings.Add(new Slider(ExampleId.Opacity, "Opacity", 0, 100, (hub, f, arg3) => ReloadColorInfoForUser(hub), 100, true, finalDisplayFormat: "{0}%"));

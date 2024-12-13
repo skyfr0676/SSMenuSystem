@@ -10,6 +10,7 @@ using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using MEC;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
@@ -21,7 +22,11 @@ namespace ServerSpecificSyncer
     {
 #if EXILED
 #if DEBUG
-        internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
+        internal static void Verified(VerifiedEventArgs ev)
+        {
+            Parameters.playerCache = ev.Player.ReferenceHub;
+            Task.Run(Parameters.SyncAll);
+        }
 #else
         internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
 #endif
@@ -62,22 +67,25 @@ namespace ServerSpecificSyncer
             {
 #if DEBUG
                 Log.Info(ss.SettingId.ToString());
-                if (Parameters.SyncCache.TryGetValue(hub, out var value))
+                if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
                     Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.");
                     return;
                 }
 #endif
+                // return to menu
                 if (ss.SettingId == -999)
                 {
                     Menu.LoadForPlayer(hub, null);
                     return;
                 }
+                
+                // check permissions
                 Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
                 if (!menu?.CheckAccess(hub) ?? false)
                 {
-                    Log.Warning($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} wich is disabled for him.");
+                    Log.Warning($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} which is disabled for him.");
                     Menu.LoadForPlayer(hub, null);
                     return;
                 }
@@ -93,6 +101,7 @@ namespace ServerSpecificSyncer
                         return;
                     }
                 }
+                
                 // load main menu
                 if (ss.SettingId == 0 && menu != null)
                 {
@@ -108,18 +117,27 @@ namespace ServerSpecificSyncer
                     else
                     {
                         ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
-                        if (s is Button wBtn)
-                            wBtn.Action?.Invoke(hub, (SSButton)ss);
-                        else if (s is Dropdown wDropdown)
-                            wDropdown.Action?.Invoke(hub, (SSDropdownSetting)ss, ((SSDropdownSetting)ss).SyncSelectionText);
-                        else if (s is Plaintext wPlaintext)
-                            wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, (SSPlaintextSetting)ss);
-                        else if (s is Slider wSlider)
-                            wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, (SSSliderSetting)ss);
-                        else if (s is YesNoButton wYesNo)
-                            wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
-                        else
-                            menu.OnInput(hub, ss);
+                        switch (s)
+                        {
+                            case Button wBtn:
+                                wBtn.Action?.Invoke(hub, (SSButton)ss);
+                                break;
+                            case Dropdown wDropdown:
+                                wDropdown.Action?.Invoke(hub, (SSDropdownSetting)ss, ((SSDropdownSetting)ss).SyncSelectionText);
+                                break;
+                            case Plaintext wPlaintext:
+                                wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, (SSPlaintextSetting)ss);
+                                break;
+                            case Slider wSlider:
+                                wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, (SSSliderSetting)ss);
+                                break;
+                            case YesNoButton wYesNo:
+                                wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
+                                break;
+                            default:
+                                menu.OnInput(hub, ss);
+                                break;
+                        }
                     }
                 }
                 // load selected menu.
@@ -135,7 +153,7 @@ namespace ServerSpecificSyncer
             {
                 if (Plugin.StaticConfig.ShowErrorToClient)
                 {
-                    ServerSpecificSettingsSync.SendToPlayer(hub, new ServerSpecificSettingBase[]
+                    Features.Utils.SendToPlayer(hub, new ServerSpecificSettingBase[]
                     {
                         new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.StaticConfig.ShowFullErrorToClient) && Plugin.StaticConfig.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
                         new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)

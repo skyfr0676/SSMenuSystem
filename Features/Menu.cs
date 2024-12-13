@@ -103,7 +103,7 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         /// <param name="menu">The target menu.</param>
         /// <exception cref="ArgumentException">One of parameters of target menu is invalid. please check the <see cref="Exception.Message"/> to find the invalid parameter.</exception>
-        private static void Register(Menu menu)
+        internal static void Register(Menu menu)
         {
             if (menu == null)
                 return;
@@ -128,7 +128,7 @@ namespace ServerSpecificSyncer.Features
 
                 Type type = setting.GetType();
                 
-                ids.GetOrAdd(type, () => new());
+                ids.GetOrAdd(type, () => new List<int>());
 
                 if (ids[type].Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
@@ -188,7 +188,7 @@ namespace ServerSpecificSyncer.Features
             foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
                 LoadForPlayer(sync.Key, null);
             LoadedMenus.Clear();
-            foreach (var menu in LoadedMenus.ToList())
+            foreach (Menu menu in LoadedMenus.ToList())
                 Unregister(menu);
         }
 
@@ -297,9 +297,9 @@ namespace ServerSpecificSyncer.Features
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu))
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
-                foreach (var menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
+                foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
-                    foreach (var keybind in menuKeybinds.Value)
+                    foreach (Keybind keybind in menuKeybinds.Value)
                         keybindings.Add(new SSKeybindSetting(keybind.SettingId, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
                 }
             }
@@ -349,15 +349,15 @@ namespace ServerSpecificSyncer.Features
                     List<ServerSpecificSettingBase> s = m.GetSettings(true);
                     s.AddRange(GetGlobalKeybindings(hub, m));
                     MenuSync[hub] = m;
-                    Parameters.SyncCache.Add(hub, new());
-                    ServerSpecificSettingsSync.SendToPlayer(hub, s.ToArray());
+                    Parameters.SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
+                    Utils.SendToPlayer(hub, s.ToArray());
                     Parameters.WaitUntilDone(hub, s);
                     m.ProperlyEnable(hub);
                     return;
                 }
                 #endif
 
-                ServerSpecificSettingsSync.SendToPlayer(hub, GetMainMenu(hub));
+                Utils.SendToPlayer(hub, GetMainMenu(hub));
                 MenuSync[hub] = null;
                 return;
             }
@@ -366,9 +366,9 @@ namespace ServerSpecificSyncer.Features
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             MenuSync[hub] = menu;
 #if DEBUG
-            Parameters.SyncCache.Add(hub, new());
+            Parameters.SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
 #endif
-            ServerSpecificSettingsSync.SendToPlayer(hub, settings.ToArray());
+            Utils.SendToPlayer(hub, settings.ToArray());
             menu.ProperlyEnable(hub);
         }
 
@@ -402,9 +402,9 @@ namespace ServerSpecificSyncer.Features
             if (ss is Keybind)
                 id -= 10000;
 
-            foreach (var bind in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub)))
+            foreach (KeyValuePair<Menu, List<Keybind>> bind in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub)))
             {
-                foreach (var key in bind.Value)
+                foreach (Keybind key in bind.Value)
                 {
                     if (key.SettingId == id)
                         return key;

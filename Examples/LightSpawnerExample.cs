@@ -48,7 +48,7 @@ internal class LightSpawnerExample : Menu
             _lightType ??= EnumUtils<LightType>.Values;
             _lightShape ??= EnumUtils<LightShape>.Values;
 
-            _settings = new();
+            _settings = new List<ServerSpecificSettingBase>();
             _settings.Add(new Slider(ExampleId.Intensity, "Intensity", 0, 100, (hub, setting, arg3) => ReloadColorInfoForUser(hub), 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
             _settings.Add(new Slider(ExampleId.Range, "Range", 0, 100, null, 10, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
             _settings.Add(new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)));
