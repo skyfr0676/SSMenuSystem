@@ -67,7 +67,10 @@ namespace ServerSpecificSyncer.Features
                         timeout += waitTimeMs/1000f;
                         await Task.Delay(waitTimeMs);
                     }
-
+                    
+                    sendSettings = new();
+                    SyncCache[hub].Clear();
+                    
                     if (SyncCache[hub].Count < sendSettings.Count || timeout >= 10)
                     {
                         Log.Error($"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
@@ -86,8 +89,6 @@ namespace ServerSpecificSyncer.Features
                         }
                     }
                     menu.InternalSettingsSync[hub] = new List<ServerSpecificSettingBase>(SyncCache[hub]);
-                    SyncCache[hub].Clear();
-                    sendSettings.Clear();
                     Log.Debug($"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
                 }
             }

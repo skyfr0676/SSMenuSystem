@@ -12,7 +12,7 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
-    [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(int?))]
+    //[HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), new Type[] { typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(Nullable<int>) })]
     public class SendToPlayerPatch
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler,

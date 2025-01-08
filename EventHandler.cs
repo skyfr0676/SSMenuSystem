@@ -18,7 +18,7 @@ using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer
 {
-    internal class EventHandler
+    internal static class EventHandler
     {
 #if EXILED
 #if DEBUG
@@ -66,7 +66,9 @@ namespace ServerSpecificSyncer
             try
             {
 #if DEBUG
+                Log.Info(ss.Label);
                 Log.Info(ss.SettingId.ToString());
+                Log.Info(ss.DebugValue);
                 if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
@@ -151,6 +153,12 @@ namespace ServerSpecificSyncer
             }
             catch (Exception e)
             {
+                Log.Error($"there is a error while receiving input {ss.SettingId} ({ss.Label}): {e.Message}\nActivate Debugger to show full details.");
+#if DEBUG
+                Log.Error(e.ToString());
+#else
+                Log.Debug(e.ToString());
+#endif
                 if (Plugin.StaticConfig.ShowErrorToClient)
                 {
                     Features.Utils.SendToPlayer(hub, new ServerSpecificSettingBase[]
@@ -159,12 +167,6 @@ namespace ServerSpecificSyncer
                         new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)
                     });
                 }
-                Log.Error($"there is a error while receiving input {ss.SettingId} ({ss.Label}): {e.Message}\nActivate Debugger to show full details.");
-#if DEBUG
-                Log.Error(e.ToString());
-#else
-                Log.Debug(e.ToString());
-#endif
             }
         }
     }

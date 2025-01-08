@@ -13,5 +13,6 @@ namespace ServerSpecificSyncer.Features
         public override int Id { get; set; }
         public HashSet<ReferenceHub> AuthorizedPlayers { get; set; } = null;
         public override bool CheckAccess(ReferenceHub hub) => AuthorizedPlayers?.Contains(hub) ?? true;
+        public Dictionary<ReferenceHub, ServerSpecificSettingBase[]> ActuallySendedToClient { get; set; } = new();
     }
 }

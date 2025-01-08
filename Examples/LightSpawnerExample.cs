@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if false
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -10,6 +11,7 @@ using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
+using Log = PluginAPI.Core.Log;
 
 namespace ServerSpecificSyncer.Examples
 {
@@ -194,4 +196,5 @@ namespace ServerSpecificSyncer.Examples
         }
     }
 }
+#endif
 

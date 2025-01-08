@@ -40,7 +40,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
     
         public static void Load(Assembly assembly, ServerSpecificSettingBase[] settings)
         {
-            if (LockedAssembly.Contains(assembly))
+            if (LockedAssembly.Contains(assembly) || assembly == typeof(ReferenceHub).Assembly)
                 return;
 
             if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
@@ -60,13 +60,13 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             };
             Log.Debug($"Started comptabilisation for assembly {menu.Name}.");
 
-#if EXILED
-        if (Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
-            menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
-#else
+    #if EXILED
+            if (Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
+                menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
+            else
+    #endif
             if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginHandler> plugin))
                 menu.Name = plugin.First().Value.PluginName;
-#endif
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {
                 Log.Warning($"assembly {name} tried to register by compatibilisation menu {menu.Name} but a menu already exist with this name. using assembly name...");

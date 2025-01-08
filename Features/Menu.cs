@@ -55,6 +55,9 @@ namespace ServerSpecificSyncer.Features
                 List<Menu> loadedMenus = new();
                 foreach (Type type in assembly.GetTypes())
                 {
+                    if (type == typeof(AssemblyMenu)) // only used for comptability (throw error when loaded)
+                        continue;
+                    
                     if (type.IsAbstract || type.IsInterface)
                         continue;
                     if (type.BaseType != typeof(Menu))
@@ -78,6 +81,7 @@ namespace ServerSpecificSyncer.Features
                             $"there is a error while loading menu {menu.Name}: {e.Message}\nEnable Debugger to show full details.");
 #if DEBUG
                         Log.Error(e.ToString());
+                        Log.Error("menu path: " + menu.GetType().FullName);
 #else
                         Log.Debug(e.ToString(), Plugin.StaticConfig?.Debug ?? false);
 #endif

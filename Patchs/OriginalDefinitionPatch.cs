@@ -23,7 +23,8 @@ namespace ServerSpecificSyncer.Patchs
             {
                 new (OpCodes.Ldarg_0),
                 new (OpCodes.Callvirt, PropertyGetter(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.SettingId))),
-                new (OpCodes.Call, Method(typeof(OriginalDefinitionPatch), nameof(GetFirstSetting)))
+                new (OpCodes.Call, Method(typeof(OriginalDefinitionPatch), nameof(GetFirstSetting))),
+                new (OpCodes.Ret),
             });
             
             for (int z = 0; z < newInstructions.Count; z++)
@@ -36,7 +37,6 @@ namespace ServerSpecificSyncer.Patchs
             foreach (ServerSpecificSettingBase ss in Menu.Menus.Select(x => x.Settings).SelectMany(x => x))
             {
                 if (ss.SettingId != id) continue;
-                
                 if (ss is ISetting setting)
                     return setting.Base;
                 return ss;
