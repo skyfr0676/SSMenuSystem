@@ -8,38 +8,39 @@ using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs;
-
-[HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
-public class ComptabilisaterGetter
+namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
-    public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
-        ILGenerator generator)
+    [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
+    public class ComptabilisaterGetter
     {
-        List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
-
-        newInstructions.InsertRange(0, new CodeInstruction[]
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+            ILGenerator generator)
         {
-            // ComptabilisaterGetter.Get(Assembly.GetCallingAssembly());
-            new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
-            new(OpCodes.Call, Method(typeof(ComptabilisaterGetter), nameof(Get))),
-            new(OpCodes.Ret),
-        });
+            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
 
-        foreach (CodeInstruction z in newInstructions)
-            yield return z;
+            newInstructions.InsertRange(0, new CodeInstruction[]
+            {
+                // ComptabilisaterGetter.Get(Assembly.GetCallingAssembly());
+                new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
+                new(OpCodes.Call, Method(typeof(ComptabilisaterGetter), nameof(Get))),
+                new(OpCodes.Ret),
+            });
 
-        ListPool<CodeInstruction>.Shared.Return(newInstructions);
-    }
-    
-    public static ServerSpecificSettingBase[] Get(Assembly assembly)
-    {
-        if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
-        {
-            AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
-            return m.OverrideSettings;
+            foreach (CodeInstruction z in newInstructions)
+                yield return z;
+
+            ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
+    
+        public static ServerSpecificSettingBase[] Get(Assembly assembly)
+        {
+            if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
+            {
+                AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
+                return m.OverrideSettings;
+            }
 
-        return null;
+            return null;
+        }
     }
 }

@@ -14,9 +14,21 @@ namespace ServerSpecificSyncer.Patchs
     [HarmonyPatch(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.OriginalDefinition), MethodType.Getter)]
     public class OriginalDefinitionPatch
     {
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions, ILGenerator generator)
+        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+            ILGenerator generator)
         {
-            ListPool<>
+            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
+            
+            newInstructions.AddRange(new CodeInstruction[]
+            {
+                new (OpCodes.Ldarg_0),
+                new (OpCodes.Callvirt, PropertyGetter(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.SettingId))),
+                new (OpCodes.Call, Method(typeof(OriginalDefinitionPatch), nameof(GetFirstSetting)))
+            });
+            
+            for (int z = 0; z < newInstructions.Count; z++)
+                yield return newInstructions[z];
+            ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
 
         public static ServerSpecificSettingBase GetFirstSetting(int id)
