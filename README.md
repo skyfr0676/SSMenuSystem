@@ -1,4 +1,5 @@
 # ServerSpecificsSyncer
+## note: the readme *can* be outdated. I working on a rework of the ReadME.
 
 [![Downloads](https://img.shields.io/github/downloads/skyfr0676/ServerSpecificsSyncer/total)](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest)
 
