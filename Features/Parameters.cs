@@ -34,73 +34,82 @@ namespace ServerSpecificSyncer.Features
         }
 
 
-        public static async Task SyncAll()
+        public static IEnumerator<float> SyncAll(ReferenceHub hub)
         {
-            ReferenceHub hub = playerCache;
+            //ReferenceHub hub = playerCache;
             playerCache = null;
             SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
             List<ServerSpecificSettingBase> sendSettings = new();
             float timeout = 0;
-            try
+            List<Menu> menus = Menu.Menus.ToList();
+            /*foreach (var menu in menus.ToArray())
+                menus.AddRange(Menu.Menus.Where(x => x.MenuRelated == menu.GetType() && x != menu));*/
+            
+            foreach (Menu menu in menus)
             {
-                foreach (Menu menu in Menu.Menus.ToList())
+                if (!menu.CheckAccess(hub))
                 {
-                    Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name}");
-                    foreach (ServerSpecificSettingBase t in menu.Settings)
-                    {
-                        if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
-                            continue;
-                        ServerSpecificSettingBase @base;
-                        if (t is ISetting setting)
-                            @base = setting.Base;
-                        else
-                            @base = t;
-
-                        sendSettings.Add(@base);
-                        
-                        Log.Error(@base.SettingId.ToString());
-                    }
-                    Utils.SendToPlayer(hub, sendSettings.ToArray());
-                    const int waitTimeMs = 10;
-                    while (SyncCache[hub].Count < sendSettings.Count && timeout < 10)
-                    {
-                        timeout += waitTimeMs/1000f;
-                        await Task.Delay(waitTimeMs);
-                    }
-                    
-                    sendSettings = new();
-                    SyncCache[hub].Clear();
-                    
-                    if (SyncCache[hub].Count < sendSettings.Count || timeout >= 10)
-                    {
-                        Log.Error($"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
-                        break;
-                    }
-
-                    foreach (ServerSpecificSettingBase setting in SyncCache[hub])
-                    {
-                        if (sendSettings.Any(s => s.SettingId == setting.SettingId))
-                        {
-                            ServerSpecificSettingBase set = sendSettings.First(s => s.SettingId == setting.SettingId);
-                            Log.Debug(set.SettingId.ToString());
-                            setting.Label = set.Label;
-                            //setting.SettingId -= menu.Hash;
-                            setting.HintDescription = set.HintDescription;
-                        }
-                    }
-                    menu.InternalSettingsSync[hub] = new List<ServerSpecificSettingBase>(SyncCache[hub]);
-                    Log.Debug($"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
+                    Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.", Plugin.StaticConfig.Debug);
+                    continue;
                 }
-            }
-            catch (Exception e)
-            {
-                Log.Error($"failed to sync register parameters for {hub.nicknameSync.MyNick}: {e}");
-                Utils.SendToPlayer(hub, null);
-            }
 
+                Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name} {(menu.MenuRelated != null ? $"SubMenu of {Menu.GetMenu(menu.MenuRelated).Name} ({menu.MenuRelated.Name})" : string.Empty)}.", Plugin.StaticConfig.Debug);
+                foreach (ServerSpecificSettingBase t in menu.Settings)
+                {
+                    if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
+                        continue;
+                    ServerSpecificSettingBase @base;
+                    if (t is ISetting setting)
+                        @base = setting.Base;
+                    else
+                        @base = t;
+
+                    sendSettings.Add(@base);
+                }
+
+                Utils.SendToPlayer(hub, menu, sendSettings.ToArray());
+                const int waitTimeMs = 10;
+                while (SyncCache[hub].Count < sendSettings.Count && timeout < 10)
+                {
+                    timeout += waitTimeMs / 1000f;
+                    yield return Timing.WaitForSeconds(10/1000f);
+                    //await Task.Delay(waitTimeMs);
+                }
+
+                if (SyncCache[hub].Count < sendSettings.Count || timeout >= 10)
+                {
+                    Log.Error(
+                        $"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
+                    break;
+                }
+
+                foreach (ServerSpecificSettingBase setting in SyncCache[hub])
+                {
+                    if (sendSettings.Any(s => s.SettingId == setting.SettingId))
+                    {
+                        ServerSpecificSettingBase set = sendSettings.First(s => s.SettingId == setting.SettingId);
+                        setting.Label = set.Label;
+                        setting.SettingId -= menu.Hash;
+                        setting.HintDescription = set.HintDescription;
+                    }
+                }
+
+                menu.InternalSettingsSync[hub] = new List<ServerSpecificSettingBase>(SyncCache[hub]);
+                sendSettings.Clear();
+                SyncCache[hub].Clear();
+                Log.Debug(
+                    $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.", Plugin.StaticConfig.Debug);
+            }
             SyncCache.Remove(hub);
+            
+            Log.Debug("Hub Synced parameters. Stat of his cache: " +
+                      (SyncCache.ContainsKey(hub) ? "active" : "disabled"), Plugin.StaticConfig.Debug);
+
             if (Menu.Menus.Where(x => x.CheckAccess(hub)).IsEmpty())
-                return;
+            {
+                Log.Warning("no valid menu found for " + hub.nicknameSync.MyNick + ".");
+                yield break;
+            }
 
 #if DEBUG
             if (Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
@@ -131,54 +140,66 @@ namespace ServerSpecificSyncer.Features
         }
         
 #if DEBUG
-        public static void WaitUntilDone(ReferenceHub hub, List<ServerSpecificSettingBase> sendSettings)
+        internal static IEnumerator<float> Sync(ReferenceHub hub, Menu menu, ServerSpecificSettingBase[] toSendWhenEnded)
         {
-            Timing.RunCoroutine(EnumWaitUntilDone(hub, sendSettings));
-        }
-
-        private static IEnumerator<float> EnumWaitUntilDone(ReferenceHub hub, List<ServerSpecificSettingBase> sendSettings)
-        {
-            Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
-            if (menu == null)
+            SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
+            List<ServerSpecificSettingBase> sendSettings = new();
+            float timeout = 0;
+            
+            if (!menu.CheckAccess(hub))
+            {
+                Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.", Plugin.StaticConfig.Debug);
                 yield break;
-            
-            float ping = 0;
-            while (SyncCache[hub].Count < sendSettings.Count && ping <= 10)
-            {
-                ping += Time.deltaTime;
-                yield return Timing.WaitForOneFrame;
             }
 
-            if (ping >= 10 && SyncCache[hub].Count < sendSettings.Count)
+            Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name}", Plugin.StaticConfig.Debug);
+            foreach (ServerSpecificSettingBase t in menu.Settings)
             {
-                Log.Error($"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
-                goto finish;
+                if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
+                    continue;
+                ServerSpecificSettingBase @base;
+                if (t is ISetting setting)
+                    @base = setting.Base;
+                else
+                    @base = t;
+
+                sendSettings.Add(@base);
             }
-            
+
+            Utils.SendToPlayer(hub, menu, sendSettings.ToArray());
+            const int waitTimeMs = 10;
+            while (SyncCache[hub].Count < sendSettings.Count && timeout < 10)
+            {
+                timeout += waitTimeMs / 1000f;
+                yield return Timing.WaitForSeconds(10/1000f);
+            }
+
+            if (SyncCache[hub].Count < sendSettings.Count || timeout >= 10)
+            {
+                Log.Error(
+                    $"timeout exceeded to sync value for hub {hub.nicknameSync.MyNick} menu {menu.Name}. Stopping the process.");
+                yield break;
+            }
+
             foreach (ServerSpecificSettingBase setting in SyncCache[hub])
             {
                 if (sendSettings.Any(s => s.SettingId == setting.SettingId))
                 {
                     ServerSpecificSettingBase set = sendSettings.First(s => s.SettingId == setting.SettingId);
                     setting.Label = set.Label;
+                    setting.SettingId -= menu.Hash;
                     setting.HintDescription = set.HintDescription;
                 }
             }
+
             menu.InternalSettingsSync[hub] = new List<ServerSpecificSettingBase>(SyncCache[hub]);
-            SyncCache[hub].Clear();
-            Log.Debug($"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
-finish:
+            sendSettings.Clear();
             SyncCache.Remove(hub);
-            if (Menu.Menus.Where(x => x.CheckAccess(hub)).IsEmpty())
-                yield break;
-#if DEBUG
-            if (Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
-                Menu.LoadForPlayer(hub, null);
-#endif
-            else
-                Menu.LoadForPlayer(hub, Menu.Menus.First());
+            Log.Debug(
+                $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.", Plugin.StaticConfig.Debug);
+            Utils.SendToPlayer(hub, menu, toSendWhenEnded);
         }
-#endif
     }
+#endif
 }
 #endif

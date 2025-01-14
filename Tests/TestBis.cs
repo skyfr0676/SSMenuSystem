@@ -17,7 +17,7 @@ namespace ServerSpecificSyncer.Tests
             new Slider(8, "dadadaddetest",-5, 5, (hub, newValue, _) => ShowHint(hub, $"x2 Boost -> {newValue}")),
             new YesNoButton(9, "dadadaddetest","A", "B", (hub, isB, _) => ShowHint(hub, $"x2 Boost -> {isB}")),
             new Keybind(11, "test global perms", (hub) => Log.Info("global perms"), preventInteractionOnGui:false, isGlobal:true),
-            new Keybind(12, "another local test", (hub) => Log.Info("local test"), preventInteractionOnGui:false, isGlobal:true),
+            new Keybind(12, "another local test", (hub) => Log.Info("local test"), preventInteractionOnGui:false, isGlobal:false),
             new Keybind(13, "another global test", (hub) => Log.Info("global test"), preventInteractionOnGui:false, isGlobal:true),
         };
 

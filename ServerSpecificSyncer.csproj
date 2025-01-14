@@ -138,6 +138,7 @@
         <Compile Include="Features\Wrappers\YesNoButton.cs" />
         <Compile Include="Patchs\ComptabiliserPatchs\Comptabilisater.cs" />
         <Compile Include="Patchs\ComptabiliserPatchs\ComptabilisaterGetter.cs" />
+        <Compile Include="Patchs\ComptabiliserPatchs\SendToPlayerDSPatch.cs" />
         <Compile Include="Patchs\ComptabiliserPatchs\SendToPlayerPatch.cs" />
         <Compile Include="Patchs\ExiledPatch.cs" />
         <Compile Include="Patchs\NWAPISetGroup.cs" />

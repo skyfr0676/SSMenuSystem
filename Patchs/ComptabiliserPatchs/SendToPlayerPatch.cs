@@ -12,7 +12,8 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
-    //[HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), new Type[] { typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(Nullable<int>) })]
+    [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer))]
+    [HarmonyPatch(new[] { typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(int?) })]
     public class SendToPlayerPatch
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler,
@@ -20,6 +21,17 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
         {
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
 
+            newInstructions.AddRange(new CodeInstruction[]
+            {
+                new(OpCodes.Ldarg_0),
+                new(OpCodes.Ldarg_1),
+                new(OpCodes.Ldarg_2),
+                new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
+                new(OpCodes.Call, Method(typeof(SendToPlayerPatch), nameof(SendToPlayer))),
+                new(OpCodes.Ret)
+            });
+
+#if false
             Label continueLabel = generator.DefineLabel();
             Label removePlayerLabel = generator.DefineLabel();
 
@@ -42,7 +54,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 new(OpCodes.Brfalse_S, continueLabel),
             
                 // [menu == null]
-                // Log.Warning($"assembly {assembly.GetName().Name} tried to send a couple of {collection.Length} settings but doesn't have a valid/registered menu! creating new one...");
+                //Log.Warning($"assembly {assembly.GetName().Name} tried to send a couple of {collection.Length} settings but doesn't have a valid/registered menu! creating new one...");
                 new(OpCodes.Ldstr, "assembly {0} tried to send a couple of {1} settings but doesn't have a valid/registered menu! creating new one..."),
                 new(OpCodes.Ldloc_S, assembly.LocalIndex),
                 new(OpCodes.Callvirt, Method(typeof(Assembly), nameof(Assembly.GetName))),
@@ -50,7 +62,8 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 new(OpCodes.Ldarg_1),
                 new(OpCodes.Callvirt, PropertyGetter(typeof(Array), nameof(Array.Length))),
                 new(OpCodes.Callvirt, Method(typeof(int), nameof(int.ToString))),
-                new(OpCodes.Call, Method(typeof(string),nameof(string.Format))),
+                new(OpCodes.Call, Method(typeof(string),nameof(string.Format), new[]{ typeof(string), typeof(object), typeof(object) })),
+                new(OpCodes.Ldnull),
                 new(OpCodes.Call, Method(typeof(Log), nameof(Log.Warning))),
             
                 // Comptabilisater.Load(assembly);
@@ -76,11 +89,31 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 new(OpCodes.Callvirt, Method(typeof(HashSet<ReferenceHub>), nameof(HashSet<ReferenceHub>.Remove))),
                 new(OpCodes.Ret),
             });
+#endif
 
             foreach (CodeInstruction z in newInstructions)
                 yield return z;
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
+        }
+
+        public static void SendToPlayer(ReferenceHub hub, ServerSpecificSettingBase[] settings, int? versionOverride, Assembly assembly)
+        {
+            Log.Info("tried to send something to the player.");
+            AssemblyMenu menu = Features.Utils.GetMenu(assembly);
+            if (menu == null)
+            {
+                Log.Warning($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
+                Comptabilisater.Load(Array.Empty<ServerSpecificSettingBase>());
+                menu = Features.Utils.GetMenu(assembly);
+            }
+            
+            menu.ActuallySendedToClient[hub] = settings;
+
+            if (Menu.TryGetCurrentPlayerMenu(hub) == menu)
+                menu.Reload(hub);
+            else
+                Menu.LoadForPlayer(hub, null);
         }
     }
 }

@@ -24,6 +24,8 @@ namespace ServerSpecificSyncer
 #if DEBUG
         [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed.")]
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
+
+        public bool ShowGlobalKeybindingsWarning { get; set; } = true;
 #endif
 
 #if NWAPI

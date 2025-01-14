@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -10,7 +11,9 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
+    #if DEBUG
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
+#endif
     public class ComptabilisaterGetter
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
@@ -34,13 +37,12 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
     
         public static ServerSpecificSettingBase[] Get(Assembly assembly)
         {
-            if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
-            {
-                AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
-                return m.OverrideSettings;
-            }
-
-            return null;
+            if (assembly == typeof(ReferenceHub).Assembly)
+                return Array.Empty<ServerSpecificSettingBase>();
+            if (!Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly)) return null;
+            AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
+            return m.OverrideSettings;
+            
         }
     }
 }

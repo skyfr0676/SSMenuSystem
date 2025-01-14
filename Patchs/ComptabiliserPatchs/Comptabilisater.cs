@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -14,7 +15,9 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
+    #if DEBUG
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Setter)]
+    #endif
     public static class Comptabilisater
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
@@ -23,8 +26,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
             newInstructions.InsertRange(0, new CodeInstruction[]
             {
-                // Comptabilisater.Load(Assembly.GetCallingAssembly(), value);
-                new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
+                // Comptabilisater.Load(value);
                 new(OpCodes.Ldarg_0),
                 new(OpCodes.Call, Method(typeof(Comptabilisater), nameof(Load))),
                 new(OpCodes.Ret),
@@ -38,10 +40,15 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 
         private static readonly HashSet<Assembly> LockedAssembly = new();
     
-        public static void Load(Assembly assembly, ServerSpecificSettingBase[] settings)
+        public static void Load(ServerSpecificSettingBase[] settings)
         {
+            Assembly assembly = Assembly.GetCallingAssembly();
+            Log.Info(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name);
             if (LockedAssembly.Contains(assembly) || assembly == typeof(ReferenceHub).Assembly)
+            {
+                Log.Info("Assembly is locked or is a part of base game. Skipping...");
                 return;
+            }
 
             if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
             {
@@ -60,12 +67,9 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             };
             Log.Debug($"Started comptabilisation for assembly {menu.Name}.");
 
-    #if EXILED
-            if (Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
+            if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
                 menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
-            else
-    #endif
-            if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginHandler> plugin))
+            else if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginHandler> plugin))
                 menu.Name = plugin.First().Value.PluginName;
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {

@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MEC;
+using Mirror;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
@@ -22,11 +23,12 @@ namespace ServerSpecificSyncer
     {
 #if EXILED
 #if DEBUG
-        internal static void Verified(VerifiedEventArgs ev)
+        internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
+        /*internal static void Verified(VerifiedEventArgs ev)
         {
             Parameters.playerCache = ev.Player.ReferenceHub;
             Task.Run(Parameters.SyncAll);
-        }
+        }*/
 #else
         internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
 #endif
@@ -66,16 +68,22 @@ namespace ServerSpecificSyncer
             try
             {
 #if DEBUG
-                Log.Info(ss.Label);
-                Log.Info(ss.SettingId.ToString());
-                Log.Info(ss.DebugValue);
                 if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
-                    Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.");
+                    Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.", Plugin.StaticConfig.Debug);
                     return;
                 }
 #endif
+                if (ss.OriginalDefinition != null)
+                {
+                    ss.Label = ss.OriginalDefinition.Label;
+                    ss.HintDescription = ss.OriginalDefinition.HintDescription;
+                    ss.SettingId = ss.OriginalDefinition.SettingId;
+                }
+                else // is a pin or header
+                    ss.SettingId -= Menu.TryGetCurrentPlayerMenu(hub)?.Hash ?? 0;
+
                 // return to menu
                 if (ss.SettingId == -999)
                 {
@@ -161,7 +169,7 @@ namespace ServerSpecificSyncer
 #endif
                 if (Plugin.StaticConfig.ShowErrorToClient)
                 {
-                    Features.Utils.SendToPlayer(hub, new ServerSpecificSettingBase[]
+                    Features.Utils.SendToPlayer(hub, null, new ServerSpecificSettingBase[]
                     {
                         new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.StaticConfig.ShowFullErrorToClient) && Plugin.StaticConfig.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
                         new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)

@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using MEC;
 using Mirror;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features.Interfaces;
@@ -26,6 +28,7 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         public static List<Menu> Menus => LoadedMenus;
         private static readonly Dictionary<Menu, List<Keybind>> GlobalKeybindingSync = new();
+        public static readonly ReadOnlyDictionary<Menu, List<Keybind>> GlobalKeybindings = new(GlobalKeybindingSync);
         
         internal Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> InternalSettingsSync = new();
         
@@ -209,8 +212,8 @@ namespace ServerSpecificSyncer.Features
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
 #if DEBUG
-        //public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
-        public int Hash => Name.GetStableHashCode();
+        public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
+        //public int Hash => Name.GetStableHashCode();
 #endif
         
         /// <summary>
@@ -255,7 +258,7 @@ namespace ServerSpecificSyncer.Features
             return mainMenu.ToArray();
         }
 
-        public List<ServerSpecificSettingBase> GetSettings(bool isDefault)
+        public List<ServerSpecificSettingBase> GetSettings(ReferenceHub hub, bool isDefault)
         {
             List<ServerSpecificSettingBase> settings = new();
 
@@ -278,6 +281,16 @@ namespace ServerSpecificSyncer.Features
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
             settings.Add(new SSGroupHeader(Name, false, Description));
 
+            if (this is AssemblyMenu assemblyMenu &&
+                assemblyMenu.ActuallySendedToClient.TryGetValue(hub, out var overrideSettings) && overrideSettings != null)
+            {
+                settings.AddRange(overrideSettings);
+                return settings;
+            }
+
+            if (Settings == null)
+                return settings;
+            
             foreach (ServerSpecificSettingBase t in Settings)
             {
                 if (t is ISetting setting)
@@ -298,14 +311,15 @@ namespace ServerSpecificSyncer.Features
         {
             List<ServerSpecificSettingBase> keybindings = new();
             
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu))
+            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
-                foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
+                keybindings.Add(new SSTextArea(0, "this feature is currently disabled, due to a registration bug (desynchronisation).\nNote for Server Owner: you can disable this warning by disabling the <mark=\"#77777777\">ShowGlobalKeybindingsWarning</mark> configuration."));
+                /*foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
                         keybindings.Add(new SSKeybindSetting(keybind.SettingId, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
-                }
+                }*/
             }
 
             return keybindings.ToArray();
@@ -340,6 +354,7 @@ namespace ServerSpecificSyncer.Features
         internal static void LoadForPlayer(ReferenceHub hub, Menu menu)
         {
             TryGetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);
+            Log.Debug("try loading " + (menu?.Name ?? "main menu") + " for player " + hub.nicknameSync.MyNick);
 
             if (!menu?.CheckAccess(hub) ?? true)
                 menu = null;
@@ -350,29 +365,34 @@ namespace ServerSpecificSyncer.Features
                 if (LoadedMenus.Count(x => x.CheckAccess(hub)) == 1 && !Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne)
                 {
                     Menu m = LoadedMenus.First(x => x.CheckAccess(hub));
-                    List<ServerSpecificSettingBase> s = m.GetSettings(true);
+                    List<ServerSpecificSettingBase> s = m.GetSettings(hub, true);
                     s.AddRange(GetGlobalKeybindings(hub, m));
                     MenuSync[hub] = m;
-                    Parameters.SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
-                    Utils.SendToPlayer(hub, s.ToArray());
-                    Parameters.WaitUntilDone(hub, s);
+                    if (!m.SettingsSync.ContainsKey(hub))
+                    {
+                        Timing.RunCoroutine(Parameters.Sync(hub, m, s.ToArray()));
+                    }
                     m.ProperlyEnable(hub);
                     return;
                 }
                 #endif
 
-                Utils.SendToPlayer(hub, GetMainMenu(hub));
+                Utils.SendToPlayer(hub, null, GetMainMenu(hub));
                 MenuSync[hub] = null;
                 return;
             }
 
-            List<ServerSpecificSettingBase> settings = menu.GetSettings(false);
+            List<ServerSpecificSettingBase> settings = menu.GetSettings(hub, false);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             MenuSync[hub] = menu;
 #if DEBUG
-            Parameters.SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
+            if (!menu.SettingsSync.ContainsKey(hub))
+            {
+                Timing.RunCoroutine(Parameters.Sync(hub, menu, settings.ToArray()));
+            }
+            else
 #endif
-            Utils.SendToPlayer(hub, settings.ToArray());
+                Utils.SendToPlayer(hub, menu, settings.ToArray());
             menu.ProperlyEnable(hub);
         }
 

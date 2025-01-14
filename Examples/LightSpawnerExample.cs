@@ -1,5 +1,4 @@
-﻿#if false
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -7,6 +6,7 @@ using System.Reflection;
 using AdminToys;
 using GameCore;
 using Mirror;
+using NorthwoodLib.Pools;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UnityEngine;
@@ -26,47 +26,48 @@ namespace ServerSpecificSyncer.Examples
         private SSTextArea _selectedColorTextArea;
         private bool AnySpawned => !_spawnedToys.IsEmpty();
         private readonly List<LightSourceToy> _spawnedToys = new();
-    
-        public override ServerSpecificSettingBase[] Settings
+
+        public override ServerSpecificSettingBase[] Settings => GetSettings();
+
+        public ServerSpecificSettingBase[] GetSettings()
         {
-            get
+            _presets ??= new List<ColorPreset>
             {
-                if (_settings != null) return _settings.ToArray();
-            
-                _presets ??= new List<ColorPreset>
-                {
-                    new("White", Color.white),
-                    new("Black", Color.black),
-                    new("Gray", Color.gray),
-                    new("Red", Color.red),
-                    new("Green", Color.green),
-                    new("Blue", Color.blue),
-                    new("Yellow", Color.yellow),
-                    new("Cyan", Color.cyan),
-                    new("Magenta", Color.magenta),
-                };
+                new("White", Color.white),
+                new("Black", Color.black),
+                new("Gray", Color.gray),
+                new("Red", Color.red),
+                new("Green", Color.green),
+                new("Blue", Color.blue),
+                new("Yellow", Color.yellow),
+                new("Cyan", Color.cyan),
+                new("Magenta", Color.magenta),
+            };
 
-                _shadowsType ??= EnumUtils<LightShadows>.Values;
-                _lightType ??= EnumUtils<LightType>.Values;
-                _lightShape ??= EnumUtils<LightShape>.Values;
+            _shadowsType ??= EnumUtils<LightShadows>.Values;
+            _lightType ??= EnumUtils<LightType>.Values;
+            _lightShape ??= EnumUtils<LightShape>.Values;
 
-                _settings = new();
-                _settings.Add(new Slider(ExampleId.Intensity, "Intensity", 0, 100, (hub, setting, arg3) => ReloadColorInfoForUser(hub), 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
-                _settings.Add(new Slider(ExampleId.Range, "Range", 0, 100, null, 10, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
-                _settings.Add(new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)));
-                _settings.Add(new Plaintext(ExampleId.CustomColor, "Custom Color (R G B)", (hub, setting, arg3) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."));
-                _selectedColorTextArea = new SSTextArea(ExampleId.SelectedColor, "Selected Color: None");
-                _settings.Add(_selectedColorTextArea);
-                _settings.Add(new Dropdown(ExampleId.ShadowType, "Shadows Type", _shadowsType.Select(x => x.ToString()).ToArray(), null));
-                _settings.Add(new Slider(ExampleId.ShadowStrength, "Shadow Strength", 0, 100, null));
-                _settings.Add(new Dropdown(ExampleId.LightType, "Light Type", _lightType.Select(x => x.ToString()).ToArray(), null));
-                _settings.Add(new Dropdown(ExampleId.LightShape, "Light Shape", _lightShape.Select(x => x.ToString()).ToArray(), null));
-                _settings.Add(new Slider(ExampleId.SpotAngle, "Spot Angle", 0, 100, null, 30, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
-                _settings.Add(new Slider(ExampleId.InnerSpotAngle, "Inner Spot Angle", 0, 100, null, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
-                _settings.Add(new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, btn) => Spawn(hub)));
-
+            if (_settings != null)
                 return _settings.ToArray();
-            }
+            
+            List<ServerSpecificSettingBase> settings = ListPool<ServerSpecificSettingBase>.Shared.Rent();
+            settings.Add(new Slider(ExampleId.Intensity, "Intensity", 0, 100, (hub, setting, arg3) => ReloadColorInfoForUser(hub), 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
+            settings.Add(new Slider(ExampleId.Range, "Range", 0, 100, null, 10, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
+            settings.Add(new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)));
+            settings.Add(new Plaintext(ExampleId.CustomColor, "Custom Color (R G B)", (hub, setting, arg3) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."));
+            _selectedColorTextArea = new SSTextArea(ExampleId.SelectedColor, "Selected Color: None");
+            settings.Add(_selectedColorTextArea);
+            settings.Add(new Dropdown(ExampleId.ShadowType, "Shadows Type", _shadowsType.Select(x => x.ToString()).ToArray(), null));
+            settings.Add(new Slider(ExampleId.ShadowStrength, "Shadow Strength", 0, 100, null));
+            settings.Add(new Dropdown(ExampleId.LightType, "Light Type", _lightType.Select(x => x.ToString()).ToArray(), null));
+            settings.Add(new Dropdown(ExampleId.LightShape, "Light Shape", _lightShape.Select(x => x.ToString()).ToArray(), null));
+            settings.Add(new Slider(ExampleId.SpotAngle, "Spot Angle", 0, 100, null, 30, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
+            settings.Add(new Slider(ExampleId.InnerSpotAngle, "Inner Spot Angle", 0, 100, null, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"));
+            settings.Add(new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, btn) => Spawn(hub)));
+            _settings = settings.ToList();
+            ListPool<ServerSpecificSettingBase>.Shared.Return(settings);
+            return _settings.ToArray();
         }
 
         public void ReloadColorInfoForUser(ReferenceHub hub) => _selectedColorTextArea.SendTextUpdate(GetColorInfoForUser(hub), receiveFilter:(h) => h == hub);
@@ -196,5 +197,3 @@ namespace ServerSpecificSyncer.Examples
         }
     }
 }
-#endif
-

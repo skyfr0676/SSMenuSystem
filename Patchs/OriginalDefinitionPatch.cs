@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
+using Mirror;
 using NorthwoodLib.Pools;
+using PluginAPI.Core;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
@@ -34,14 +36,17 @@ namespace ServerSpecificSyncer.Patchs
 
         public static ServerSpecificSettingBase GetFirstSetting(int id)
         {
-            foreach (ServerSpecificSettingBase ss in Menu.Menus.Select(x => x.Settings).SelectMany(x => x))
+            foreach (var menu in Menu.Menus)
             {
-                if (ss.SettingId != id) continue;
-                if (ss is ISetting setting)
-                    return setting.Base;
-                return ss;
+                foreach (var ss in menu.Settings)
+                {
+                    int settingId = ss.SettingId + menu.Hash;
+                    if (settingId != id) continue;
+                    if (ss is ISetting setting)
+                        return setting.Base;
+                    return ss;
+                }
             }
-
             return null;
         }
     }
