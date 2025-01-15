@@ -7,6 +7,7 @@ using System.Reflection;
 using MEC;
 using Mirror;
 using PluginAPI.Core;
+using ServerSpecificSyncer.Examples;
 using ServerSpecificSyncer.Features.Interfaces;
 using ServerSpecificSyncer.Features.Wrappers;
 using UnityEngine;
@@ -59,6 +60,9 @@ namespace ServerSpecificSyncer.Features
                 foreach (Type type in assembly.GetTypes())
                 {
                     if (type == typeof(AssemblyMenu)) // only used for comptability (throw error when loaded)
+                        continue;
+
+                    if (type == typeof(MainExample) && (!Plugin.StaticConfig?.EnableExamples ?? false))
                         continue;
                     
                     if (type.IsAbstract || type.IsInterface)
@@ -126,9 +130,11 @@ namespace ServerSpecificSyncer.Features
                 
             
             Dictionary<Type, List<int>> ids = new();
-            
+                
             foreach (ServerSpecificSettingBase action in menu.Settings)
             {
+                if (action is SSGroupHeader)
+                    continue;
                 ServerSpecificSettingBase setting = action;
                 if (setting is ISetting isSetting)
                     setting = isSetting.Base;
@@ -161,6 +167,7 @@ namespace ServerSpecificSyncer.Features
             }
             
             LoadedMenus.Add(menu);
+            menu.OnRegistered();
             Log.Debug($"Server Specific menu {menu.Name} is now registered!", Plugin.StaticConfig.Debug);
         }
         
@@ -268,7 +275,7 @@ namespace ServerSpecificSyncer.Features
             if (!isDefault)
             {
                 if (MenuRelated != null)
-                    settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unkown"),
+                    settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
                         Plugin.GetTranslation().ReturnTo.ButtonText));
                 else
                     settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
@@ -276,20 +283,26 @@ namespace ServerSpecificSyncer.Features
             }
             
             if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
-                settings.Add(new SSGroupHeader("Sub-Menus"));
+                settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle));
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
-                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
+                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
+
             settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
                 assemblyMenu.ActuallySendedToClient.TryGetValue(hub, out var overrideSettings) && overrideSettings != null)
             {
+                if (overrideSettings.IsEmpty())
+                    settings.RemoveAt(settings.Count - 1);
                 settings.AddRange(overrideSettings);
                 return settings;
             }
 
-            if (Settings == null)
+            if (Settings == null || Settings.IsEmpty())
+            {
+                settings.RemoveAt(settings.Count - 1);
                 return settings;
+            }
             
             foreach (ServerSpecificSettingBase t in Settings)
             {
@@ -464,5 +477,7 @@ namespace ServerSpecificSyncer.Features
         public static void RegisterPin(ServerSpecificSettingBase[] toPin) => Pinned[Assembly.GetCallingAssembly()] = toPin;
 
         public static void UnregisterPin() => Pinned.Remove(Assembly.GetCallingAssembly());
+        
+        public virtual void OnRegistered(){}
     }
 }

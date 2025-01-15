@@ -217,5 +217,6 @@ namespace ServerSpecificSyncer.Examples
             public readonly string Name;
             public readonly Color Color;
         }
+        public override Type MenuRelated { get; set; } = typeof(MainExample);
     }
 }

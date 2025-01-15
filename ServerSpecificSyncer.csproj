@@ -115,6 +115,12 @@
         <Reference Include="0Harmony">
             <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
         </Reference>
+        <Reference Include="Pooling">
+            <HintPath>$(EXILED_REFERENCES)\Pooling.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule">
+            <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
+        </Reference>
         <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
           <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\YamlDotNet.dll</HintPath>
         </Reference>
@@ -123,8 +129,12 @@
         <Compile Include="Config.cs" />
         <Compile Include="Configs\LabelButton.cs" />
         <Compile Include="EventHandler.cs" />
+        <Compile Include="Examples\AbilitiesExample.cs" />
         <Compile Include="Examples\LightSpawnerExample.cs" />
+        <Compile Include="Examples\MainExample.cs" />
         <Compile Include="Examples\PrimitiveSpawnerExample.cs" />
+        <Compile Include="Examples\DemoExample.cs" />
+        <Compile Include="Examples\TextAreaExample.cs" />
         <Compile Include="Features\AssemblyMenu.cs" />
         <Compile Include="Features\ComptabilityConfig.cs" />
         <Compile Include="Features\Interfaces\ISetting.cs" />
@@ -141,15 +151,13 @@
         <Compile Include="Patchs\ComptabiliserPatchs\ComptabilisaterGetter.cs" />
         <Compile Include="Patchs\ComptabiliserPatchs\SendToPlayerDSPatch.cs" />
         <Compile Include="Patchs\ComptabiliserPatchs\SendToPlayerPatch.cs" />
+        <Compile Include="Patchs\ComptabiliserPatchs\SetIdPatch.cs" />
         <Compile Include="Patchs\ExiledPatch.cs" />
         <Compile Include="Patchs\NWAPISetGroup.cs" />
         <Compile Include="Patchs\OriginalDefinitionPatch.cs" />
         <Compile Include="Patchs\PrevalidateResponsePatch.cs" />
         <Compile Include="Plugin.cs" />
         <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Tests\Test.cs" />
-        <Compile Include="Tests\TestBis.cs" />
-        <Compile Include="Tests\TestCommand.cs" />
         <Compile Include="Translation.cs" />
     </ItemGroup>
     <ItemGroup>

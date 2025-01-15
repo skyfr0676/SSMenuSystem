@@ -99,6 +99,8 @@ namespace ServerSpecificSyncer
         private void GenericEnable()
         {
             Instance = this;
+            _harmony = new Harmony("fr.sky.patches");
+            _harmony.PatchAll();
 
 #if DEBUG
             Log.Warning("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
@@ -107,8 +109,6 @@ namespace ServerSpecificSyncer
             StaticConfig.Debug = true;
 #endif
 
-            _harmony = new Harmony("fr.sky.patches");
-            _harmony.PatchAll();
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;
         }
 

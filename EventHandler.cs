@@ -107,7 +107,7 @@ namespace ServerSpecificSyncer
                     if (loadedKeybind != null)
                     {
                         if (setting.SyncIsPressed)
-                            loadedKeybind.Action?.Invoke(hub);
+                            loadedKeybind.Action?.Invoke(hub, setting.SyncIsPressed);
                         return;
                     }
                 }
@@ -159,7 +159,7 @@ namespace ServerSpecificSyncer
                 else
                 {
                     if (!Menu.Menus.Any(x => x.Id == ss.SettingId))
-                        throw new KeyNotFoundException("invalid loaded id. please report this bug to developers.");
+                        throw new KeyNotFoundException($"invalid loaded id ({ss.SettingId}). please report this bug to developers.");
                     Menu m = Menu.Menus.FirstOrDefault(x => x.Id == ss.SettingId);
                     Menu.LoadForPlayer(hub, m);
                 }
@@ -170,7 +170,7 @@ namespace ServerSpecificSyncer
 #if DEBUG
                 Log.Error(e.ToString());
 #else
-                Log.Debug(e.ToString());
+                Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
 #endif
                 if (Plugin.StaticConfig.ShowErrorToClient)
                 {

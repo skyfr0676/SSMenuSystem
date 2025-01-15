@@ -15,6 +15,7 @@ namespace ServerSpecificSyncer
         public LabelButton ReturnTo { get; set; } = new("Return to {0}", "Return");
         public LabelButton ReloadButton { get; set; } = new("Reload menus", "Reload");
         public string ServerError { get; set; } = "INTERNAL SERVER ERROR";
+        public string SubMenuTitle { get; set; } = "Sub-Menus";
         public string NoPermission { get; set; } = "insufficient permissions to see the full errors";
     }
 }

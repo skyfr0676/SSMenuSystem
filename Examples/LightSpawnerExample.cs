@@ -30,7 +30,7 @@ namespace ServerSpecificSyncer.Examples
 
         public override ServerSpecificSettingBase[] Settings => GetSettings();
 
-        public ServerSpecificSettingBase[] GetSettings()
+        private ServerSpecificSettingBase[] GetSettings()
         {
             _presets ??= new List<ColorPreset>
             {
@@ -209,5 +209,7 @@ namespace ServerSpecificSyncer.Examples
             public readonly string Name;
             public readonly Color Color;
         }
+
+        public override Type MenuRelated { get; set; } = typeof(MainExample);
     }
 }

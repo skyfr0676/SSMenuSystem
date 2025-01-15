@@ -23,10 +23,11 @@ namespace ServerSpecificSyncer
         public bool ShowFullErrorToModerators { get; set; } = true;
 
 #if DEBUG
-        [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed.")]
+        [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed. Disabled.")]
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
 
         public bool ShowGlobalKeybindingsWarning { get; set; } = true;
+        public bool EnableExamples { get; set; } = true;
 
         public ComptabilityConfig ComptabilitySystem { get; set; } = new();
 #endif
