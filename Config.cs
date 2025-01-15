@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using ServerSpecificSyncer.Features;
 #if EXILED
 using Exiled.API.Interfaces;
 #endif
@@ -26,6 +27,8 @@ namespace ServerSpecificSyncer
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
 
         public bool ShowGlobalKeybindingsWarning { get; set; } = true;
+
+        public ComptabilityConfig ComptabilitySystem { get; set; } = new();
 #endif
 
 #if NWAPI

@@ -43,10 +43,10 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
         public static void Load(ServerSpecificSettingBase[] settings)
         {
             Assembly assembly = Assembly.GetCallingAssembly();
-            Log.Info(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name);
+            Log.Debug(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name, Plugin.StaticConfig.Debug);
             if (LockedAssembly.Contains(assembly) || assembly == typeof(ReferenceHub).Assembly)
             {
-                Log.Info("Assembly is locked or is a part of base game. Skipping...");
+                Log.Debug("Assembly is locked or is a part of base game. Skipping...", Plugin.StaticConfig.Debug);
                 return;
             }
 
@@ -65,12 +65,17 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 OverrideSettings = settings,
                 Name = name,
             };
-            Log.Debug($"Started comptabilisation for assembly {menu.Name}.");
-
-            if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
+            
+            if (settings?.First()?.GetType() == typeof(SSGroupHeader))
+            {
+                menu.Name = settings.First().Label;
+                menu.OverrideSettings = menu.OverrideSettings.Skip(1).ToArray();
+            }
+            else if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
                 menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
             else if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginHandler> plugin))
                 menu.Name = plugin.First().Value.PluginName;
+
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {
                 Log.Warning($"assembly {name} tried to register by compatibilisation menu {menu.Name} but a menu already exist with this name. using assembly name...");

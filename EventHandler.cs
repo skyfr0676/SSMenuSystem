@@ -127,6 +127,10 @@ namespace ServerSpecificSyncer
                     else
                     {
                         ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
+                        if (menu.SettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
+                            menu.SettingsSync[hub][menu.SettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
+                        else
+                            menu.SettingsSync[hub].Add(ss);
                         switch (s)
                         {
                             case Button wBtn:
@@ -144,10 +148,11 @@ namespace ServerSpecificSyncer
                             case YesNoButton wYesNo:
                                 wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
                                 break;
-                            default:
-                                menu.OnInput(hub, ss);
-                                break;
                         }
+
+                        if (ss.SettingId > menu.Hash)
+                            ss.SettingId -= menu.Hash;
+                        menu.OnInput(hub, ss);
                     }
                 }
                 // load selected menu.

@@ -457,7 +457,7 @@ namespace ServerSpecificSyncer.Features
 
         public void ReloadAll()
         {
-            foreach (ReferenceHub hub in MenuSync.Where(x => x.Value == this).Select(x => x.Key))
+            foreach (ReferenceHub hub in MenuSync.Where(x => x.Value == this).Select(x => x.Key).ToList())
                 LoadForPlayer(hub, this);
         }
         

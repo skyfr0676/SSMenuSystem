@@ -126,6 +126,7 @@
         <Compile Include="Examples\LightSpawnerExample.cs" />
         <Compile Include="Examples\PrimitiveSpawnerExample.cs" />
         <Compile Include="Features\AssemblyMenu.cs" />
+        <Compile Include="Features\ComptabilityConfig.cs" />
         <Compile Include="Features\Interfaces\ISetting.cs" />
         <Compile Include="Features\Menu.cs" />
         <Compile Include="Features\Parameters.cs" />

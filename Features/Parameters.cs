@@ -22,14 +22,21 @@ namespace ServerSpecificSyncer.Features
             where TMenu : Menu
             where TSs : ServerSpecificSettingBase
         {
+            if (typeof(TSs).BaseType == typeof(ISetting))
+            {
+                Log.Error(nameof(TSs) + " need to be of base type (example: Plaintext became SSPlaintextSetting).");
+                return default;
+            }
+
             foreach (Menu menu in Menu.Menus.Where(x => x is TMenu))
             {
-                if (!menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings)) continue;
+                if (!menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings))
+                    continue;
                 
                 ServerSpecificSettingBase t = settings.Where(x => x is TSs).FirstOrDefault(x => x.SettingId == settingId);
                 return t as TSs;
             }
-
+            
             return default;
         }
 
