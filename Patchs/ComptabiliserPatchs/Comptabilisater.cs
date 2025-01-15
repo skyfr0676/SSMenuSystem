@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -15,9 +14,7 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
-    #if DEBUG
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Setter)]
-    #endif
     public static class Comptabilisater
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
@@ -42,6 +39,8 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
     
         public static void Load(ServerSpecificSettingBase[] settings)
         {
+            if (!Plugin.StaticConfig.ComptabilitySystem.ComptabilityEnabled)
+                return;
             Assembly assembly = Assembly.GetCallingAssembly();
             Log.Debug(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name, Plugin.StaticConfig.Debug);
             if (LockedAssembly.Contains(assembly) || assembly == typeof(ReferenceHub).Assembly)
@@ -54,11 +53,17 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             {
                 AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
                 m.OverrideSettings = settings;
+                if (m.OverrideSettings?.First() is SSGroupHeader)
+                {
+                    m.Name = m.OverrideSettings.First().Label;
+                    m.OverrideSettings = m.OverrideSettings.Skip(1).ToArray();
+                }
                 m.ReloadAll();
                 return;
             }
 
             string name = assembly.GetName().Name;
+            
             AssemblyMenu menu = new()
             {
                 Assembly = assembly,
@@ -66,9 +71,9 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 Name = name,
             };
             
-            if (settings?.First()?.GetType() == typeof(SSGroupHeader))
+            if (menu.OverrideSettings?.First() is SSGroupHeader)
             {
-                menu.Name = settings.First().Label;
+                menu.Name = menu.OverrideSettings.First().Label;
                 menu.OverrideSettings = menu.OverrideSettings.Skip(1).ToArray();
             }
             else if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
@@ -81,7 +86,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 Log.Warning($"assembly {name} tried to register by compatibilisation menu {menu.Name} but a menu already exist with this name. using assembly name...");
                 menu.Name = name;
             }
-                
+
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {
                 Log.Error($"assembly {name} tried to register by compatibilisation but a menu was already registered with this name. Aborting needed.");
@@ -91,6 +96,8 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
         
             menu.Id = -Mathf.Abs(menu.Name.GetStableHashCode());
             Menu.Register(menu);
+            foreach (var hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
+                Menu.LoadForPlayer(hub, null);
         }
     }
 }

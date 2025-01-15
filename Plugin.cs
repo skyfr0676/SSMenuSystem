@@ -41,11 +41,6 @@ namespace ServerSpecificSyncer
         /// </summary>
         public override string Prefix => "ss_syncer";
 
-        /// <summary>
-        /// Gets the plugin priority.
-        /// </summary>
-        public override PluginPriority Priority => PluginPriority.First;
-
 #endif
 
         private static Config _staticConfig;
@@ -71,6 +66,7 @@ namespace ServerSpecificSyncer
             Exiled.Events.Handlers.Player.Verified += EventHandler.Verified;
             Exiled.Events.Handlers.Player.Left += EventHandler.Left;
             Exiled.Events.Handlers.Player.ChangingGroup += EventHandler.ChangingGroup;
+            Exiled.Events.Handlers.Server.ReloadedConfigs += EventHandler.ReloadedConfigs;
             GenericEnable();
             base.OnEnabled();
         }
@@ -101,10 +97,11 @@ namespace ServerSpecificSyncer
             Instance = this;
             _harmony = new Harmony("fr.sky.patches");
             _harmony.PatchAll();
+            Menu.RegisterQueuedAssemblies();
+            Menu.RegisterAll();
 
 #if DEBUG
             Log.Warning("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
-            Menu.RegisterAll();
             Menu.RegisterPin(new ServerSpecificSettingBase[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
             StaticConfig.Debug = true;
 #endif

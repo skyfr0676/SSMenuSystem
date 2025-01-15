@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -110,7 +109,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             
             menu.ActuallySendedToClient[hub] = settings;
 
-            if (Menu.TryGetCurrentPlayerMenu(hub) == menu)
+            if (Menu.GetCurrentPlayerMenu(hub) == menu)
                 menu.Reload(hub);
             else
                 Menu.LoadForPlayer(hub, null);

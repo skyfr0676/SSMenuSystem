@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using CustomPlayerEffects;
 using InventorySystem;
 using InventorySystem.Items;
-using InventorySystem.Items.Pickups;
-using NorthwoodLib.Pools;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using PlayerStatsSystem;
@@ -12,21 +10,21 @@ using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
-using UserSettings.ServerSpecific.Examples;
 
 namespace ServerSpecificSyncer.Examples
 {
     public class AbilitiesExample : Menu
     {
-        public const float HealAllyHp = 50f;
-        public const float HealAllyRange = 3.5f;
-        public const byte BoostIntensity = 60;
-        public const float BoostHealthDrain = 5f;
-        public override ServerSpecificSettingBase[] Settings => GetSettings();
+        private const float HealAllyHp = 50f;
+        private const float HealAllyRange = 3.5f;
+        private const byte BoostIntensity = 60;
+        private const float BoostHealthDrain = 5f;
         private List<ServerSpecificSettingBase> _settings;
         private static readonly HashSet<ReferenceHub> ActiveSpeedBoosts = new();
 
-        public void TryHealAlly(ReferenceHub sender)
+        public override ServerSpecificSettingBase[] Settings => GetSettings();
+
+        private void TryHealAlly(ReferenceHub sender)
         {
             ItemIdentifier curItem = sender.inventory.CurItem;
             if (curItem.TypeId != ItemType.Medkit)
@@ -34,7 +32,7 @@ namespace ServerSpecificSyncer.Examples
             Vector3 position = sender.PlayerCameraReference.position;
             Vector3 forward = sender.PlayerCameraReference.forward;
 
-            while (Physics.Raycast(position, forward, out var hitInfo, 3.5f) && hitInfo.collider.TryGetComponent<HitboxIdentity>(out var component) && !HitboxIdentity.IsEnemy(component.TargetHub, sender))
+            while (Physics.Raycast(position, forward, out var hitInfo, HealAllyRange) && hitInfo.collider.TryGetComponent<HitboxIdentity>(out var component) && !HitboxIdentity.IsEnemy(component.TargetHub, sender))
             {
                 if (component.TargetHub == sender)
                 {
@@ -42,19 +40,19 @@ namespace ServerSpecificSyncer.Examples
                 }
                 else
                 {
-                    component.TargetHub.playerStats.GetModule<HealthStat>().ServerHeal(50f);
+                    component.TargetHub.playerStats.GetModule<HealthStat>().ServerHeal(HealAllyHp);
                     sender.inventory.ServerRemoveItem(curItem.SerialNumber, null);
                     break;
                 }
             }
         }
 
-        public void SetSpeedBoost(ReferenceHub hub, bool state)
+        private void SetSpeedBoost(ReferenceHub hub, bool state)
         {
             MovementBoost effect = hub.playerEffectsController.GetEffect<MovementBoost>();
             if (state && hub.IsHuman())
             {
-                effect.ServerSetState(60);
+                effect.ServerSetState(BoostIntensity);
                 ActiveSpeedBoosts.Add(hub);
             }
             else
@@ -82,7 +80,8 @@ namespace ServerSpecificSyncer.Examples
                             return;
                         SetSpeedBoost(hub, !ActiveSpeedBoosts.Contains(hub));
                     }
-                    SetSpeedBoost(hub, isPressed);
+                    else
+                        SetSpeedBoost(hub, isPressed);
                 }, KeyCode.Y, hint: "Increase your speed by draining your health.", isGlobal: false),
                 new SSTwoButtonsSetting(ExampleId.SpeedBoostToggle, "Speed Boost - Activation Mode", "Hold", "Toggle")
             };
@@ -90,12 +89,12 @@ namespace ServerSpecificSyncer.Examples
             return _settings.ToArray();
         }
 
-        internal static void OnDisconnect(ReferenceHub hub)
+        private static void OnDisconnect(ReferenceHub hub)
         {
             ActiveSpeedBoosts.Remove(hub);
         }
 
-        public void OnRoleChanged(
+        private void OnRoleChanged(
             ReferenceHub userHub,
             PlayerRoleBase prevRole,
             PlayerRoleBase newRole)
@@ -109,25 +108,25 @@ namespace ServerSpecificSyncer.Examples
             PlayerRoleManager.OnRoleChanged += OnRoleChanged;
             StaticUnityMethods.OnUpdate += OnUpdate;
         }
-        
-        public void OnUpdate()
+
+        private void OnUpdate()
         {
             if (!StaticUnityMethods.IsPlaying)
                 return;
             foreach (ReferenceHub activeSpeedBoost in ActiveSpeedBoosts)
             {
                 if (!Mathf.Approximately(activeSpeedBoost.GetVelocity().SqrMagnitudeIgnoreY(), 0.0f))
-                    activeSpeedBoost.playerStats.DealDamage(new UniversalDamageHandler(Time.deltaTime * 5f, DeathTranslations.Scp207));
+                    activeSpeedBoost.playerStats.DealDamage(new UniversalDamageHandler(Time.deltaTime * BoostHealthDrain, DeathTranslations.Scp207));
             }
         }
 
         public override string Name { get; set; } = "Abilities Extension";
         public override int Id { get; set; } = -8;
-        internal static class ExampleId
+        private static class ExampleId
         {
-            public static readonly int SpeedBoostKey = 0;
-            public static readonly int SpeedBoostToggle = 1;
-            public static readonly int HealAlly = 2;
+            public static readonly int SpeedBoostKey = 5;
+            public static readonly int SpeedBoostToggle = 7;
+            public static readonly int HealAlly = 9;
         }
         public override Type MenuRelated { get; set; } = typeof(MainExample);
     }

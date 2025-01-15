@@ -11,9 +11,7 @@ using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 {
-    #if DEBUG
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
-#endif
     public class ComptabilisaterGetter
     {
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,

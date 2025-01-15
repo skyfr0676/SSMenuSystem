@@ -1,7 +1,6 @@
 using System;
 using ServerSpecificSyncer.Features;
 using UserSettings.ServerSpecific;
-using UserSettings.ServerSpecific.Examples;
 
 namespace ServerSpecificSyncer.Examples
 {

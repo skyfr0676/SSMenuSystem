@@ -1,23 +1,22 @@
-#if DEBUG
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
 using MEC;
 using PluginAPI.Core;
 using ServerSpecificSyncer.Features.Interfaces;
-using ServerSpecificSyncer.Features.Wrappers;
-using UnityEngine;
 using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Features
 {
     public static class Parameters
     {
-        internal static ReferenceHub playerCache;
-
+        /// <summary>
+        /// Get synced parameter value for <see cref="hub"/>.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        /// <param name="settingId">The id of setting.</param>
+        /// <typeparam name="TMenu">The Menu to get parameter.</typeparam>
+        /// <typeparam name="TSs">The setting type.</typeparam>
+        /// <returns>An instance of <see cref="TSs"/> That contains synecd value, or null if not found.</returns>
         public static TSs GetParameter<TMenu, TSs>(this ReferenceHub hub, int settingId)
             where TMenu : Menu
             where TSs : ServerSpecificSettingBase
@@ -41,16 +40,17 @@ namespace ServerSpecificSyncer.Features
         }
 
 
-        public static IEnumerator<float> SyncAll(ReferenceHub hub)
+        /// <summary>
+        /// Sync all paramters for all menus for <see cref="hub"/>.
+        /// </summary>
+        /// <param name="hub">The target hub</param>
+        /// <returns>a enumerator for <see cref="Timing.RunCoroutine(System.Collections.Generic.IEnumerator{float})"/></returns>.
+        internal static IEnumerator<float> SyncAll(ReferenceHub hub)
         {
-            //ReferenceHub hub = playerCache;
-            playerCache = null;
             SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
             List<ServerSpecificSettingBase> sendSettings = new();
             float timeout = 0;
             List<Menu> menus = Menu.Menus.ToList();
-            /*foreach (var menu in menus.ToArray())
-                menus.AddRange(Menu.Menus.Where(x => x.MenuRelated == menu.GetType() && x != menu));*/
             
             foreach (Menu menu in menus)
             {
@@ -118,18 +118,22 @@ namespace ServerSpecificSyncer.Features
                 yield break;
             }
 
-#if DEBUG
-            if (Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
+            if ((Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne && false) || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
                 Menu.LoadForPlayer(hub, null);
             else
                 Menu.LoadForPlayer(hub, Menu.Menus.First());
-#else
-            Menu.LoadForPlayer(hub, null);
-#endif
         }
         
+        /// <summary>
+        /// A cache, updated on <see cref="EventHandler.OnReceivingInput"/> if hub is inside, when syncing parameters.
+        /// </summary>
         internal static readonly Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> SyncCache = new();
 
+        /// <summary>
+        /// Get ALL synced parameters from ALL menus for <see cref="hub"/>
+        /// </summary>
+        /// <param name="referenceHub">The target hub.</param>
+        /// <returns>read :kappa:</returns>
         public static List<ServerSpecificSettingBase> GetAllSyncedParameters(ReferenceHub referenceHub)
         {
             List<ServerSpecificSettingBase> toReturn = new();
@@ -138,6 +142,12 @@ namespace ServerSpecificSyncer.Features
             return toReturn;
         }
         
+        /// <summary>
+        /// Get All synced parameter for target menu.
+        /// </summary>
+        /// <param name="referenceHub">The target hub.</param>
+        /// <typeparam name="T">The target menu.</typeparam>
+        /// <returns>A list that contains all synced parameters.</returns>
         public static List<ServerSpecificSettingBase> GetMenuSpecificSyncedParameters<T>(ReferenceHub referenceHub) where T : Menu
         {
             List<ServerSpecificSettingBase> toReturn = new();
@@ -146,7 +156,13 @@ namespace ServerSpecificSyncer.Features
             return toReturn;
         }
         
-#if DEBUG
+        /// <summary>
+        /// Sync all parameters from <see cref="menu"/> for <see cref="hub"/>.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        /// <param name="menu">The target menu.</param>
+        /// <param name="toSendWhenEnded">All parameters to send when ended.</param>
+        /// <returns>an enumerator for <see cref="Timing.RunCoroutine(System.Collections.Generic.IEnumerator{float})"/></returns>
         internal static IEnumerator<float> Sync(ReferenceHub hub, Menu menu, ServerSpecificSettingBase[] toSendWhenEnded)
         {
             SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
@@ -207,6 +223,4 @@ namespace ServerSpecificSyncer.Features
             Utils.SendToPlayer(hub, menu, toSendWhenEnded);
         }
     }
-#endif
 }
-#endif

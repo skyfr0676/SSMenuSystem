@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Reflection;
-using Mirror;
 using UserSettings.ServerSpecific;
 
 namespace ServerSpecificSyncer.Features

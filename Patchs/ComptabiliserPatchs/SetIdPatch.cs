@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
-using PluginAPI.Core;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;

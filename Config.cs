@@ -22,7 +22,6 @@ namespace ServerSpecificSyncer
         public bool ShowFullErrorToClient { get; set; } = false;
         public bool ShowFullErrorToModerators { get; set; } = true;
 
-#if DEBUG
         [Description("If there is only one menu registered and this set to false, this menu would be automatiquely displayed. Disabled.")]
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
 
@@ -30,7 +29,6 @@ namespace ServerSpecificSyncer
         public bool EnableExamples { get; set; } = true;
 
         public ComptabilityConfig ComptabilitySystem { get; set; } = new();
-#endif
 
 #if NWAPI
         public Translation Translation { get; set; } = new();

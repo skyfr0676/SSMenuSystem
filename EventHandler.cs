@@ -10,9 +10,6 @@ using PluginAPI.Core;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
-using MEC;
-using Mirror;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
@@ -22,26 +19,19 @@ namespace ServerSpecificSyncer
     internal static class EventHandler
     {
 #if EXILED
-#if DEBUG
         internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
-        /*internal static void Verified(VerifiedEventArgs ev)
-        {
-            Parameters.playerCache = ev.Player.ReferenceHub;
-            Task.Run(Parameters.SyncAll);
-        }*/
-#else
-        internal static void Verified(VerifiedEventArgs ev) => Menu.LoadForPlayer(ev.Player.ReferenceHub, null);
-#endif
         internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
         internal static void ChangingGroup(ChangingGroupEventArgs ev) => SyncChangedGroup(ev.Player.ReferenceHub);
+        internal static void ReloadedConfigs()
+        {
+            Log.Info("reloaded configs.");
+            foreach (var hub in ReferenceHub.AllHubs)
+                Menu.LoadForPlayer(hub, Menu.GetCurrentPlayerMenu(hub));
+        }
 
 #elif NWAPI
         [PluginEvent(ServerEventType.PlayerJoined)]
-#if DEBUG
         public void Verified(Player player) => Timing.RunCoroutine(Parameters.SyncAll(player.ReferenceHub));
-#else
-        public void Verified(Player player) => Menu.LoadForPlayer(player.ReferenceHub, null);
-#endif
 
         [PluginEvent(ServerEventType.PlayerLeft)]
         public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
@@ -52,11 +42,10 @@ namespace ServerSpecificSyncer
         {
             Timing.CallDelayed(0.1f, () =>
             {
-#if DEBUG
                 if (Parameters.SyncCache.ContainsKey(hub))
                     return;
-#endif
-                Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+
+                Menu menu = Menu.GetCurrentPlayerMenu(hub);
                 menu?.Reload(hub);
                 if (menu == null)
                     Menu.LoadForPlayer(hub, null);
@@ -67,14 +56,13 @@ namespace ServerSpecificSyncer
         {
             try
             {
-#if DEBUG
                 if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
                     Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.", Plugin.StaticConfig.Debug);
                     return;
                 }
-#endif
+
                 if (ss.OriginalDefinition != null)
                 {
                     ss.Label = ss.OriginalDefinition.Label;
@@ -82,7 +70,7 @@ namespace ServerSpecificSyncer
                     ss.SettingId = ss.OriginalDefinition.SettingId;
                 }
                 else // is a pin or header
-                    ss.SettingId -= Menu.TryGetCurrentPlayerMenu(hub)?.Hash ?? 0;
+                    ss.SettingId -= Menu.GetCurrentPlayerMenu(hub)?.Hash ?? 0;
 
                 // return to menu
                 if (ss.SettingId == -999)
@@ -92,7 +80,7 @@ namespace ServerSpecificSyncer
                 }
                 
                 // check permissions
-                Menu menu = Menu.TryGetCurrentPlayerMenu(hub);
+                Menu menu = Menu.GetCurrentPlayerMenu(hub);
                 if (!menu?.CheckAccess(hub) ?? false)
                 {
                     Log.Warning($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} which is disabled for him.");
@@ -106,8 +94,7 @@ namespace ServerSpecificSyncer
                     Keybind loadedKeybind = Menu.TryGetKeybinding(hub, ss, menu);
                     if (loadedKeybind != null)
                     {
-                        if (setting.SyncIsPressed)
-                            loadedKeybind.Action?.Invoke(hub, setting.SyncIsPressed);
+                        loadedKeybind.Action?.Invoke(hub, setting.SyncIsPressed);
                         return;
                     }
                 }
