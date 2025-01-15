@@ -10,7 +10,7 @@ using static HarmonyLib.AccessTools;
 namespace ServerSpecificSyncer.Patchs
 {
     /// <summary>
-    /// A patch for OriginalDefinition.
+    /// A patch for OriginalDefinition. 
     /// </summary>
     [HarmonyPatch(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.OriginalDefinition), MethodType.Getter)]
     internal class OriginalDefinitionPatch
