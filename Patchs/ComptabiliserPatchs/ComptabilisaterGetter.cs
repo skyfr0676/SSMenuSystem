@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -34,13 +35,12 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
     
         public static ServerSpecificSettingBase[] Get(Assembly assembly)
         {
-            if (Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly))
-            {
-                AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
-                return m.OverrideSettings;
-            }
-
-            return null;
+            if (assembly == typeof(ReferenceHub).Assembly)
+                return Array.Empty<ServerSpecificSettingBase>();
+            if (!Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly)) return null;
+            AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
+            return m.OverrideSettings;
+            
         }
     }
 }

@@ -21,7 +21,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
         /// <param name="preventInteractionOnGui">The parameter used to block interaction when UI is opened in <see cref="SSKeybindSetting"/>.</param>
         /// <param name="hint">The hint of <see cref="SSKeybindSetting"/>.</param>
         /// <param name="isGlobal"><inheritdoc cref="IsGlobal"/></param>
-        public Keybind(int? id, string label, Action<ReferenceHub> onUsed, KeyCode suggestedKey = KeyCode.None, bool preventInteractionOnGui = true,
+        public Keybind(int? id, string label, Action<ReferenceHub, bool> onUsed, KeyCode suggestedKey = KeyCode.None, bool preventInteractionOnGui = true,
             string hint = null, bool isGlobal = true) : base(id+Increment, label, suggestedKey, preventInteractionOnGui, hint)
         {
             IsGlobal = isGlobal;
@@ -37,7 +37,7 @@ namespace ServerSpecificSyncer.Features.Wrappers
         /// <summary>
         /// The action will be executed when the button is pressed.
         /// </summary>
-        public Action<ReferenceHub> Action { get; }
+        public Action<ReferenceHub, bool> Action { get; }
 
         public ServerSpecificSettingBase Base { get; }
     }

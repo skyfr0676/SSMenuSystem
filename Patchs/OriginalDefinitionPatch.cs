@@ -1,20 +1,21 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
 using ServerSpecificSyncer.Features;
 using ServerSpecificSyncer.Features.Interfaces;
-using ServerSpecificSyncer.Features.Wrappers;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
 namespace ServerSpecificSyncer.Patchs
 {
+    /// <summary>
+    /// A patch for OriginalDefinition.
+    /// </summary>
     [HarmonyPatch(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.OriginalDefinition), MethodType.Getter)]
-    public class OriginalDefinitionPatch
+    internal class OriginalDefinitionPatch
     {
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
         {
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
@@ -32,16 +33,24 @@ namespace ServerSpecificSyncer.Patchs
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
 
-        public static ServerSpecificSettingBase GetFirstSetting(int id)
+        /// <summary>
+        /// Get the first setting correspondig to the <see cref="id"/>.
+        /// </summary>
+        /// <param name="id">id of <see cref="ServerSpecificSettingBase"/>.</param>
+        /// <returns><see cref="ServerSpecificSettingBase"/> if found, null if not.</returns>
+        private static ServerSpecificSettingBase GetFirstSetting(int id)
         {
-            foreach (ServerSpecificSettingBase ss in Menu.Menus.Select(x => x.Settings).SelectMany(x => x))
+            foreach (var menu in Menu.Menus)
             {
-                if (ss.SettingId != id) continue;
-                if (ss is ISetting setting)
-                    return setting.Base;
-                return ss;
+                foreach (var ss in menu.Settings)
+                {
+                    int settingId = ss.SettingId + menu.Hash;
+                    if (settingId != id) continue;
+                    if (ss is ISetting setting)
+                        return setting.Base;
+                    return ss;
+                }
             }
-
             return null;
         }
     }

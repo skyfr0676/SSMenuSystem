@@ -6,8 +6,16 @@ namespace ServerSpecificSyncer.Features
 {
     public class Utils
     {
-        public static void SendToPlayer(ReferenceHub hub, ServerSpecificSettingBase[] collection, int? versionOverride = null)
+        public static void SendToPlayer(ReferenceHub hub, Menu relatedMenu, ServerSpecificSettingBase[] collection, int? versionOverride = null)
         {
+            if (relatedMenu != null)
+            {
+                foreach (var c in collection)
+                {
+                    if (c.SettingId < relatedMenu.Hash)
+                        c.SetId(c.SettingId + relatedMenu.Hash, c.Label);
+                }
+            }
             hub.connectionToClient.Send(new SSSEntriesPack(collection, versionOverride ?? ServerSpecificSettingsSync.Version));
         }
     
