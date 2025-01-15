@@ -58,6 +58,8 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                     m.Name = m.OverrideSettings.First().Label;
                     m.OverrideSettings = m.OverrideSettings.Skip(1).ToArray();
                 }
+                foreach (var hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
+                    Menu.LoadForPlayer(hub, null);
                 m.ReloadAll();
                 return;
             }
