@@ -2,20 +2,21 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
             Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
+    <Import Project="SSMenuSystem.props" />
     <PropertyGroup>
         <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
         <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
         <ProjectGuid>{523A1ABE-6297-47F1-8075-32E523CA5FD0}</ProjectGuid>
         <OutputType>Library</OutputType>
         <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>ServerSpecificSyncer</RootNamespace>
+        <RootNamespace>SSMenuSystem</RootNamespace>
         <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-        <AssemblyName>ServerSpecificSyncer</AssemblyName>
+        <AssemblyName>SSMenuSystem</AssemblyName>
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release NWAPI|AnyCPU' ">
-        <AssemblyName>ServerSpecificSyncer-NWAPI</AssemblyName>
+        <AssemblyName>SSMenuSystem-NWAPI</AssemblyName>
         <PostBuildEvent>cp "$(AssemblyName).dll" "/home/sky/.config/SCP Secret Laboratory/PluginAPI/plugins/7777";</PostBuildEvent>
         <DebugType>pdbonly</DebugType>
         <Optimize>true</Optimize>
@@ -24,11 +25,11 @@
         <WarningLevel>4</WarningLevel>
         <OutputPath>bin\Release NWAPI\</OutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Release NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
+        <DocumentationFile>bin\Release NWAPI\SSMenuSystem.xml</DocumentationFile>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug NWAPI|AnyCPU' ">
-        <AssemblyName>ServerSpecificSyncer-NWAPI</AssemblyName>
+        <AssemblyName>SSMenuSystem-NWAPI</AssemblyName>
         <PostBuildEvent>cp "$(AssemblyName).dll" "/home/sky/.config/SCP Secret Laboratory/PluginAPI/plugins/7777";</PostBuildEvent>
         <DebugSymbols>true</DebugSymbols>
         <DebugType>full</DebugType>
@@ -38,69 +39,36 @@
         <WarningLevel>0</WarningLevel>
         <OutputPath>bin\Debug NWAPI\</OutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Debug NWAPI\ServerSpecificSyncer.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug NWAPI\SSMenuSystem.xml</DocumentationFile>
     </PropertyGroup>
     
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
-        <AssemblyName>ServerSpecificSyncer-EXILED</AssemblyName>
+        <AssemblyName>SSMenuSystem-EXILED</AssemblyName>
         <PostBuildEvent>cp "$(AssemblyName).dll" "$EXILED_DEV_REFERENCES/Plugins/";</PostBuildEvent>
       <OutputPath>bin\Release EXILED\</OutputPath>
       <DefineConstants>TRACE;EXILED</DefineConstants>
       <Optimize>true</Optimize>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <DebugType>pdbonly</DebugType>
-      <DocumentationFile>bin\Release EXILED\ServerSpecificSyncer.xml</DocumentationFile>
+      <DocumentationFile>bin\Release EXILED\SSMenuSystem.xml</DocumentationFile>
       <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
-        <AssemblyName>ServerSpecificSyncer-EXILED</AssemblyName>
+        <AssemblyName>SSMenuSystem-EXILED</AssemblyName>
         <PostBuildEvent>cp "$(AssemblyName).dll" "$EXILED_DEV_REFERENCES/Plugins/";</PostBuildEvent>
       <OutputPath>bin\Debug EXILED\</OutputPath>
       <DefineConstants>DEBUG;TRACE;EXILED</DefineConstants>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DocumentationFile>bin\Debug EXILED\ServerSpecificSyncer.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug EXILED\SSMenuSystem.xml</DocumentationFile>
       <WarningLevel>0</WarningLevel>
     </PropertyGroup>
     
     <ItemGroup>
-        <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Assembly-CSharp-Publicized.dll</HintPath>
-        </Reference>
         <Reference Include="Assembly-CSharp-firstpass">
             <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
         </Reference>
-        <Reference Include="CommandSystem.Core, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\CommandSystem.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.API, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.API.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.CreditTags, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.CreditTags.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.CustomItems, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.CustomItems.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.CustomRoles, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.CustomRoles.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.Events, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.Events.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.Loader, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.Loader.dll</HintPath>
-        </Reference>
-        <Reference Include="Exiled.Permissions, Version=9.2.2.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\Exiled.Permissions.dll</HintPath>
-        </Reference>
         <Reference Include="Mirror">
             <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
-        </Reference>
-        <Reference Include="NorthwoodLib, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\NorthwoodLib.dll</HintPath>
-        </Reference>
-        <Reference Include="PluginAPI, Version=13.1.5.0, Culture=neutral, processorArchitecture=Amd64">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\PluginAPI.dll</HintPath>
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
             <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
@@ -120,9 +88,6 @@
         </Reference>
         <Reference Include="UnityEngine.PhysicsModule">
             <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
-        </Reference>
-        <Reference Include="YamlDotNet, Version=11.0.0.0, Culture=neutral, PublicKeyToken=ec19458f3c15af5e, processorArchitecture=MSIL">
-          <HintPath>packages\ExMod.Exiled.9.2.2\lib\net48\YamlDotNet.dll</HintPath>
         </Reference>
     </ItemGroup>
     <ItemGroup>
@@ -162,7 +127,15 @@
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
-      <None Include="packages.config" />
+    </ItemGroup>
+    <ItemGroup>
+      <Content Include=".editorconfig" />
+      <Content Include="Directory.Build.props" />
+      <Content Include="SSMenuSystem.props" />
+      <Content Include="SSMenuSystem.ruleset" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="ExMod.Exiled" Version="9.4.0" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

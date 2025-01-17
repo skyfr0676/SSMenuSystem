@@ -2,15 +2,15 @@
 using System.Reflection;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features
+namespace SSMenuSystem.Features
 {
-    public class Utils
+    internal static class Utils
     {
-        public static void SendToPlayer(ReferenceHub hub, Menu relatedMenu, ServerSpecificSettingBase[] collection, int? versionOverride = null)
+        internal static void SendToPlayer(ReferenceHub hub, Menu relatedMenu, ServerSpecificSettingBase[] collection, int? versionOverride = null)
         {
             if (relatedMenu != null)
             {
-                foreach (var c in collection)
+                foreach (ServerSpecificSettingBase c in collection)
                 {
                     if (c.SettingId < relatedMenu.Hash)
                         c.SetId(c.SettingId + relatedMenu.Hash, c.Label);
@@ -18,7 +18,7 @@ namespace ServerSpecificSyncer.Features
             }
             hub.connectionToClient.Send(new SSSEntriesPack(collection, versionOverride ?? ServerSpecificSettingsSync.Version));
         }
-    
-        public static AssemblyMenu GetMenu(Assembly assembly) => Menu.Menus.OfType<AssemblyMenu>().FirstOrDefault(x => x.Assembly == assembly);
+
+        internal static AssemblyMenu GetMenu(Assembly assembly) => Menu.Menus.OfType<AssemblyMenu>().FirstOrDefault(x => x.Assembly == assembly);
     }
 }

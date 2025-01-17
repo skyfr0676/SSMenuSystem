@@ -5,16 +5,16 @@ using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.ComptabiliserPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
-    public class ComptabilisaterGetter
+    internal class ComptabilisaterGetter
     {
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
         {
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
@@ -32,7 +32,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
-    
+
         public static ServerSpecificSettingBase[] Get(Assembly assembly)
         {
             if (assembly == typeof(ReferenceHub).Assembly)
@@ -40,7 +40,7 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
             if (!Menu.Menus.OfType<AssemblyMenu>().Any(x => x.Assembly == assembly)) return null;
             AssemblyMenu m = Menu.Menus.OfType<AssemblyMenu>().First(x => x.Assembly == assembly);
             return m.OverrideSettings;
-            
+
         }
     }
 }

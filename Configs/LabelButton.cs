@@ -1,17 +1,20 @@
-namespace ServerSpecificSyncer.Configs
+namespace SSMenuSystem.Configs
 {
+    /// <summary>
+    /// Button labels config.
+    /// </summary>
     public class LabelButton
     {
         /// <summary>
         /// The label of button (displayed at the left).
         /// </summary>
         public string Label { get; set; }
-        
+
         /// <summary>
         /// The Button content (displayed on the button).
         /// </summary>
         public string ButtonText { get; set; }
-        
+
         /// <summary>
         /// Initialize a new instance of <see cref="LabelButton"/>
         /// </summary>

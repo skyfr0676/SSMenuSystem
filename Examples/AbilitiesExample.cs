@@ -6,14 +6,14 @@ using InventorySystem.Items;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
 using PlayerStatsSystem;
-using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Features.Wrappers;
+using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
-    public class AbilitiesExample : Menu
+    internal class AbilitiesExample : Menu
     {
         private const float HealAllyHp = 50f;
         private const float HealAllyRange = 3.5f;
@@ -32,7 +32,7 @@ namespace ServerSpecificSyncer.Examples
             Vector3 position = sender.PlayerCameraReference.position;
             Vector3 forward = sender.PlayerCameraReference.forward;
 
-            while (Physics.Raycast(position, forward, out var hitInfo, HealAllyRange) && hitInfo.collider.TryGetComponent<HitboxIdentity>(out var component) && !HitboxIdentity.IsEnemy(component.TargetHub, sender))
+            while (Physics.Raycast(position, forward, out RaycastHit hitInfo, HealAllyRange) && hitInfo.collider.TryGetComponent<HitboxIdentity>(out HitboxIdentity component) && !HitboxIdentity.IsEnemy(component.TargetHub, sender))
             {
                 if (component.TargetHub == sender)
                 {
@@ -63,7 +63,7 @@ namespace ServerSpecificSyncer.Examples
         }
         private ServerSpecificSettingBase[] GetSettings()
         {
-            _settings = new()
+            _settings = new List<ServerSpecificSettingBase>
             {
                 new SSGroupHeader("Abilities"),
                 new Keybind(ExampleId.HealAlly, "Heal Ally", (hub, isPressed) =>
@@ -102,7 +102,7 @@ namespace ServerSpecificSyncer.Examples
             this.SetSpeedBoost(userHub, false);
         }
 
-        public override void OnRegistered()
+        protected override void OnRegistered()
         {
             ReferenceHub.OnPlayerRemoved += OnDisconnect;
             PlayerRoleManager.OnRoleChanged += OnRoleChanged;

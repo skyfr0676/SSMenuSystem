@@ -3,16 +3,17 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using AdminToys;
+using Exiled.Events.Commands.Hub;
 using GameCore;
 using Mirror;
-using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Features.Wrappers;
+using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using Utils.NonAllocLINQ;
 using Log = PluginAPI.Core.Log;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
     internal class PrimitiveSpawnerExample : Menu
     {
@@ -39,24 +40,24 @@ namespace ServerSpecificSyncer.Examples
                 new("Cyan", Color.cyan),
                 new("Magenta", Color.magenta),
             };
-            
+
             _selectedColorTextArea ??= new SSTextArea(ExampleId.SelectedColor, "Selected Color: None");
 
             _settings = new List<ServerSpecificSettingBase>
             {
-                new Dropdown(ExampleId.Type, "Type", EnumUtils<PrimitiveType>.Values.Select(x => x.ToString()).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)),
-                new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)),
-                new Slider(ExampleId.Opacity, "Opacity", 0, 100, (hub, f, arg3) => ReloadColorInfoForUser(hub), 100, true, finalDisplayFormat: "{0}%"),
-                new Plaintext(ExampleId.CustomColor, "Color", (hub, setting, arg3) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."),
+                new Dropdown(ExampleId.Type, "Type", EnumUtils<PrimitiveType>.Values.Select(x => x.ToString()).ToArray(), (hub, _, _, _) => ReloadColorInfoForUser(hub)),
+                new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, _, _, _) => ReloadColorInfoForUser(hub)),
+                new Slider(ExampleId.Opacity, "Opacity", 0, 100, (hub, _, _) => ReloadColorInfoForUser(hub), 100, true, finalDisplayFormat: "{0}%"),
+                new Plaintext(ExampleId.CustomColor, "Color", (hub, _, _) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."),
                 _selectedColorTextArea,
-                new YesNoButton(ExampleId.Collisions, "Collisions", "Enabled", "Disabled", null),
+                new YesNoButton(ExampleId.Collisions, "Collisions", "Enabled", "Disabled"),
                 new YesNoButton(ExampleId.Renderer, "Renderer", "Visible", "Invisible", null, false, "Invisible primitives can still receive collisions."),
                 new Slider(ExampleId.ScaleX, "Scale (X)", 0, 50, null, 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
                 new Slider(ExampleId.ScaleY, "Scale (Y)", 0, 50, null, 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
                 new Slider(ExampleId.ScaleZ, "Scale (Z)", 0, 50, null, 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
-                new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, btn) => Spawn(hub))
+                new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, _) => Spawn(hub))
             };
-            
+
             _settings.AddRange(_addedSettings);
 
             return _settings.ToArray();
@@ -69,7 +70,7 @@ namespace ServerSpecificSyncer.Examples
         }
 
         public void Spawn(ReferenceHub sender)
-        { 
+        {
             PrimitiveObjectToy primitiveObjectToy = null;
             foreach (GameObject gameObject in NetworkClient.prefabs.Values.ToList())
             {
@@ -97,7 +98,7 @@ namespace ServerSpecificSyncer.Examples
                 sender.GetParameter<PrimitiveSpawnerExample, SSTwoButtonsSetting>(ExampleId.Collisions).SyncIsA
                     ? PrimitiveFlags.Collidable
                     : PrimitiveFlags.None;
-        
+
             PrimitiveFlags visible =
                 sender.GetParameter<PrimitiveSpawnerExample, SSTwoButtonsSetting>(ExampleId.Renderer).SyncIsA
                     ? PrimitiveFlags.Visible
@@ -134,7 +135,7 @@ namespace ServerSpecificSyncer.Examples
                 Destroy(setting.SettingId);
             if (setting.SettingId == ExampleId.DestroyAll)
                 DestroyAll();
-            
+
             base.OnInput(hub, setting);
         }
 
@@ -170,13 +171,13 @@ namespace ServerSpecificSyncer.Examples
                 .SyncSelectionIndexRaw;
             Color color = _presets[selectionIndex].Color;
             return new Color(
-                !array.TryGet(0, out var element1) || !float.TryParse(element1, out var result1)
+                !array.TryGet(0, out string element1) || !float.TryParse(element1, out float result1)
                     ? color.r
                     : result1 / byte.MaxValue,
-                !array.TryGet(1, out var element2) || !float.TryParse(element2, out var result2)
+                !array.TryGet(1, out string element2) || !float.TryParse(element2, out float result2)
                     ? color.g
                     : result2 / byte.MaxValue,
-                !array.TryGet(2, out var element3) || !float.TryParse(element3, out var result3)
+                !array.TryGet(2, out string element3) || !float.TryParse(element3, out float result3)
                     ? color.b
                     : result3 / byte.MaxValue,
                 hub.GetParameter<PrimitiveSpawnerExample, SSSliderSetting>(ExampleId.Opacity)
@@ -206,7 +207,7 @@ namespace ServerSpecificSyncer.Examples
             internal static readonly int DestroySpecific = 13;
         }
         // ReSharper restore ConvertToConstant.Local
-    
+
         private readonly struct ColorPreset
         {
             public ColorPreset(string name, Color color)

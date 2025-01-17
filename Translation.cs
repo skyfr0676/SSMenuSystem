@@ -1,10 +1,10 @@
 ﻿using System.ComponentModel;
-using ServerSpecificSyncer.Configs;
+using SSMenuSystem.Configs;
 #if EXILED
 using Exiled.API.Interfaces;
 #endif
 
-namespace ServerSpecificSyncer
+namespace SSMenuSystem
 {
     /// <summary>
     /// The translation configs.

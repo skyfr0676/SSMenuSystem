@@ -1,10 +1,10 @@
 using System.ComponentModel;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 #if EXILED
 using Exiled.API.Interfaces;
 #endif
 
-namespace ServerSpecificSyncer
+namespace SSMenuSystem
 {
     /// <inheritdoc cref="IConfig"/>
     public class Config

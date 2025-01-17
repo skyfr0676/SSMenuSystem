@@ -5,11 +5,11 @@ using HarmonyLib;
 using MEC;
 using NorthwoodLib.Pools;
 using PluginAPI.Core;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UnityEngine;
 using static HarmonyLib.AccessTools;
 
-namespace ServerSpecificSyncer.Patchs
+namespace SSMenuSystem.Patchs
 {
     [HarmonyPatch(typeof(ServerRoles), nameof(ServerRoles.SetGroup))]
     public class NwapiSetGroup

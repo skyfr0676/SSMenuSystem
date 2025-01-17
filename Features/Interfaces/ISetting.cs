@@ -1,8 +1,8 @@
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features.Interfaces
+namespace SSMenuSystem.Features.Interfaces
 {
-    public interface ISetting
+    internal interface ISetting
     {
         ServerSpecificSettingBase Base { get; }
     }

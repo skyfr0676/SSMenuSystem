@@ -5,13 +5,13 @@ using System.Linq;
 using System.Reflection;
 using MEC;
 using PluginAPI.Core;
-using ServerSpecificSyncer.Examples;
-using ServerSpecificSyncer.Features.Interfaces;
-using ServerSpecificSyncer.Features.Wrappers;
+using SSMenuSystem.Examples;
+using SSMenuSystem.Features.Interfaces;
+using SSMenuSystem.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features
+namespace SSMenuSystem.Features
 {
     /// <summary>
     /// The Menu system.
@@ -27,37 +27,37 @@ namespace ServerSpecificSyncer.Features
         /// </summary>
         public static List<Menu> Menus => LoadedMenus;
         private static readonly Dictionary<Menu, List<Keybind>> GlobalKeybindingSync = new();
-        
+
         /// <summary>
         /// All Global Keybinds registered for each menu.
         /// </summary>
         public static ReadOnlyDictionary<Menu, List<Keybind>> GlobalKeybindings => new(GlobalKeybindingSync);
-        
+
         /// <summary>
         /// All synced parameters for a specified <see cref="ReferenceHub"/>.
         /// </summary>
         internal readonly Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> InternalSettingsSync = new();
-        
+
         /// <summary>
         /// All synced parameters for a specified <see cref="ReferenceHub"/>.
         /// </summary>
         public ReadOnlyDictionary<ReferenceHub, List<ServerSpecificSettingBase>> SettingsSync => new(InternalSettingsSync);
-        
+
         /// <summary>
-        /// This is used to see if <see cref="hub"/> can use <see cref="Menu"/> or not.
+        /// This is used to see if <see cref="ReferenceHub"/> can use <see cref="Menu"/> or not.
         /// </summary>
         /// <param name="hub">The target <see cref="ReferenceHub"/></param>
         /// <returns>True => Player can view and use the menu, and False => can't saw and use.</returns>
         public virtual bool CheckAccess(ReferenceHub hub) => true;
-        
+
         private static Queue<Assembly> _waitingAssemblies = new();
-        
+
         /// <summary>
         /// Register all waiting assemblies when plugin is loaded.
         /// </summary>
         internal static void RegisterQueuedAssemblies()
         {
-            while (_waitingAssemblies.TryDequeue(out var assembly))
+            while (_waitingAssemblies.TryDequeue(out Assembly assembly))
                 Register(assembly);
         }
 
@@ -80,7 +80,7 @@ namespace ServerSpecificSyncer.Features
         /// Register all menus in the <see cref="Assembly.GetCallingAssembly"/>.
         /// </summary>
         public static void RegisterAll() => Register(Assembly.GetCallingAssembly());
-        
+
         /// <summary>
         /// Register all menus of indicated assembly.
         /// </summary>
@@ -104,7 +104,7 @@ namespace ServerSpecificSyncer.Features
 
                     if (type == typeof(MainExample) && (!Plugin.StaticConfig.EnableExamples))
                         continue;
-                    
+
                     if (type.IsAbstract || type.IsInterface)
                         continue;
                     if (type.BaseType != typeof(Menu))
@@ -148,7 +148,7 @@ namespace ServerSpecificSyncer.Features
 #endif
             }
         }
-        
+
         /// <summary>
         /// Register specific menu.
         /// </summary>
@@ -170,10 +170,10 @@ namespace ServerSpecificSyncer.Features
                 throw new ArgumentException($"menus name cannot be null or empty.");
             if (Menus.Any(x => x.Name == menu.Name))
                 throw new ArgumentException($"two menus can't have the same name.");
-                
-            
+
+
             Dictionary<Type, List<int>> ids = new();
-                
+
             foreach (ServerSpecificSettingBase action in menu.Settings)
             {
                 if (action is SSGroupHeader)
@@ -183,14 +183,14 @@ namespace ServerSpecificSyncer.Features
                     setting = isSetting.Base;
 
                 Type type = setting.GetType();
-                
+
                 ids.GetOrAdd(type, () => new List<int>());
 
                 if (ids[type].Contains(setting.SettingId))
                     throw new ArgumentException($"id {setting.SettingId} for menu {menu.Name} is duplicated.");
                 if (setting.SettingId < 0)
                     throw new ArgumentException($"id above and equal to 0 is reserved for menus and main menu.");
-                
+
                 ids[type].Add(setting.SettingId);
 
                 if (action is Keybind bind && bind.IsGlobal)
@@ -208,12 +208,12 @@ namespace ServerSpecificSyncer.Features
                 if (!LoadedMenus.Any(m => m.GetType() == menu.MenuRelated))
                     throw new ArgumentException($"menu {menu.Name} has a invalid related menu ({menu.MenuRelated.FullName} has not been loaded.");
             }
-            
+
             LoadedMenus.Add(menu);
             menu.OnRegistered();
             Log.Debug($"Server Specific menu {menu.Name} is now registered!", Plugin.StaticConfig.Debug);
         }
-        
+
         private static bool CheckSameId(Menu menu)
         {
             if (menu.MenuRelated == null)
@@ -236,11 +236,11 @@ namespace ServerSpecificSyncer.Features
                     LoadForPlayer(sync.Key, null);
             }
         }
-        
+
         /// <summary>
         /// Unload all menus loaded.
         /// </summary>
-        public static void UnregisterAll()
+        internal static void UnregisterAll()
         {
             foreach (KeyValuePair<ReferenceHub, Menu> sync in MenuSync)
                 LoadForPlayer(sync.Key, null);
@@ -252,8 +252,10 @@ namespace ServerSpecificSyncer.Features
         /// <summary>
         /// Gets or Sets if this menu is related to a <see cref="MenuRelated"/> (will be shown as a SubMenu).
         /// </summary>
+        #nullable enable
         public virtual Type? MenuRelated { get; set; } = null;
-        
+        #nullable disable
+
         /// <summary>
         /// Gets In-Build Settings.
         /// </summary>
@@ -263,7 +265,7 @@ namespace ServerSpecificSyncer.Features
         /// Gets the Hash of menu, based on <see cref="Name"/>. Mainly used to seperate menu settings for client.
         /// </summary>
         public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
-        
+
         /// <summary>
         /// Gets or Sets the name of Menu.
         /// </summary>
@@ -275,7 +277,7 @@ namespace ServerSpecificSyncer.Features
         protected virtual string Description { get; set; } = string.Empty;
 
         /// <summary>
-        /// Gets or Sets the id of Menu. Must be above 0 and must not be equal to 0. 
+        /// Gets or Sets the id of Menu. Must be above 0 and must not be equal to 0.
         /// </summary>
         public abstract int Id { get; set; }
 
@@ -293,14 +295,14 @@ namespace ServerSpecificSyncer.Features
 
             if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
                 return mainMenu.ToArray();
-            
+
             mainMenu.Add(new SSGroupHeader("Main Menu"));
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
                     mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
-            
+
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
 
             return mainMenu.ToArray();
@@ -322,7 +324,7 @@ namespace ServerSpecificSyncer.Features
                     settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
                         Plugin.GetTranslation().ReturnToMenu.ButtonText));
             }
-            
+
             if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
                 settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle));
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
@@ -331,7 +333,7 @@ namespace ServerSpecificSyncer.Features
             settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
-                assemblyMenu.ActuallySendedToClient.TryGetValue(hub, out var overrideSettings) && overrideSettings != null)
+                assemblyMenu.ActuallySendedToClient.TryGetValue(hub, out ServerSpecificSettingBase[] overrideSettings) && overrideSettings != null)
             {
                 if (overrideSettings.IsEmpty())
                     settings.RemoveAt(settings.Count - 1);
@@ -344,7 +346,7 @@ namespace ServerSpecificSyncer.Features
                 settings.RemoveAt(settings.Count - 1);
                 return settings;
             }
-            
+
             foreach (ServerSpecificSettingBase t in Settings)
             {
                 if (t is ISetting setting)
@@ -364,7 +366,7 @@ namespace ServerSpecificSyncer.Features
         private static ServerSpecificSettingBase[] GetGlobalKeybindings(ReferenceHub hub, Menu menu)
         {
             List<ServerSpecificSettingBase> keybindings = new();
-            
+
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
             {
                 keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
@@ -378,7 +380,7 @@ namespace ServerSpecificSyncer.Features
 
             return keybindings.ToArray();
         }
-        
+
         /// <summary>
         /// Executed when action is executed on
         /// </summary>
@@ -387,26 +389,26 @@ namespace ServerSpecificSyncer.Features
         public virtual void OnInput(ReferenceHub hub, ServerSpecificSettingBase setting) {}
 
         /// <summary>
-        /// Executed when <see cref="hub"/> opened the menu.
+        /// Executed when <see cref="ReferenceHub"/> opened the menu.
         /// </summary>
         /// <param name="hub">the target hub.</param>
         protected virtual void ProperlyEnable(ReferenceHub hub) {}
-        
+
         /// <summary>
-        /// Executed when <see cref="hub"/> closed the menu.
+        /// Executed when <see cref="ReferenceHub"/> closed the menu.
         /// </summary>
         /// <param name="hub">The target hub.</param>
         protected virtual void ProperlyDisable(ReferenceHub hub) {}
 
         /// <summary>
-        /// Gets the loaded <see cref="hub"/> menu. (menu that been displayed on the <see cref="hub"/>).
+        /// Gets the loaded <see cref="ReferenceHub"/> menu. (menu that been displayed on the <see cref="ReferenceHub"/>).
         /// </summary>
         /// <param name="hub">The target hub</param>
-        /// <returns><see cref="Menu"/> if <see cref="hub"/> opened a menu, null if he was on the main menu.</returns>
+        /// <returns><see cref="Menu"/> if <see cref="ReferenceHub"/> opened a menu, null if he was on the main menu.</returns>
         public static Menu GetCurrentPlayerMenu(ReferenceHub hub) => MenuSync.TryGetValue(hub, out Menu menu) ? menu : null;
-        
+
         /// <summary>
-        /// Load <see cref="menu"/> for <see cref="hub"/> (only if he has access).
+        /// Load <see cref="Menu"/> for <see cref="ReferenceHub"/> (only if he has access).
         /// </summary>
         /// <param name="hub"></param>
         /// <param name="menu"></param>
@@ -417,7 +419,7 @@ namespace ServerSpecificSyncer.Features
 
             if (!menu?.CheckAccess(hub) ?? true)
                 menu = null;
-            
+
             if (menu == null)
             {
                 if (LoadedMenus.Count(x => x.CheckAccess(hub)) == 1 && !Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne
@@ -446,7 +448,7 @@ namespace ServerSpecificSyncer.Features
             List<ServerSpecificSettingBase> settings = menu.GetSettings(hub, false);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             MenuSync[hub] = menu;
-            
+
             if (!menu.SettingsSync.ContainsKey(hub))
             {
                 Timing.RunCoroutine(Parameters.Sync(hub, menu, settings.ToArray()));
@@ -475,11 +477,11 @@ namespace ServerSpecificSyncer.Features
         public Menu TryGetSubMenu(int id) => LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == GetType() && x != this);
 
         /// <summary>
-        /// Gets the first keybind linked to <see cref="ss"/>.
+        /// Gets the first keybind linked to <see cref="ServerSpecificSettingBase"/>.
         /// </summary>
         /// <param name="hub">The target hub.</param>
         /// <param name="ss">The specified <see cref="SSKeybindSetting"/> or <see cref="Keybind"/>.</param>
-        /// <param name="menu">The <see cref="hub"/> current loaded menu, to get global or local keybinds.</param>
+        /// <param name="menu">The <see cref="ReferenceHub"/> current loaded menu, to get global or local keybinds.</param>
         /// <returns><see cref="Keybind"/> if found or not.</returns>
         public static Keybind TryGetKeybinding(ReferenceHub hub, ServerSpecificSettingBase ss, Menu menu = null)
         {
@@ -495,7 +497,7 @@ namespace ServerSpecificSyncer.Features
                         return key;
                 }
             }
-            
+
             if (menu == null)
                 return null;
             if (!menu.CheckAccess(hub))
@@ -516,16 +518,29 @@ namespace ServerSpecificSyncer.Features
         /// <param name="hub">The target hub.</param>
         public void Reload(ReferenceHub hub) => LoadForPlayer(hub, this);
 
+        /// <summary>
+        /// Reload all <see cref="ReferenceHub"/> that loaded the <see cref="Menu"/>.
+        /// </summary>
         public void ReloadAll()
         {
             foreach (ReferenceHub hub in MenuSync.Where(x => x.Value == this).Select(x => x.Key).ToList())
                 LoadForPlayer(hub, this);
         }
-        
+
+        /// <summary>
+        /// Register <see cref="ServerSpecificSettingBase"/> that will be displayed on the top of all pages.
+        /// </summary>
+        /// <param name="toPin">the list of <see cref="ServerSpecificSettingBase"/> to pin.</param>
         public static void RegisterPin(ServerSpecificSettingBase[] toPin) => Pinned[Assembly.GetCallingAssembly()] = toPin;
 
+        /// <summary>
+        /// Remove pins that was registered by <see cref="Assembly.GetCallingAssembly"/>.
+        /// </summary>
         public static void UnregisterPin() => Pinned.Remove(Assembly.GetCallingAssembly());
-        
-        public virtual void OnRegistered(){}
+
+        /// <summary>
+        /// Called when the <see cref="Menu"/> is registered.
+        /// </summary>
+        protected virtual void OnRegistered(){}
     }
 }

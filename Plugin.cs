@@ -1,20 +1,21 @@
-﻿using Exiled.API.Enums;
-using HarmonyLib;
-using ServerSpecificSyncer.Features;
-using UserSettings.ServerSpecific;
-using Log = PluginAPI.Core.Log;
-#if EXILED
-using System;
+﻿using System;
 using Exiled.API.Features;
+using HarmonyLib;
+using SSMenuSystem.Features;
+using UserSettings.ServerSpecific;
+#if EXILED
+
 #elif NWAPI
+using Log = PluginAPI.Core.Log;
 using PluginAPI.Core;
 #endif
 
-namespace ServerSpecificSyncer
+namespace SSMenuSystem
 {
     /// <summary>
     /// Load the plugin to send datas to player
     /// </summary>
+    // ReSharper disable once ClassNeverInstantiated.Global
     public class Plugin
 #if EXILED
         : Plugin<Config, Translation>
@@ -29,41 +30,39 @@ namespace ServerSpecificSyncer
         /// <summary>
         /// Gets the name shown in the Loader.
         /// </summary>
-        public override string Name => "ServerSpecificSyncer";
-        
+        public override string Name => "SS-Menu System";
+
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 0);
-        
+        public override Version Version => new(2, 0, 1);
+
         /// <inheritdoc/>
         public override Version RequiredExiledVersion => new(9, 3, 0);
-        
+
         /// <summary>
         /// Gets the prefix used for configs.
         /// </summary>
-        public override string Prefix => "ss_syncer";
+        public override string Prefix => "ss_menu_system";
 
 #endif
 
         private static Config _staticConfig;
-        
+
         /// <summary>
         /// Gets the <see cref="Config"/> instance. Can be null if the plugin is not enabled.
         /// </summary>
         public static Config StaticConfig => _staticConfig ??= Instance?.Config;
-        
+
         /// <summary>
         /// Gets the <see cref="Plugin"/> instance. can be null if the plugin is not enabled.
         /// </summary>
         public static Plugin Instance { get; private set; }
-        
+
         private Harmony _harmony;
-        
+
 #if EXILED
-        /// <summary>
-        /// When the plugin is enabled.
-        /// </summary>
+        /// <inheritdoc/>
         public override void OnEnabled()
         {
             Exiled.Events.Handlers.Player.Verified += EventHandler.Verified;
@@ -73,11 +72,29 @@ namespace ServerSpecificSyncer
             GenericEnable();
             base.OnEnabled();
         }
-        
+
+        /// <inheritdoc />
+        public override void OnDisabled()
+        {
+            Exiled.Events.Handlers.Player.Verified -= EventHandler.Verified;
+            Exiled.Events.Handlers.Player.Left -= EventHandler.Left;
+            Exiled.Events.Handlers.Player.ChangingGroup -= EventHandler.ChangingGroup;
+            Exiled.Events.Handlers.Server.ReloadedConfigs -= EventHandler.ReloadedConfigs;
+            ServerSpecificSettingsSync.ServerOnSettingValueReceived -= EventHandler.OnReceivingInput;
+
+            Instance = null;
+            _harmony.UnpatchAll(_harmony.Id);
+            _harmony = null;
+
+            Menu.UnregisterAll();
+
+            base.OnDisabled();
+        }
+
 #elif NWAPI
         [PluginAPI.Core.Attributes.PluginConfig("config.yml")]
         public Config Config;
-        
+
         [PluginAPI.Core.Attributes.PluginEntryPoint("ServerSpecificSyncer", "2.0.0", "sync all plugins to one server specific", "sky")]
         public void OnEnabled()
         {
@@ -89,7 +106,7 @@ namespace ServerSpecificSyncer
 
             if (!Config.IsEnabled)
                 return;
-            
+
             PluginAPI.Events.EventManager.RegisterEvents<EventHandler>(this);
             GenericEnable();
             Log.Info("ServerSpecificSyncer@1.0.0 has been enabled!");

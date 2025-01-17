@@ -2,21 +2,24 @@ using System.Collections.Generic;
 using System.Linq;
 using MEC;
 using PluginAPI.Core;
-using ServerSpecificSyncer.Features.Interfaces;
+using SSMenuSystem.Features.Interfaces;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features
+namespace SSMenuSystem.Features
 {
+    /// <summary>
+    /// Parameters class for getting parameters from <see cref="Menu"/>.
+    /// </summary>
     public static class Parameters
     {
         /// <summary>
-        /// Get synced parameter value for <see cref="hub"/>.
+        /// Get synced parameter value for <see cref="ReferenceHub"/>.
         /// </summary>
         /// <param name="hub">The target hub.</param>
         /// <param name="settingId">The id of setting.</param>
         /// <typeparam name="TMenu">The Menu to get parameter.</typeparam>
         /// <typeparam name="TSs">The setting type.</typeparam>
-        /// <returns>An instance of <see cref="TSs"/> That contains synecd value, or null if not found.</returns>
+        /// <returns>An instance of <see cref="ServerSpecificSettingBase"/> That contains synecd value, or null if not found.</returns>
         public static TSs GetParameter<TMenu, TSs>(this ReferenceHub hub, int settingId)
             where TMenu : Menu
             where TSs : ServerSpecificSettingBase
@@ -31,17 +34,17 @@ namespace ServerSpecificSyncer.Features
             {
                 if (!menu.SettingsSync.TryGetValue(hub, out List<ServerSpecificSettingBase> settings))
                     continue;
-                
+
                 ServerSpecificSettingBase t = settings.Where(x => x is TSs).FirstOrDefault(x => x.SettingId == settingId);
                 return t as TSs;
             }
-            
+
             return default;
         }
 
 
         /// <summary>
-        /// Sync all paramters for all menus for <see cref="hub"/>.
+        /// Sync all paramters for all menus for <see cref="ReferenceHub"/>.
         /// </summary>
         /// <param name="hub">The target hub</param>
         /// <returns>a enumerator for <see cref="Timing.RunCoroutine(System.Collections.Generic.IEnumerator{float})"/></returns>.
@@ -51,7 +54,7 @@ namespace ServerSpecificSyncer.Features
             List<ServerSpecificSettingBase> sendSettings = new();
             float timeout = 0;
             List<Menu> menus = Menu.Menus.ToList();
-            
+
             foreach (Menu menu in menus)
             {
                 if (!menu.CheckAccess(hub))
@@ -108,7 +111,7 @@ namespace ServerSpecificSyncer.Features
                     $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.", Plugin.StaticConfig.Debug);
             }
             SyncCache.Remove(hub);
-            
+
             Log.Debug("Hub Synced parameters. Stat of his cache: " +
                       (SyncCache.ContainsKey(hub) ? "active" : "disabled"), Plugin.StaticConfig.Debug);
 
@@ -118,22 +121,23 @@ namespace ServerSpecificSyncer.Features
                 yield break;
             }
 
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalse // TODO: remove false
             if ((Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne && false) || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
                 Menu.LoadForPlayer(hub, null);
             else
                 Menu.LoadForPlayer(hub, Menu.Menus.First());
         }
-        
+
         /// <summary>
         /// A cache, updated on <see cref="EventHandler.OnReceivingInput"/> if hub is inside, when syncing parameters.
         /// </summary>
         internal static readonly Dictionary<ReferenceHub, List<ServerSpecificSettingBase>> SyncCache = new();
 
         /// <summary>
-        /// Get ALL synced parameters from ALL menus for <see cref="hub"/>
+        /// Get ALL synced parameters from ALL menus for <see cref="ReferenceHub"/>
         /// </summary>
         /// <param name="referenceHub">The target hub.</param>
-        /// <returns>read :kappa:</returns>
+        /// <returns>all synced parameters from ALL menus for <see cref="ReferenceHub"/>.</returns>
         public static List<ServerSpecificSettingBase> GetAllSyncedParameters(ReferenceHub referenceHub)
         {
             List<ServerSpecificSettingBase> toReturn = new();
@@ -141,7 +145,7 @@ namespace ServerSpecificSyncer.Features
                 toReturn.AddRange(menu.InternalSettingsSync[referenceHub]);
             return toReturn;
         }
-        
+
         /// <summary>
         /// Get All synced parameter for target menu.
         /// </summary>
@@ -155,9 +159,9 @@ namespace ServerSpecificSyncer.Features
                 toReturn.AddRange(menu.InternalSettingsSync[referenceHub]);
             return toReturn;
         }
-        
+
         /// <summary>
-        /// Sync all parameters from <see cref="menu"/> for <see cref="hub"/>.
+        /// Sync all parameters from <see cref="Menu"/> for <see cref="ReferenceHub"/>.
         /// </summary>
         /// <param name="hub">The target hub.</param>
         /// <param name="menu">The target menu.</param>
@@ -168,7 +172,7 @@ namespace ServerSpecificSyncer.Features
             SyncCache.Add(hub, new List<ServerSpecificSettingBase>());
             List<ServerSpecificSettingBase> sendSettings = new();
             float timeout = 0;
-            
+
             if (!menu.CheckAccess(hub))
             {
                 Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.", Plugin.StaticConfig.Debug);

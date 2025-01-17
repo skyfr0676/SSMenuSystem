@@ -1,9 +1,9 @@
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
-    public class MainExample : Menu
+    internal class MainExample : Menu
     {
         public override ServerSpecificSettingBase[] Settings => new ServerSpecificSettingBase[] { };
         public override string Name { get; set; } = "Examples";

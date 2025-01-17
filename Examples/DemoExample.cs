@@ -1,8 +1,8 @@
 using System;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
     internal class DemoExample : Menu
     {

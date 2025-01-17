@@ -5,12 +5,12 @@ using System.Linq;
 using AdminToys;
 using GameCore;
 using Mirror;
-using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Features.Wrappers;
 using UnityEngine;
+using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
     internal class LightSpawnerExample : Menu
     {
@@ -20,7 +20,7 @@ namespace ServerSpecificSyncer.Examples
         private LightShadows[] _shadowsType;
         private LightType[] _lightType;
         private LightShape[] _lightShape;
-    
+
         private SSTextArea _selectedColorTextArea;
         private bool AnySpawned => !_spawnedToys.IsEmpty();
         private readonly List<LightSourceToy> _spawnedToys = new();
@@ -47,20 +47,20 @@ namespace ServerSpecificSyncer.Examples
             _lightShape ??= EnumUtils<LightShape>.Values;
             _selectedColorTextArea ??= new SSTextArea(ExampleId.SelectedColor, "Selected Color: None");
 
-            _settings = new()
+            _settings = new List<ServerSpecificSettingBase>
             {
-                new Slider(ExampleId.Intensity, "Intensity", 0, 100, (hub, setting, arg3) => ReloadColorInfoForUser(hub), 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
+                new Slider(ExampleId.Intensity, "Intensity", 0, 100, (hub, _, _) => ReloadColorInfoForUser(hub), 1, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
                 new Slider(ExampleId.Range, "Range", 0, 100, null, 10, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
-                new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, setting, arg3) => ReloadColorInfoForUser(hub)),
-                new Plaintext(ExampleId.CustomColor, "Custom Color (R G B)", (hub, setting, arg3) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."),
+                new Dropdown(ExampleId.Color, "Color (preset)", _presets.Select(x => x.Name).ToArray(), (hub, _, _, _) => ReloadColorInfoForUser(hub)),
+                new Plaintext(ExampleId.CustomColor, "Custom Color (R G B)", (hub, _, _) => ReloadColorInfoForUser(hub), characterLimit:11, hint: "Leave empty to use a preset."),
                 _selectedColorTextArea,
-                new Dropdown(ExampleId.ShadowType, "Shadows Type", _shadowsType.Select(x => x.ToString()).ToArray(), null),
-                new Slider(ExampleId.ShadowStrength, "Shadow Strength", 0, 100, null),
-                new Dropdown(ExampleId.LightType, "Light Type", _lightType.Select(x => x.ToString()).ToArray(), null),
-                new Dropdown(ExampleId.LightShape, "Light Shape", _lightShape.Select(x => x.ToString()).ToArray(), null),
+                new Dropdown(ExampleId.ShadowType, "Shadows Type", _shadowsType.Select(x => x.ToString()).ToArray()),
+                new Slider(ExampleId.ShadowStrength, "Shadow Strength", 0, 100),
+                new Dropdown(ExampleId.LightType, "Light Type", _lightType.Select(x => x.ToString()).ToArray()),
+                new Dropdown(ExampleId.LightShape, "Light Shape", _lightShape.Select(x => x.ToString()).ToArray()),
                 new Slider(ExampleId.SpotAngle, "Spot Angle", 0, 100, null, 30, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
-                new Slider(ExampleId.InnerSpotAngle, "Inner Spot Angle", 0, 100, null, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
-                new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, btn) => Spawn(hub))
+                new Slider(ExampleId.InnerSpotAngle, "Inner Spot Angle", 0, 100, valueToStringFormat: "0.00", finalDisplayFormat: "x{0}"),
+                new Button(ExampleId.ConfirmSpawning, "Confirm Spawning", "Spawn", (hub, _) => Spawn(hub))
             };
             _settings.AddRange(_addedSettings);
             return _settings.ToArray();
@@ -69,7 +69,7 @@ namespace ServerSpecificSyncer.Examples
         private void ReloadColorInfoForUser(ReferenceHub hub) => _selectedColorTextArea.SendTextUpdate(GetColorInfoForUser(hub), receiveFilter:(h) => h == hub);
 
         private void Spawn(ReferenceHub sender)
-        { 
+        {
             LightSourceToy lightSourceToy = null;
             foreach (GameObject gameObject in NetworkClient.prefabs.Values)
             {
@@ -93,7 +93,7 @@ namespace ServerSpecificSyncer.Examples
             lightSourceToy.NetworkLightShape = (LightShape)sender.GetParameter<LightSpawnerExample, SSDropdownSetting>(ExampleId.LightShape).SyncSelectionIndexRaw;
             lightSourceToy.NetworkSpotAngle = sender.GetParameter<LightSpawnerExample, SSSliderSetting>(ExampleId.SpotAngle).SyncFloatValue;
             lightSourceToy.NetworkInnerSpotAngle = sender.GetParameter<LightSpawnerExample, SSSliderSetting>(ExampleId.InnerSpotAngle).SyncFloatValue;
-        
+
             if (!AnySpawned)
             {
                 _addedSettings.Add(new SSGroupHeader("Spawned Lights"));
@@ -118,14 +118,14 @@ namespace ServerSpecificSyncer.Examples
             _addedSettings.Clear();
             ReloadAll();
         }
-        
+
         public override void OnInput(ReferenceHub hub, ServerSpecificSettingBase setting)
         {
             if (setting.SettingId > ExampleId.DestroySpecific)
                 Destroy(setting.SettingId);
             if (setting.SettingId == ExampleId.DestroyAll)
                 DestroyAll();
-            
+
             base.OnInput(hub, setting);
         }
 
@@ -160,13 +160,13 @@ namespace ServerSpecificSyncer.Examples
             Color color = _presets[selectionIndex].Color;
 
             return new Color(
-                !array.TryGet(0, out var element1) || !float.TryParse(element1, out var result1)
+                !array.TryGet(0, out string element1) || !float.TryParse(element1, out float result1)
                     ? color.r
                     : result1 / byte.MaxValue,
-                !array.TryGet(1, out var element2) || !float.TryParse(element2, out var result2)
+                !array.TryGet(1, out string element2) || !float.TryParse(element2, out float result2)
                     ? color.g
                     : result2 / byte.MaxValue,
-                !array.TryGet(2, out var element3) || !float.TryParse(element3, out var result3)
+                !array.TryGet(2, out string element3) || !float.TryParse(element3, out float result3)
                     ? color.b
                     : result3 / byte.MaxValue);
         }
@@ -175,7 +175,7 @@ namespace ServerSpecificSyncer.Examples
 
         public override string Name { get; set; } = "Light Spawner";
         public override int Id { get; set; } = -5;
-        
+
         // ReSharper disable ConvertToConstant.Local
         private static class ExampleId
         {
@@ -195,7 +195,7 @@ namespace ServerSpecificSyncer.Examples
             internal static readonly int DestroySpecific = 14;
         }
         // ReSharper restore ConvertToConstant.Local
-    
+
         private readonly struct ColorPreset
         {
             public ColorPreset(string name, Color color)
