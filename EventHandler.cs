@@ -13,6 +13,7 @@ using UserSettings.ServerSpecific;
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 #endif
+using MEC;
 
 namespace SSMenuSystem
 {

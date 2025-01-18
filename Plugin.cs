@@ -35,10 +35,9 @@ namespace SSMenuSystem
         /// Gets the version of the plugin.
         /// </summary>
         public override Version Version => new(2, 0, 3);
-
+        
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new(9, 3, 0);
-
+        public override Version RequiredExiledVersion => new(4, 0, 0);
         /// <summary>
         /// Gets the prefix used for configs.
         /// </summary>
