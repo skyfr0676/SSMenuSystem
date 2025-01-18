@@ -38,7 +38,6 @@ if [ $# -gt 1 ]; then # there is more than 1 start argument
             git add .
             git commit -m "[AUTOMATIC] push version to $VERSION"
             git push origin dev
-            break
         elif [ "$arg" == "--push" ]; then # push new version into the nuget repo
             next_index=$((i + 1))
             if [ -n "${!next_index}" ]; then
