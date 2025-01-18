@@ -6,126 +6,9 @@
 SSMenuSystem is a framework that add SS Plugin comptability and a menu system.
 
 ## how to use ServerSpecificSyncer as:
-### Server Owner
-To install `SSMenuSystem` on your server, all you need is:
-- For **EXILED**:
-    - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/SSMenuSystem-EXILED.dll) EXILED version (Name should be `SSMenuSystem-EXILED.dll`)
-    - Put it in `.config/EXILED/Plugins` (replace `.config` with `%appdata%` on Windows) *Note: Harmony is already installed on EXILED so you don't have to install the dependency*
-    - Restart the server
-        - Configs should be on `.config/EXILED/Configs/{port}-config.yml`
-        - Translations should be on `.config/EXILED/Configs/{port}-translations.yml`
-- For **NWAPI**:
-    - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/SSMenuSystem-NWAPI.dll) NWAPI version (Name should be  `SSMenuSystem-NWAPI.dll`)
-    - Put it in `.config/SCP Secret Laboratory/PluginAPI/Plugins/{port}` (replace `.config` with `%appdata%` on windows)
-        - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/0Harmony.dll) harmony version used (Name should be `0Harmony.dll`)
-    - Put it in `.config/SCP Secret Laboratory/PluginAPI/Plugins/{port}/dependencies` (replace `.config` with `%appdata%` on windows)
-    - Restart the server
-        - both configs and translations should be on `.config/SCP Seret Laboratory/PluginAPI/Plugins/{port}/SSMenuSystem/config.yml`
-
-
-Now you know how to install `SSMenuSystem` !<br/>
-To help you to configure the plugin, there is a board of configs and translations:
-### configuration:
-| parameter                    | yml value                         | type                |                                                                                                             description                                                                                                             |          default value          |
-|------------------------------|-----------------------------------|---------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------:|
-| IsEnabled                    | is_enabled                        | bool                |                                                                                               define if the plugin is enabled or not.                                                                                               |              true               |
-| Debug                        | debug                             | bool                |                                                                            define if the plugin can log debug info or not (attention: can be intrusive)                                                                             |              false              |
-| AllowPinnedContent           | allow_pinned_content              | bool                |                                                                  Describe if pinned contnet is allowed. If set to false, all pinned content will not be displayed.                                                                  |              true               |
-| ShowErrorToClient            | show_error_to_client              | bool                | If there is an error in the `OnInput` (mostly because of `Action`, the client will see a message that indicated an internal server error is occured, with a Reload button. If set to false, main menu will be automatically loaded. |              true               |
-| ShowFullErrorToClient        | show_full_error_to_client         | bool                |                                                               **HIGHLY UNRECOMMENDED TO SET ON TRUE**<br/> The client will see the error occured if it's set to true.                                                               |              false              |
-| ShowFullErrorToModerators    | show_full_error_to_moderators     | bool                |                                                       On the "error" page, if player has `RemoteAdmin` permission (see Remote Admin), the moderator will see the total error.                                                       |              true               |
-| ForceMainMenuEventIfOnlyOne  | force_main_menu_event_if_only_one | bool                |                                                **Disabled feature**<br/>*If only one menu is registered, instead of displaying the main menu, it's display the only menu available.*                                                |              false              |
-| ShowGlobalKeybindingsWarning | show_global_keybindings_warning   | bool                |                                         **Temporary parameter** due to Global Keybinds issue, a warning is displayed instead of global keybinds. This parameters can disable this warning.                                          |              false              |
-| EnableExamples               | enable_examples                   | bool                |                 This plugin contains examples. The parameter simply enable examples.<br/>WARNING: can be game-breaking due to features inside, like human scanner (available even for SCPs, speed boost or others).                 |              false              |
-| ComptabilitySystem           | comptability_system               | ComptabilitySystem  |                                                                                             All configs related to Comptability system.                                                                                             | Instance of ComptabilitySystem  |
-
-This board is related to ComptabilitySystem:
-
-| parameter           | yml value                                    | type                |                     description                      |          default value          |
-|---------------------|----------------------------------------------|---------------------|:----------------------------------------------------:|:-------------------------------:|
-| ComptabilityEnabled | comptability_enabled                         | bool                | Define if the comptability system is enabled or not. |              true               |
-
-
-Configs written in a YML config:
-
-```yml
-is_enabled: true
-debug: true
-# Whether pins is allowed or not (pin is a thing that has been displayed on all menus).
-allow_pinned_content: true
-# Whether clients (= non-moderators) whould see errors or not.
-show_error_to_client: true
-# Whether clients (= non-moderators) whould see total errors (= some plugins-content name) or not. HIGLY UNRECOMMENDED TO SET TRUE.
-show_full_error_to_client: false
-# Whether moderators (= has RA access) whould see total errors (= some plugins-content name).
-show_full_error_to_moderators: true
-# If there is only one menu registered and this set to false, this menu would be automatiquely displayed. Disabled.
-force_main_menu_event_if_only_one: false
-# because GlobalKeybinds is disabled, set this to false to remove the warning displayed.
-show_global_keybindings_warning: true
-# Whether examples is enabled. Warning: if set to true, some content of examples would be Game breaking (speed ability, scan ability, etc...).
-enable_examples: true
-comptability_system:
-    # If enabled, the comptability system will be enabled and all plugins that use SSSystem will be registered as menu.
-    comptability_enabled: true
-```
-
-### translations:
-
-| parameter               | yml value               |    type     |                                                     description                                                      | default                                                                                                        |
-|-------------------------|-------------------------|:-----------:|:--------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------|
-| OpenMenu                | open_menu               | LabelButton |                                   Used in the main menu, to display menu buttons.                                    | - "Open {0}"<br/> - Open                                                                                       |
-| ReturnToMenu            | return_to_menu          | LabelButton | Used when menu is opened, at the top, to display the "return to menu" button (not into parent menu, see `ReturnTo`). | "Return to menu<br/> - Return                                                                                  |
-| ReturnTo                | return_to               | LabelButton |               Used when sub-menu is opened, at the top, to display the "return to parent menu" button.               | - Return to {0}<br/> - Return                                                                                  |
-| ReloadButton            | reload_button           | LabelButton |              Only used when a client saw an error, used to show the "return into the main menu" button.              | - Reload menus<br/> - Reload                                                                                   |
-| GlobalKeybindingTitle   | global_keybinding_title | GroupHeader |                         Display the "Global keybindings" header. Can change Label and Hint.                          | - Global Keybinding<br/> - don't take a look at this (nah seriously it's just to make some keybindings global) |
-| ServerError             | server_error            |   string    |                       Only displayed when error is thrown, to alert client of an actual error.                       | INTERNAL SERVER ERROR                                                                                          |
-| SubMenuTitle            | sub_menu_title          |   string    |                    The text will be displayed in the header, if sub-menus exist in a parent menu.                    | Sub-Menus                                                                                                      |
-
-And you will think (i'm sure :kappa:) "But what is "LabelButton" and "GroupHeader" type ?"
-
-It's really simple ! it's just a contraction of two translations:
-- for LabelButton:
-    - The label
-    - The button text
-- And for GroupHeader:
-    - The label
-    - The hint
-
-and there is an example of yml translation format:
-```yml
-# On the main-menu, button displayed to open a menu where {0} = menu name.
-open_menu:
-    label: 'Open {0}'
-    button_text: 'Open'
-# the button displayed when menu is opened.
-return_to_menu:
-    label: 'Return to menu'
-    button_text: 'Return'
-# The button that displayed when sub-menu is opened (return to related menu) where {0} = menu name.
-return_to:
-    label: 'Return to {0}'
-    button_text: 'Return'
-# The reload button.
-reload_button:
-    label: 'Reload menus'
-    button_text: 'Reload'
-global_keybinding_title:
-    label: 'Global Keybinding'
-    hint: "don't take a look at this (nah seriously it's just to make some keybindings global)"
-# Text displayed when an error is occured (to avoid client crash + explain why it's don't work). Can accept TextMeshPro tags.
-server_error: 'INTERNAL SERVER ERROR'
-# Title of sub-menus when there is one.
-sub_menu_title: 'Sub-Menus'
-# Translation when player doesn't have permission to see total errors (= see a part of code name).
-no_permission: 'insufficient permissions to see the full errors'
-
-```
-Now that you understand how to install `SSMenuSystem` on your server, we will now see how to use it as a plugin dependency
-
 ### Plugin creator
 
-Reference SSMenuSystem DLL using the [latest](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest) version (or use Nuget package (Same name)) on your favorite editor
+Reference SSMenuSysteù DLL using the [latest](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest) version (or use Nuget package (Same name)) on your favorite editor
 
  - Create a new class
 
@@ -210,6 +93,124 @@ public void OnEnabled()
 {
     Menu.RegisterAll();
 }
+```
+
+Now that you understand how to use `SSMenuSystem`, we will now see how to install it on your server
+
+### Server Owner
+To install `SSMenuSystem` on your server, all you need is:
+ - For **EXILED**:
+   - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/SSMenuSystem-EXILED.dll) EXILED version (Name should be `SSMenuSystem-EXILED.dll`)
+   - Put it in `.config/EXILED/Plugins` (replace `.config` with `%appdata%` on Windows) *Note: Harmony is already installed on EXILED so you don't have to install the dependency*
+   - Restart the server
+     - Configs should be on `.config/EXILED/Configs/{port}-config.yml`
+     - Translations should be on `.config/EXILED/Configs/{port}-translations.yml`
+ - For **NWAPI**:
+   - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/SSMenuSystem-NWAPI.dll) NWAPI version (Name should be  `SSMenuSystem-NWAPI.dll`)
+   - Put it in `.config/SCP Secret Laboratory/PluginAPI/Plugins/{port}` (replace `.config` with `%appdata%` on windows)
+     - Install the [latest](https://github.com/skyfr0676/SSMenuSystem/releases/latest/download/0Harmony.dll) harmony version used (Name should be `0Harmony.dll`)
+   - Put it in `.config/SCP Secret Laboratory/PluginAPI/Plugins/{port}/dependencies` (replace `.config` with `%appdata%` on windows)
+   - Restart the server
+     - both configs and translations should be on `.config/SCP Seret Laboratory/PluginAPI/Plugins/{port}/SSMenuSystem/config.yml`
+
+
+Now you know how to install `SSMenuSystem` !<br/>
+To help you to configure the plugin, there is a board of configs and translations:
+### configuration:
+| parameter                    | yml value                         | type                |                                                                                                             description                                                                                                             |          default value          |
+|------------------------------|-----------------------------------|---------------------|:-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|:-------------------------------:|
+| IsEnabled                    | is_enabled                        | bool                |                                                                                               define if the plugin is enabled or not.                                                                                               |              true               |
+| Debug                        | debug                             | bool                |                                                                            define if the plugin can log debug info or not (attention: can be intrusive)                                                                             |              false              |
+| AllowPinnedContent           | allow_pinned_content              | bool                |                                                                  Describe if pinned contnet is allowed. If set to false, all pinned content will not be displayed.                                                                  |              true               |
+| ShowErrorToClient            | show_error_to_client              | bool                | If there is an error in the `OnInput` (mostly because of `Action`, the client will see a message that indicated an internal server error is occured, with a Reload button. If set to false, main menu will be automatically loaded. |              true               |
+| ShowFullErrorToClient        | show_full_error_to_client         | bool                |                                                               **HIGHLY UNRECOMMENDED TO SET ON TRUE**<br/> The client will see the error occured if it's set to true.                                                               |              false              |
+| ShowFullErrorToModerators    | show_full_error_to_moderators     | bool                |                                                       On the "error" page, if player has `RemoteAdmin` permission (see Remote Admin), the moderator will see the total error.                                                       |              true               |
+| ForceMainMenuEventIfOnlyOne  | force_main_menu_event_if_only_one | bool                |                                                **Disabled feature**<br/>*If only one menu is registered, instead of displaying the main menu, it's display the only menu available.*                                                |              false              |
+| ShowGlobalKeybindingsWarning | show_global_keybindings_warning   | bool                |                                         **Temporary parameter** due to Global Keybinds issue, a warning is displayed instead of global keybinds. This parameters can disable this warning.                                          |              false              |
+| EnableExamples               | enable_examples                   | bool                |                 This plugin contains examples. The parameter simply enable examples.<br/>WARNING: can be game-breaking due to features inside, like human scanner (available even for SCPs, speed boost or others).                 |              false              |
+| ComptabilitySystem           | comptability_system               | ComptabilitySystem  |                                                                                             All configs related to Comptability system.                                                                                             | Instance of ComptabilitySystem  |
+
+This board is related to ComptabilitySystem:
+
+| parameter           | yml value                                    | type                |                     description                      |          default value          |
+|---------------------|----------------------------------------------|---------------------|:----------------------------------------------------:|:-------------------------------:|
+| ComptabilityEnabled | comptability_enabled                         | bool                | Define if the comptability system is enabled or not. |              true               |
+
+
+Configs written in a YML config:
+
+```yml
+is_enabled: true
+debug: true
+# Whether pins is allowed or not (pin is a thing that has been displayed on all menus).
+allow_pinned_content: true
+# Whether clients (= non-moderators) whould see errors or not.
+show_error_to_client: true
+# Whether clients (= non-moderators) whould see total errors (= some plugins-content name) or not. HIGLY UNRECOMMENDED TO SET TRUE.
+show_full_error_to_client: false
+# Whether moderators (= has RA access) whould see total errors (= some plugins-content name).
+show_full_error_to_moderators: true
+# If there is only one menu registered and this set to false, this menu would be automatiquely displayed. Disabled.
+force_main_menu_event_if_only_one: false
+# because GlobalKeybinds is disabled, set this to false to remove the warning displayed.
+show_global_keybindings_warning: true
+# Whether examples is enabled. Warning: if set to true, some content of examples would be Game breaking (speed ability, scan ability, etc...).
+enable_examples: true
+comptability_system:
+    # If enabled, the comptability system will be enabled and all plugins that use SSSystem will be registered as menu.
+    comptability_enabled: true
+```
+
+### translations:
+
+| parameter               | yml value               |    type     |                                                     description                                                      | default                                                                                                        |
+|-------------------------|-------------------------|:-----------:|:--------------------------------------------------------------------------------------------------------------------:|:---------------------------------------------------------------------------------------------------------------|
+| OpenMenu                | open_menu               | LabelButton |                                   Used in the main menu, to display menu buttons.                                    | - "Open {0}"<br/> - Open                                                                                       |
+| ReturnToMenu            | return_to_menu          | LabelButton | Used when menu is opened, at the top, to display the "return to menu" button (not into parent menu, see `ReturnTo`). | "Return to menu<br/> - Return                                                                                  |
+| ReturnTo                | return_to               | LabelButton |               Used when sub-menu is opened, at the top, to display the "return to parent menu" button.               | - Return to {0}<br/> - Return                                                                                  |
+| ReloadButton            | reload_button           | LabelButton |              Only used when a client saw an error, used to show the "return into the main menu" button.              | - Reload menus<br/> - Reload                                                                                   |
+| GlobalKeybindingTitle   | global_keybinding_title | GroupHeader |                         Display the "Global keybindings" header. Can change Label and Hint.                          | - Global Keybinding<br/> - don't take a look at this (nah seriously it's just to make some keybindings global) |
+| ServerError             | server_error            |   string    |                       Only displayed when error is thrown, to alert client of an actual error.                       | INTERNAL SERVER ERROR                                                                                          |
+| SubMenuTitle            | sub_menu_title          |   string    |                    The text will be displayed in the header, if sub-menus exist in a parent menu.                    | Sub-Menus                                                                                                      |
+
+And you will think (i'm sure :kappa:) "But what is "LabelButton" and "GroupHeader" type ?"
+
+It's really simple ! it's just a contraction of two translations:
+ - for LabelButton:
+   - The label
+   - The button text
+ - And for GroupHeader:
+   - The label
+   - The hint
+
+and there is an example of yml translation format:
+```yml
+# On the main-menu, button displayed to open a menu where {0} = menu name.
+open_menu:
+    label: 'Open {0}'
+    button_text: 'Open'
+# the button displayed when menu is opened.
+return_to_menu:
+    label: 'Return to menu'
+    button_text: 'Return'
+# The button that displayed when sub-menu is opened (return to related menu) where {0} = menu name.
+return_to:
+    label: 'Return to {0}'
+    button_text: 'Return'
+# The reload button.
+reload_button:
+    label: 'Reload menus'
+    button_text: 'Reload'
+global_keybinding_title:
+    label: 'Global Keybinding'
+    hint: "don't take a look at this (nah seriously it's just to make some keybindings global)"
+# Text displayed when an error is occured (to avoid client crash + explain why it's don't work). Can accept TextMeshPro tags.
+server_error: 'INTERNAL SERVER ERROR'
+# Title of sub-menus when there is one.
+sub_menu_title: 'Sub-Menus'
+# Translation when player doesn't have permission to see total errors (= see a part of code name).
+no_permission: 'insufficient permissions to see the full errors'
+
 ```
 
 # if you see a bug, please report this [here](https://github.com/skyfr0676/ServerSpecificsSyncer/issues)

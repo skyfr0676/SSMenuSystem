@@ -16,7 +16,7 @@ using PluginAPI.Enums;
 
 namespace SSMenuSystem
 {
-    internal class EventHandler
+    internal static class EventHandler
     {
 #if EXILED
         internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));

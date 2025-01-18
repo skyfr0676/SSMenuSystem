@@ -16,7 +16,10 @@
         <LangVersion>latest</LangVersion>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <Version>2.0.1</Version>
+        <Title>SSMenuSystem</Title>
+        <PackageId>ssmenusystem</PackageId>
+        <Description>A framework that add a menu system into SCP: Secret Laboratory. Builded with EXILED and NWAPI separated</Description>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release NWAPI|AnyCPU' ">
         <AssemblyName>SSMenuSystem-NWAPI</AssemblyName>
@@ -28,7 +31,7 @@
         <WarningLevel>4</WarningLevel>
         <OutputPath>bin\Release NWAPI\</OutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Release NWAPI\SSMenuSystem-NWAPI.xml</DocumentationFile>
+        <DocumentationFile>bin\Release NWAPI\SSMenuSystem.xml</DocumentationFile>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug NWAPI|AnyCPU' ">
@@ -42,7 +45,7 @@
         <WarningLevel>0</WarningLevel>
         <OutputPath>bin\Debug NWAPI\</OutputPath>
         <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Debug NWAPI\SSMenuSystem-NWAPI.xml</DocumentationFile>
+        <DocumentationFile>bin\Debug NWAPI\SSMenuSystem.xml</DocumentationFile>
     </PropertyGroup>
     
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
@@ -53,7 +56,7 @@
       <Optimize>true</Optimize>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <DebugType>pdbonly</DebugType>
-      <DocumentationFile>bin\Release EXILED\SSMenuSystem-EXILED.xml</DocumentationFile>
+      <DocumentationFile>bin\Release EXILED\SSMenuSystem.xml</DocumentationFile>
       <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
@@ -62,7 +65,7 @@
       <OutputPath>bin\Debug EXILED\</OutputPath>
       <DefineConstants>DEBUG;TRACE;EXILED</DefineConstants>
       <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-      <DocumentationFile>bin\Debug EXILED\SSMenuSystem-EXILED.xml</DocumentationFile>
+      <DocumentationFile>bin\Debug EXILED\SSMenuSystem.xml</DocumentationFile>
       <WarningLevel>0</WarningLevel>
     </PropertyGroup>
     
@@ -134,10 +137,7 @@
     </ItemGroup>
     <ItemGroup>
       <Content Include=".editorconfig" />
-      <Content Include="build.sh" />
       <Content Include="Directory.Build.props" />
-      <Content Include="SSMenuSystem-EXILED.nuspec" />
-      <Content Include="SSMenuSystem-NWAPI.nuspec" />
       <Content Include="SSMenuSystem.props" />
       <Content Include="SSMenuSystem.ruleset" />
     </ItemGroup>
