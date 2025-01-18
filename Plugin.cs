@@ -95,7 +95,7 @@ namespace SSMenuSystem
         [PluginAPI.Core.Attributes.PluginConfig("config.yml")]
         public Config Config;
 
-        [PluginAPI.Core.Attributes.PluginEntryPoint("ServerSpecificSyncer", "2.0.0", "sync all plugins to one server specific", "sky")]
+        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.1", "sync all plugins to one server specific with menus.", "sky")]
         public void OnEnabled()
         {
             if (Config == null)

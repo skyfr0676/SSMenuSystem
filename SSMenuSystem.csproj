@@ -14,6 +14,12 @@
         <AssemblyName>SSMenuSystem</AssemblyName>
         <FileAlignment>512</FileAlignment>
         <LangVersion>latest</LangVersion>
+        <IsPackable>true</IsPackable>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Version>2.0.1</Version>
+        <Title>SSMenuSystem</Title>
+        <PackageId>ssmenusystem</PackageId>
+        <Description>A framework that add a menu system into SCP: Secret Laboratory. Builded with EXILED and NWAPI separated</Description>
     </PropertyGroup>
     <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release NWAPI|AnyCPU' ">
         <AssemblyName>SSMenuSystem-NWAPI</AssemblyName>
@@ -92,6 +98,7 @@
     </ItemGroup>
     <ItemGroup>
         <Compile Include="Config.cs" />
+        <Compile Include="Configs\GroupHeader.cs" />
         <Compile Include="Configs\LabelButton.cs" />
         <Compile Include="EventHandler.cs" />
         <Compile Include="Examples\AbilitiesExample.cs" />

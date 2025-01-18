@@ -154,7 +154,7 @@ namespace SSMenuSystem.Features
         /// </summary>
         /// <param name="menu">The target menu.</param>
         /// <exception cref="ArgumentException">One of parameters of target menu is invalid. please check the <see cref="Exception.Message"/> to find the invalid parameter.</exception>
-        internal static void Register(Menu menu)
+        public static void Register(Menu menu)
         {
             if (menu == null)
                 return;
@@ -261,7 +261,7 @@ namespace SSMenuSystem.Features
         /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
-        /// <summary>
+            /// <summary>
         /// Gets the Hash of menu, based on <see cref="Name"/>. Mainly used to seperate menu settings for client.
         /// </summary>
         public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
@@ -369,7 +369,7 @@ namespace SSMenuSystem.Features
 
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
             {
-                keybindings.Add(new SSGroupHeader("Global Keybinding", hint:"don't take a look at this (nah seriously it's just to make some keybindings global)"));
+                keybindings.Add(new SSGroupHeader(Plugin.GetTranslation().GlobalKeybindingTitle.Label, hint:Plugin.GetTranslation().GlobalKeybindingTitle.Hint));
                 keybindings.Add(new SSTextArea(0, "this feature is currently disabled, due to a registration bug (desynchronisation).\nNote for Server Owner: you can disable this warning by disabling the <mark=\"#77777777\">ShowGlobalKeybindingsWarning</mark> configuration."));
                 /*foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
