@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using System.Reflection;
+using PluginAPI.Core;
 using UserSettings.ServerSpecific;
 
 namespace SSMenuSystem.Features
@@ -12,6 +13,8 @@ namespace SSMenuSystem.Features
             {
                 foreach (ServerSpecificSettingBase c in collection)
                 {
+                    if (c is SSGroupHeader && c.Label == Plugin.GetTranslation().GlobalKeybindingTitle.Label && c.HintDescription == Plugin.GetTranslation().GlobalKeybindingTitle.Hint)
+                        break;
                     if (c.SettingId < relatedMenu.Hash)
                         c.SetId(c.SettingId + relatedMenu.Hash, c.Label);
                 }

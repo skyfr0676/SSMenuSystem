@@ -1,5 +1,6 @@
 using System;
 using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
 using UserSettings.ServerSpecific;
 
 namespace SSMenuSystem.Examples
@@ -44,7 +45,9 @@ namespace SSMenuSystem.Examples
                 hint:
                 "Alternative to dropdown. API is the same as in regular dropdown, but the client-side entry behaves differently."),
             new SSButton(16, "Another Button", "Press me! (again)",
-                hint: "Triggers an event whenever it is pressed.")
+                hint: "Triggers an event whenever it is pressed."),
+            new Keybind(17, "Another Button",
+            hint: "Triggers an event whenever it is pressed.", isGlobal:true)
         };
 
         public override string Name { get; set; } = "Demo Example";

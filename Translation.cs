@@ -54,7 +54,7 @@ namespace SSMenuSystem
         /// Title of sub-menus when there is one.
         /// </summary>
         [Description("Title of sub-menus when there is one.")]
-        public string SubMenuTitle { get; set; } = "Sub-Menus";
+        public GroupHeader SubMenuTitle { get; set; } = new("Sub-Menus", null);
 
         /// <summary>
         /// Translation when player doesn't have permission to see total errors (= see a part of code name).

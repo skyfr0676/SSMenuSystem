@@ -1,8 +1,13 @@
 # SSMenuSystem
 *from "ServerSpecific-Menu System"*
 
-[![Downloads](https://img.shields.io/github/downloads/skyfr0676/ServerSpecificsSyncer/total)](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest)
-
+[![Downloads](https://img.shields.io/github/downloads/skyfr0676/SSMenuSystem/total?style=for-the-badge)](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest)
+[![NuGet Version](https://img.shields.io/nuget/v/SSMenuSystem?style=for-the-badge)](https://www.nuget.org/packages/SSMenuSystem/)
+![Open Issues](https://img.shields.io/github/issues/skyfr0676/SSMenuSystem?style=for-the-badge)
+![Open Pull Requests](https://img.shields.io/github/issues-pr/skyfr0676/SSMenuSystem?style=for-the-badge)
+![Forks](https://img.shields.io/github/forks/skyfr0676/SSMenuSystem.svg?style=for-the-badge)
+![Stars](https://img.shields.io/github/stars/skyfr0676/SSMenuSystem?style=for-the-badge)
+![](https://img.shields.io/badge/.NET-4.8-512BD4?logo=dotnet&logoColor=fff&style=for-the-badge)<br/>
 SSMenuSystem is a framework that add SS Plugin comptability and a menu system.
 
 ## how to use ServerSpecificSyncer as:
@@ -125,7 +130,7 @@ Now that you understand how to install `SSMenuSystem` on your server, we will no
 
 ### Plugin creator
 
-Reference SSMenuSystem DLL using the [latest](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest) version (or use Nuget package (Same name)) on your favorite editor
+Reference SSMenuSystem DLL using the [latest](https://github.com/skyfr0676/ServerSpecificsSyncer/releases/latest) version (or use [Nuget package](https://www.nuget.org/packages/SSMenuSystem/)) on your favorite editor
 
  - Create a new class
 

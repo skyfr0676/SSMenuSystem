@@ -26,11 +26,19 @@ namespace SSMenuSystem.Features
         /// All menus loaded.
         /// </summary>
         public static List<Menu> Menus => LoadedMenus;
-        private static readonly Dictionary<Menu, List<Keybind>> GlobalKeybindingSync = new();
+        // private static readonly Dictionary<Menu, List<Keybind>> GlobalKeybindingSync = new();
 
         /// <summary>
         /// All Global Keybinds registered for each menu.
         /// </summary>
+        public static Dictionary<Menu, List<Keybind>> GlobalKeybindingSync => Menus.ToDictionary(
+            menu => menu,
+            menu => menu.Settings.Where(x => x is Keybind k && k.IsGlobal).Select(x => x as Keybind).ToList());
+
+        /// <summary>
+        /// All Global Keybinds registered for each menu.
+        /// </summary>
+        [Obsolete("Use GlobalKeybindingSync instead", true)]
         public static ReadOnlyDictionary<Menu, List<Keybind>> GlobalKeybindings => new(GlobalKeybindingSync);
 
         /// <summary>
@@ -192,15 +200,6 @@ namespace SSMenuSystem.Features
                     throw new ArgumentException($"id above and equal to 0 is reserved for menus and main menu.");
 
                 ids[type].Add(setting.SettingId);
-
-                if (action is Keybind bind && bind.IsGlobal)
-                {
-                    if (!GlobalKeybindingSync.ContainsKey(menu))
-                        GlobalKeybindingSync[menu] = new List<Keybind>();
-                    GlobalKeybindingSync[menu].Add(bind);
-                }
-                if (action is SSKeybindSetting && action is not Keybind)
-                    Log.Warning($"setting {action.SettingId} (label {action.Label}) is registered has {nameof(SSKeybindSetting)}. it's recommended to use {typeof(Keybind).FullName} (especially if you want to create global keybindings) !");
             }
 
             if (menu.MenuRelated != null)
@@ -326,7 +325,7 @@ namespace SSMenuSystem.Features
             }
 
             if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
-                settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle));
+                settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle.Label, hint:Plugin.GetTranslation().SubMenuTitle.Hint));
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
@@ -367,15 +366,16 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> keybindings = new();
 
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
+            Log.Info(GlobalKeybindingSync.Count.ToString());
+            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu && x.Value.Any()) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
             {
                 keybindings.Add(new SSGroupHeader(Plugin.GetTranslation().GlobalKeybindingTitle.Label, hint:Plugin.GetTranslation().GlobalKeybindingTitle.Hint));
-                keybindings.Add(new SSTextArea(0, "this feature is currently disabled, due to a registration bug (desynchronisation).\nNote for Server Owner: you can disable this warning by disabling the <mark=\"#77777777\">ShowGlobalKeybindingsWarning</mark> configuration."));
-                /*foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
+                // keybindings.Add(new SSTextArea(0, "this feature is currently disabled, due to a registration bug (desynchronisation).\nNote for Server Owner: you can disable this warning by disabling the <mark=\"#77777777\">ShowGlobalKeybindingsWarning</mark> configuration."));
+                foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
-                        keybindings.Add(new SSKeybindSetting(keybind.SettingId, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
-                }*/
+                        keybindings.Add(new SSKeybindSetting(keybind.SettingId + menuKeybinds.Key.Hash, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
+                }
             }
 
             return keybindings.ToArray();

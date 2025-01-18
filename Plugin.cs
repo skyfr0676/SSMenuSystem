@@ -4,11 +4,10 @@ using HarmonyLib;
 using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 #if EXILED
-
 #elif NWAPI
-using Log = PluginAPI.Core.Log;
 using PluginAPI.Core;
 #endif
+using Log = PluginAPI.Core.Log;
 
 namespace SSMenuSystem
 {

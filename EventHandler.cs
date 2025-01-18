@@ -125,7 +125,7 @@ namespace SSMenuSystem
                                 wBtn.Action?.Invoke(hub, (SSButton)ss);
                                 break;
                             case Dropdown wDropdown:
-                                wDropdown.Action?.Invoke(hub, ((SSDropdownSetting)ss).Options[((SSDropdownSetting)ss).SyncSelectionIndexRaw], ((SSDropdownSetting)ss).SyncSelectionIndexRaw, (SSDropdownSetting)ss);
+                                wDropdown.Action?.Invoke(hub, wDropdown.Options[((SSDropdownSetting)ss).SyncSelectionIndexRaw], ((SSDropdownSetting)ss).SyncSelectionIndexRaw, (SSDropdownSetting)ss);
                                 break;
                             case Plaintext wPlaintext:
                                 wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, (SSPlaintextSetting)ss);
