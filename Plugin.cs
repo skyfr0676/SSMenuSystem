@@ -34,7 +34,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 2);
+        public override Version Version => new(2, 0, 3);
 
         /// <inheritdoc/>
         public override Version RequiredExiledVersion => new(9, 3, 0);
@@ -101,7 +101,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Declared when plugin is started.
         /// </summary>
-        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.2", "sync all plugins to one server specific with menus.", "sky")]
+        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.3", "sync all plugins to one server specific with menus.", "sky")]
         public void OnEnabled()
         {
             if (Config == null)
@@ -128,7 +128,7 @@ namespace SSMenuSystem
 
 #if DEBUG
             Log.Warning("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
-            Menu.RegisterPin(new ServerSpecificSettingBase[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
+            Menu.RegisterPin(new[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
             StaticConfig.Debug = true;
 #endif
 

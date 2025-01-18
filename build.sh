@@ -10,14 +10,18 @@ CONFIGURATIONS=(
 )
 VERSION=$(echo "$1")
 NEW_VERSION=$(echo "$1" | sed 's/\./, /g')
-sed -i "38s/.*/        public override Version Version => new($NEW_VERSION);/" Plugin.cs
-sed -i "105s/.*/        [PluginAPI.Core.Attributes.PluginEntryPoint(\"SSMenuSystem\", \"$VERSION\", \"sync all plugins to one server specific with menus.\", \"sky\")]/" Plugin.cs
+sed -i "37s/.*/        public override Version Version => new($NEW_VERSION);/" Plugin.cs
+sed -i "104s/.*/        [PluginAPI.Core.Attributes.PluginEntryPoint(\"SSMenuSystem\", \"$VERSION\", \"sync all plugins to one server specific with menus.\", \"sky\")]/" Plugin.cs
 sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
 sed -i "6s/.*/        <version>$VERSION-NWAPI<\/version>/" SSMenuSystem-NWAPI.nuspec
 sed -i "34s/.*/[assembly: AssemblyVersion(\"$VERSION\")]/" Properties/AssemblyInfo.cs
 
 for CONFIG in "${CONFIGURATIONS[@]}"; do
     msbuild "SSMenuSystem.csproj" /p:Configuration="$CONFIG"
+    # shellcheck disable=SC2181
+    if [ "$?" -ne 0 ]; then
+        exit 1
+    fi
 done
 
 rm -rf "pack"

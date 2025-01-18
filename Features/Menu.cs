@@ -20,7 +20,7 @@ namespace SSMenuSystem.Features
     {
         private static readonly Dictionary<ReferenceHub, Menu> MenuSync = new();
         private static readonly List<Menu> LoadedMenus = new();
-        private static readonly Dictionary<Assembly, ServerSpecificSettingBase[]> Pinned = new();
+        private static readonly Dictionary<Assembly, SSTextArea[]> Pinned = new();
 
         /// <summary>
         /// All menus loaded.
@@ -366,11 +366,9 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> keybindings = new();
 
-            Log.Info(GlobalKeybindingSync.Count.ToString());
-            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu && x.Value.Any()) && Plugin.StaticConfig.ShowGlobalKeybindingsWarning)
+            if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu && x.Value.Any()))
             {
                 keybindings.Add(new SSGroupHeader(Plugin.GetTranslation().GlobalKeybindingTitle.Label, hint:Plugin.GetTranslation().GlobalKeybindingTitle.Hint));
-                // keybindings.Add(new SSTextArea(0, "this feature is currently disabled, due to a registration bug (desynchronisation).\nNote for Server Owner: you can disable this warning by disabling the <mark=\"#77777777\">ShowGlobalKeybindingsWarning</mark> configuration."));
                 foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
@@ -531,7 +529,8 @@ namespace SSMenuSystem.Features
         /// Register <see cref="ServerSpecificSettingBase"/> that will be displayed on the top of all pages.
         /// </summary>
         /// <param name="toPin">the list of <see cref="ServerSpecificSettingBase"/> to pin.</param>
-        public static void RegisterPin(ServerSpecificSettingBase[] toPin) => Pinned[Assembly.GetCallingAssembly()] = toPin;
+        public static void RegisterPin(SSTextArea[] toPin) =>
+            Pinned[Assembly.GetCallingAssembly()] = toPin;
 
         /// <summary>
         /// Remove pins that was registered by <see cref="Assembly.GetCallingAssembly"/>.

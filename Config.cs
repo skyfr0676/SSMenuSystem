@@ -49,12 +49,6 @@ namespace SSMenuSystem
         public bool ForceMainMenuEventIfOnlyOne { get; set; }
 
         /// <summary>
-        /// Because GlobalKeybinds is disabled, set this to false to remove the warning displayed.
-        /// </summary>
-        [Description("because GlobalKeybinds is disabled, set this to false to remove the warning displayed.")]
-        public bool ShowGlobalKeybindingsWarning { get; set; } = true;
-
-        /// <summary>
         /// Gets or sets a value indicating whether examples is enabled. Warning: if set to true, some content of examples would be Game breaking (speed ability, scan ability, etc...)
         /// </summary>
         [Description("Whether examples is enabled. Warning: if set to true, some content of examples would be Game breaking (speed ability, scan ability, etc...).")]
