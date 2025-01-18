@@ -7,17 +7,17 @@ using HarmonyLib;
 using Mirror;
 using NorthwoodLib.Pools;
 using PluginAPI.Core;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.ComptabiliserPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Setter)]
-    public static class Comptabilisater
+    internal static class Comptabilisater
     {
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
         {
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
@@ -28,16 +28,16 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 new(OpCodes.Call, Method(typeof(Comptabilisater), nameof(Load))),
                 new(OpCodes.Ret),
             });
-        
+
             foreach (CodeInstruction z in newInstructions)
                 yield return z;
-        
+
             ListPool<CodeInstruction>.Shared.Return(newInstructions);
         }
 
         private static readonly HashSet<Assembly> LockedAssembly = new();
-    
-        public static void Load(ServerSpecificSettingBase[] settings)
+
+        internal static void Load(ServerSpecificSettingBase[] settings)
         {
             if (!Plugin.StaticConfig.ComptabilitySystem.ComptabilityEnabled)
                 return;
@@ -58,21 +58,21 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                     m.Name = m.OverrideSettings.First().Label;
                     m.OverrideSettings = m.OverrideSettings.Skip(1).ToArray();
                 }
-                foreach (var hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
+                foreach (ReferenceHub hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
                     Menu.LoadForPlayer(hub, null);
                 m.ReloadAll();
                 return;
             }
 
             string name = assembly.GetName().Name;
-            
+
             AssemblyMenu menu = new()
             {
                 Assembly = assembly,
                 OverrideSettings = settings,
                 Name = name,
             };
-            
+
             if (menu.OverrideSettings?.First() is SSGroupHeader)
             {
                 menu.Name = menu.OverrideSettings.First().Label;
@@ -95,10 +95,10 @@ namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
                 LockedAssembly.Add(assembly);
                 return;
             }
-        
+
             menu.Id = -Mathf.Abs(menu.Name.GetStableHashCode());
             Menu.Register(menu);
-            foreach (var hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
+            foreach (ReferenceHub hub in ReferenceHub.AllHubs.Where(x => Menu.GetCurrentPlayerMenu(x) == null))
                 Menu.LoadForPlayer(hub, null);
         }
     }

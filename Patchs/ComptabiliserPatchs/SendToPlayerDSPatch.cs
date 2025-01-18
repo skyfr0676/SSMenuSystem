@@ -4,23 +4,16 @@ using HarmonyLib;
 using NorthwoodLib.Pools;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.ComptabiliserPatchs
 {
-    
+
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), new[] { typeof(ReferenceHub) })]
-    public class SendToPlayerDSPatch
+    internal class SendToPlayerDSPatch
     {
-        public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler,
+        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler,
             ILGenerator generator)
         {
-            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
-            
-            newInstructions.Add(new CodeInstruction(OpCodes.Ret));
-
-            foreach (CodeInstruction z in newInstructions)
-                yield return z;
-
-            ListPool<CodeInstruction>.Shared.Return(newInstructions);
+            yield return new CodeInstruction(OpCodes.Ret);
         }
     }
 }

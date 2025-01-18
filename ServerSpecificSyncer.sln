@@ -1,6 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServerSpecificSyncer", "ServerSpecificSyncer.csproj", "{523A1ABE-6297-47F1-8075-32E523CA5FD0}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSMenuSystem", "SSMenuSystem.csproj", "{523A1ABE-6297-47F1-8075-32E523CA5FD0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

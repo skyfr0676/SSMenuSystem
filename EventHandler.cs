@@ -1,20 +1,21 @@
-﻿#if EXILED
+﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Exiled.Events.EventArgs.Player;
+using MEC;
+using PluginAPI.Core;
+using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
+using UserSettings.ServerSpecific;
+#if EXILED
 #elif NWAPI
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 #endif
 using MEC;
 
-using PluginAPI.Core;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Features.Wrappers;
-using UserSettings.ServerSpecific;
-
-namespace ServerSpecificSyncer
+namespace SSMenuSystem
 {
     internal class EventHandler
     {
@@ -25,7 +26,7 @@ namespace ServerSpecificSyncer
         internal static void ReloadedConfigs()
         {
             Log.Info("reloaded configs.");
-            foreach (var hub in ReferenceHub.AllHubs)
+            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
                 Menu.LoadForPlayer(hub, Menu.GetCurrentPlayerMenu(hub));
         }
 
@@ -36,9 +37,10 @@ namespace ServerSpecificSyncer
         [PluginEvent(ServerEventType.PlayerLeft)]
         public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
 #endif
-    
-        
-        public static void SyncChangedGroup(ReferenceHub hub)
+
+
+        // ReSharper disable once MemberCanBePrivate.Global
+        internal static void SyncChangedGroup(ReferenceHub hub)
         {
             Timing.CallDelayed(0.1f, () =>
             {
@@ -51,7 +53,7 @@ namespace ServerSpecificSyncer
                     Menu.LoadForPlayer(hub, null);
             });
         }
-        
+
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
             try
@@ -78,7 +80,7 @@ namespace ServerSpecificSyncer
                     Menu.LoadForPlayer(hub, null);
                     return;
                 }
-                
+
                 // check permissions
                 Menu menu = Menu.GetCurrentPlayerMenu(hub);
                 if (!menu?.CheckAccess(hub) ?? false)
@@ -87,7 +89,7 @@ namespace ServerSpecificSyncer
                     Menu.LoadForPlayer(hub, null);
                     return;
                 }
-                
+
                 // global/local keybinds
                 if (ss.SettingId > Keybind.Increment && ss is SSKeybindSetting setting)
                 {
@@ -98,7 +100,7 @@ namespace ServerSpecificSyncer
                         return;
                     }
                 }
-                
+
                 // load main menu
                 if (ss.SettingId == 0 && menu != null)
                 {
@@ -124,7 +126,7 @@ namespace ServerSpecificSyncer
                                 wBtn.Action?.Invoke(hub, (SSButton)ss);
                                 break;
                             case Dropdown wDropdown:
-                                wDropdown.Action?.Invoke(hub, (SSDropdownSetting)ss, ((SSDropdownSetting)ss).SyncSelectionText);
+                                wDropdown.Action?.Invoke(hub, wDropdown.Options[((SSDropdownSetting)ss).SyncSelectionIndexRaw], ((SSDropdownSetting)ss).SyncSelectionIndexRaw, (SSDropdownSetting)ss);
                                 break;
                             case Plaintext wPlaintext:
                                 wPlaintext.OnChanged?.Invoke(hub, ((SSPlaintextSetting)ss).SyncInputText, (SSPlaintextSetting)ss);

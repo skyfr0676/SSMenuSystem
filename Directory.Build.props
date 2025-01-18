@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project>
+    <!-- StyleCop Analyzers configuration -->
+    <PropertyGroup>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)\SSMenuSystem.ruleset</CodeAnalysisRuleSet>
+    </PropertyGroup>
+</Project>

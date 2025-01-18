@@ -1,6 +1,6 @@
 using System.ComponentModel;
 
-namespace ServerSpecificSyncer.Features
+namespace SSMenuSystem.Features
 {
     /// <summary>
     /// The comptability configs.

@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Reflection;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Features
+namespace SSMenuSystem.Features
 {
-    public class AssemblyMenu : Menu
+    internal class AssemblyMenu : Menu
     {
-        public Assembly Assembly { get; set; }
-        public ServerSpecificSettingBase[] OverrideSettings { get; set; }
+        internal Assembly Assembly { get; set; }
+        internal ServerSpecificSettingBase[] OverrideSettings { get; set; }
         public override ServerSpecificSettingBase[] Settings => OverrideSettings ?? Array.Empty<ServerSpecificSettingBase>();
         public override string Name { get; set; }
         public override int Id { get; set; }
         public override bool CheckAccess(ReferenceHub hub) =>
-            (ActuallySendedToClient.TryGetValue(hub, out var settings) && settings != null && !settings.IsEmpty()) ||
+            (ActuallySendedToClient.TryGetValue(hub, out ServerSpecificSettingBase[] settings) && settings != null && !settings.IsEmpty()) ||
             (OverrideSettings != null && !OverrideSettings.IsEmpty());
-        public Dictionary<ReferenceHub, ServerSpecificSettingBase[]> ActuallySendedToClient { get; set; } = new();
+        internal Dictionary<ReferenceHub, ServerSpecificSettingBase[]> ActuallySendedToClient { get; set; } = new();
     }
 }

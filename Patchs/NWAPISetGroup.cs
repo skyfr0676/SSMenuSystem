@@ -5,14 +5,14 @@ using HarmonyLib;
 using MEC;
 using NorthwoodLib.Pools;
 using PluginAPI.Core;
-using ServerSpecificSyncer.Features;
+using SSMenuSystem.Features;
 using UnityEngine;
 using static HarmonyLib.AccessTools;
 
-namespace ServerSpecificSyncer.Patchs
+namespace SSMenuSystem.Patchs
 {
     [HarmonyPatch(typeof(ServerRoles), nameof(ServerRoles.SetGroup))]
-    public class NwapiSetGroup
+    internal class NwapiSetGroup
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
@@ -20,7 +20,7 @@ namespace ServerSpecificSyncer.Patchs
             List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent(instructions);
             int offset = 1;
             int index = newInstructions.FindIndex(instruction => instruction.opcode == OpCodes.Ret) + offset;
-            
+
             newInstructions.InsertRange(index, new[]
             {
                 // NwapiSetGroup.OnChangingGroup(this.gameObject);
@@ -29,7 +29,7 @@ namespace ServerSpecificSyncer.Patchs
                 new(OpCodes.Call, Method(typeof(NwapiSetGroup), nameof(OnChangingGroup))),
             });
 
-            foreach (var t in newInstructions)
+            foreach (CodeInstruction t in newInstructions)
                 yield return t;
 
             ListPool<CodeInstruction>.Shared.Return(newInstructions);

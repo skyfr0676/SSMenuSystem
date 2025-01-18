@@ -2,14 +2,14 @@ using System;
 using System.Collections.Generic;
 using PlayerRoles;
 using PlayerRoles.FirstPersonControl;
-using ServerSpecificSyncer.Features;
-using ServerSpecificSyncer.Features.Wrappers;
+using SSMenuSystem.Features;
+using SSMenuSystem.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 
-namespace ServerSpecificSyncer.Examples
+namespace SSMenuSystem.Examples
 {
-    public class TextAreaExample : Menu
+    internal class TextAreaExample : Menu
     {
         public override ServerSpecificSettingBase[] Settings => GetSettings();
         private List<ServerSpecificSettingBase> _settings;
@@ -18,7 +18,7 @@ namespace ServerSpecificSyncer.Examples
         private ServerSpecificSettingBase[] GetSettings()
         {
             _responseScan ??= new SSTextArea(null, "Not Scanned yet");
-            _settings = new()
+            _settings = new List<ServerSpecificSettingBase>
             {
                 new SSGroupHeader("Different Text Area Types"),
                 new SSTextArea(1,
@@ -29,15 +29,15 @@ namespace ServerSpecificSyncer.Examples
                 new SSTextArea(5, "This multi-line text area cannot be collapsed.\nIt remains fully expanded at all times, but supports URL links.\nExample link: <link=\"https://www.youtube.com/watch?v=dQw4w9WgXcQ\"><mark=#5865f215>[Click]</mark></link>"),
                 new SSGroupHeader("Human Scanner", false, "Generates a list of alive humans with their distances to you. The size is automatically adjusted based on the number of results."),
                 _responseScan,
-                new Button(6, "Scan for players.", "Scan", (hub, button) => OnScannerButtonPressed(hub))
+                new Button(6, "Scan for players.", "Scan", (hub, _) => OnScannerButtonPressed(hub))
             };
 
             return _settings.ToArray();
         }
         public override string Name { get; set; } = "Text Area";
         public override int Id { get; set; } = -7;
-        
-        
+
+
         public void OnScannerButtonPressed(ReferenceHub sender)
         {
             if (!(sender.roleManager.CurrentRole is IFpcRole currentRole1))
