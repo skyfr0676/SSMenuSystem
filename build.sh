@@ -43,8 +43,8 @@ if [ $# -gt 1 ]; then # there is more than 1 start argument
             if [ -n "${!next_index}" ]; then
                 echo "API Key found"
                 API_KEY="${!next_index}"
-                nuget push "pack/SSMenuSystem-EXILED.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$API_KEY"
-                nuget push "pack/SSMenuSystem-NWAPI.$VERSION-NWAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$API_KEY"
+                nuget push "./pack/SSMenuSystem-EXILED.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -k "$API_KEY"
+                nuget push "./pack/SSMenuSystem-NWAPI.$VERSION-NWAPI.nupkg" -Source https://api.nuget.org/v3/index.json -k "$API_KEY"
             else
                 echo "Invalid syntax: cannot get api key after \"--push\""
             fi
