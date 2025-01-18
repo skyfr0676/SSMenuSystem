@@ -17,25 +17,25 @@ namespace SSMenuSystem
 
         /// <inheritdoc/>
         public bool Debug { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether pins is allowed or not (pin is a thing that has been displayed on all menus).
         /// </summary>
         [Description("Whether pins is allowed or not (pin is a thing that has been displayed on all menus).")]
         public bool AllowPinnedContent { get; set; } = true;
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether clients (= non-moderators) whould see errors or not.
         /// </summary>
         [Description("Whether clients (= non-moderators) whould see errors or not.")]
         public bool ShowErrorToClient { get; set; } = true;
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether clients (= non-moderators) whould see total errors (= some plugins-content name) or not. HIGLY UNRECOMMENDED TO SET TRUE.
         /// </summary>
         [Description("Whether clients (= non-moderators) whould see total errors (= some plugins-content name) or not. HIGLY UNRECOMMENDED TO SET TRUE.")]
         public bool ShowFullErrorToClient { get; set; } = false;
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether moderators (= has RA access) whould see total errors (= some plugins-content name).
         /// </summary>
@@ -53,7 +53,7 @@ namespace SSMenuSystem
         /// </summary>
         [Description("because GlobalKeybinds is disabled, set this to false to remove the warning displayed.")]
         public bool ShowGlobalKeybindingsWarning { get; set; } = true;
-        
+
         /// <summary>
         /// Gets or sets a value indicating whether examples is enabled. Warning: if set to true, some content of examples would be Game breaking (speed ability, scan ability, etc...)
         /// </summary>
@@ -66,6 +66,9 @@ namespace SSMenuSystem
         public ComptabilityConfig ComptabilitySystem { get; set; } = new();
 
 #if NWAPI
+        /// <summary>
+        /// Plugin translations.
+        /// </summary>
         public Translation Translation { get; set; } = new();
 #endif
     }

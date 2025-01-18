@@ -35,7 +35,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 1);
+        public override Version Version => new(2, 0, 2);
 
         /// <inheritdoc/>
         public override Version RequiredExiledVersion => new(9, 3, 0);
@@ -92,10 +92,17 @@ namespace SSMenuSystem
         }
 
 #elif NWAPI
+
+        /// <summary>
+        /// Plugin configuration.
+        /// </summary>
         [PluginAPI.Core.Attributes.PluginConfig("config.yml")]
         public Config Config;
 
-        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.1", "sync all plugins to one server specific with menus.", "sky")]
+        /// <summary>
+        /// Declared when plugin is started.
+        /// </summary>
+        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.2", "sync all plugins to one server specific with menus.", "sky")]
         public void OnEnabled()
         {
             if (Config == null)

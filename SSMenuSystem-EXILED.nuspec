@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2010/07/nuspec.xsd">
+    <metadata>
+        <id>SSMenuSystem</id>
+        <title>SS Menu System</title>
+        <version>2.0.2-EXILED</version>
+        <authors>Sky</authors>
+        <owners>Sky</owners>
+        <copyright>Copyright © Sky 2025</copyright>
+        <requireLicenseAcceptance>false</requireLicenseAcceptance>
+        <repository type="Git" url="https://github.com/skyfr0676/SSMenuSystem" />
+        <projectUrl>https://github.com/skyfr0676/SSMenuSystem</projectUrl>
+        <description>An api that add a menu system into SCP: Secret Laboratory. Builded for EXILED 9.4.0.</description>
+        <readme>docs\README.md</readme>
+
+        <dependencies>
+            <group targetFramework="net48">
+                <dependency id="ExMod.Exiled" version="[9.4.0]" />
+            </group>
+        </dependencies>
+
+    </metadata>
+
+    <files>
+        <!-- Project files -->
+        <file src="packages/ExMod.Exiled.9.2.2/lib/net48/Assembly-CSharp-Publicized.dll" target="lib\net48" />
+        <file src="packages/ExMod.Exiled.9.2.2/lib/net48/NorthwoodLib.dll" target="lib\net48" />
+        <file src="packages/ExMod.Exiled.9.2.2/lib/net48/PluginAPI.dll" target="lib\net48" />
+        <file src="bin/Release EXILED/SSMenuSystem-EXILED.dll" target="lib\net48" />
+        <file src="bin/Release EXILED/SSMenuSystem-EXILED.xml" target="lib\net48" />
+        <file src="README.md" target="docs\" />
+        <!-- Project files -->
+    </files>
+
+</package>
