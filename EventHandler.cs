@@ -1,19 +1,17 @@
-﻿
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Exiled.Events.EventArgs.Player;
-using MEC;
 using PluginAPI.Core;
 using SSMenuSystem.Features;
 using SSMenuSystem.Features.Wrappers;
 using UserSettings.ServerSpecific;
+using MEC;
 #if EXILED
+using Exiled.Events.EventArgs.Player;
 #elif NWAPI
 using PluginAPI.Core.Attributes;
 using PluginAPI.Enums;
 #endif
-using MEC;
 
 namespace SSMenuSystem
 {
