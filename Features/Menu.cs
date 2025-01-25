@@ -346,6 +346,18 @@ namespace SSMenuSystem.Features
                 return settings;
             }
 
+            ServerSpecificSettingBase[] oSettings = GetSettingsFor(hub);
+            if (oSettings != null && !oSettings.IsEmpty())
+            {
+                foreach (ServerSpecificSettingBase t in oSettings)
+                {
+                    if (t is ISetting setting)
+                        settings.Add(setting.Base);
+                    else
+                        settings.Add(t);
+                }
+            }
+
             foreach (ServerSpecificSettingBase t in Settings)
             {
                 if (t is ISetting setting)
@@ -541,5 +553,15 @@ namespace SSMenuSystem.Features
         /// Called when the <see cref="Menu"/> is registered.
         /// </summary>
         protected virtual void OnRegistered(){}
+
+        /// <summary>
+        /// Get settings for the specific <see cref="ReferenceHub"/>
+        /// <param name="hub">The target <see cref="ReferenceHub"/>.</param>
+        /// <returns>A list of <see cref="ServerSpecificSettingBase"/> that will be sent into the player (like <see cref="Settings"/> but only for the <see cref="ReferenceHub"/>)</returns>
+        /// </summary>
+        public virtual ServerSpecificSettingBase[] GetSettingsFor(ReferenceHub hub)
+        {
+            return null;
+        }
     }
 }

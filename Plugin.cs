@@ -34,10 +34,11 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 3);
-        
+        public override Version Version => new(2, 0, 4);
+
         /// <inheritdoc/>
-        public override Version RequiredExiledVersion => new(4, 0, 0);
+        public override Version RequiredExiledVersion => new(9, 5, 0);
+
         /// <summary>
         /// Gets the prefix used for configs.
         /// </summary>
@@ -100,7 +101,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Declared when plugin is started.
         /// </summary>
-        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.3", "sync all plugins to one server specific with menus.", "sky")]
+        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.4", "sync all plugins to one server specific with menus.", "sky")]
         public void OnEnabled()
         {
             if (Config == null)

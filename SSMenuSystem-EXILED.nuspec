@@ -3,7 +3,7 @@
     <metadata>
         <id>SSMenuSystem</id>
         <title>SS Menu System</title>
-        <version>2.0.3-EXILED</version>
+        <version>2.0.4-EXILED</version>
         <authors>Sky</authors>
         <owners>Sky</owners>
         <copyright>Copyright © Sky 2025</copyright>
@@ -28,6 +28,9 @@
         <file src="packages/ExMod.Exiled.9.2.2/lib/net48/PluginAPI.dll" target="lib\net48" />
         <file src="bin/Release EXILED/SSMenuSystem-EXILED.dll" target="lib\net48" />
         <file src="bin/Release EXILED/SSMenuSystem-EXILED.xml" target="lib\net48" />
+        <file src="/home/sky/Projects/Tools/C/SCPSL plugins/Unity.TextMeshPro.dll" target="lib\net48" />
+        <file src="/home/sky/Projects/Tools/C/SCPSL plugins/UnityEngine.CoreModule.dll" target="lib\net48" />
+        <file src="/home/sky/Projects/Tools/C/SCPSL plugins/Mirror.dll" target="lib\net48" />
         <file src="README.md" target="docs\" />
         <!-- Project files -->
     </files>
