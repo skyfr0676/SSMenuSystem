@@ -155,7 +155,7 @@ this is a example of a menu class (with needed `override`):
  - Global setting (**currently disabled due to a desync issue**)
    - Global settings can display (and use) the keybind in all pages (main menu, sub-menu and menu), below the "Global Keybindings" header.
 
-The `Id` **MUST** be above 0: 0 is restricted to menus button related and positive Ids is restricted to parameters
+The `Id` **MUST** be less than 0: 0 is restricted to menus button related and positive Ids is restricted to parameters
 
 There is parameters for `Menu`:
 
