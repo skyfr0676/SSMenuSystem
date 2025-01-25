@@ -3,7 +3,7 @@ CONFIGURATIONS=(
     "Release EXILED"
     "Release NWAPI"
 )
-VALID_ARGS=("build" "pack" "--version" "push" "draft"  "--push_nuget" "--verbosity")
+VALID_ARGS=("build" "pack" "--version" "push" "draft"  "--push_nuget" "--verbosity" "merge")
 PASS_ARGUMENTS=()
 
 verbosity="normal"
@@ -133,4 +133,10 @@ if [ -n "$push_nuget" ]; then # push new version into the nuget repo
         nuget push "./pack/SSMenuSystem.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
         nuget push "./pack/SSMenuSystem.$VERSION-NWAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
     fi
+fi
+
+if [ -n "$merge" ]; then
+  if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo -e "\e[31m[ERROR]: there is not saved or not commited content. Commit, push or stash them.\e[0m"
+  fi
 fi
