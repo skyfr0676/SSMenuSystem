@@ -1,9 +1,9 @@
-﻿using System;
-using Exiled.API.Features;
-using HarmonyLib;
+﻿using HarmonyLib;
 using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 #if EXILED
+using System;
+using Exiled.API.Features;
 #elif NWAPI
 using PluginAPI.Core;
 #endif
