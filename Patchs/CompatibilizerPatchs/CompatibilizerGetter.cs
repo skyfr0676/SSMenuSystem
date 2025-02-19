@@ -9,10 +9,10 @@ using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace SSMenuSystem.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibiliserPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
-    internal class ComptabilisaterGetter
+    internal class CompatibilizerGetter
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
@@ -23,7 +23,7 @@ namespace SSMenuSystem.Patchs.ComptabiliserPatchs
             {
                 // ComptabilisaterGetter.Get(Assembly.GetCallingAssembly());
                 new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
-                new(OpCodes.Call, Method(typeof(ComptabilisaterGetter), nameof(Get))),
+                new(OpCodes.Call, Method(typeof(CompatibilizerGetter), nameof(Get))),
                 new(OpCodes.Ret),
             });
 

@@ -1,15 +1,18 @@
-﻿using System;
+﻿#if NWAPI
+using PluginAPI.Core;
+#endif
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
-using PluginAPI.Core;
 using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
+using Log = SSMenuSystem.Features.Log;
 
-namespace SSMenuSystem.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer))]
     [HarmonyPatch(new[] { typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(int?) })]
@@ -98,12 +101,11 @@ namespace SSMenuSystem.Patchs.ComptabiliserPatchs
 
         private static void SendToPlayer(ReferenceHub hub, ServerSpecificSettingBase[] settings, int? versionOverride, Assembly assembly)
         {
-            Log.Info("tried to send something to the player.");
             AssemblyMenu menu = Features.Utils.GetMenu(assembly);
             if (menu == null)
             {
-                Log.Warning($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
-                Comptabilisater.Load(Array.Empty<ServerSpecificSettingBase>());
+                Log.Warn($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
+                Compabilisater.Load(Array.Empty<ServerSpecificSettingBase>());
                 menu = Features.Utils.GetMenu(assembly);
             }
 

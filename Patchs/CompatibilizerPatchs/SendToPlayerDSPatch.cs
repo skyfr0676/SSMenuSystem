@@ -1,10 +1,9 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
-using NorthwoodLib.Pools;
 using UserSettings.ServerSpecific;
 
-namespace SSMenuSystem.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibiliserPatchs
 {
 
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), new[] { typeof(ReferenceHub) })]

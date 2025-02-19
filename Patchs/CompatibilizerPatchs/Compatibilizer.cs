@@ -1,21 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Mirror;
 using NorthwoodLib.Pools;
-using PluginAPI.Core;
 using SSMenuSystem.Features;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
+using Log = SSMenuSystem.Features.Log;
 
-namespace SSMenuSystem.Patchs.ComptabiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibiliserPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Setter)]
-    internal static class Comptabilisater
+    internal static class Compatibilizer
     {
         private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions,
             ILGenerator generator)
@@ -25,7 +24,7 @@ namespace SSMenuSystem.Patchs.ComptabiliserPatchs
             {
                 // Comptabilisater.Load(value);
                 new(OpCodes.Ldarg_0),
-                new(OpCodes.Call, Method(typeof(Comptabilisater), nameof(Load))),
+                new(OpCodes.Call, Method(typeof(Compatibilizer), nameof(Load))),
                 new(OpCodes.Ret),
             });
 
@@ -42,10 +41,10 @@ namespace SSMenuSystem.Patchs.ComptabiliserPatchs
             if (!Plugin.StaticConfig.ComptabilitySystem.ComptabilityEnabled)
                 return;
             Assembly assembly = Assembly.GetCallingAssembly();
-            Log.Debug(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name, Plugin.StaticConfig.Debug);
+            Log.Debug(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name);
             if (LockedAssembly.Contains(assembly) || assembly == typeof(ReferenceHub).Assembly)
             {
-                Log.Debug("Assembly is locked or is a part of base game. Skipping...", Plugin.StaticConfig.Debug);
+                Log.Debug("Assembly is locked or is a part of base game. Skipping...");
                 return;
             }
 
@@ -78,14 +77,20 @@ namespace SSMenuSystem.Patchs.ComptabiliserPatchs
                 menu.Name = menu.OverrideSettings.First().Label;
                 menu.OverrideSettings = menu.OverrideSettings.Skip(1).ToArray();
             }
+
+#if EXILED || NWAPI
             else if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
                 menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
-            else if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginHandler> plugin))
+            else if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginAPI.Core.PluginHandler> plugin))
                 menu.Name = plugin.First().Value.PluginName;
+#else
+            else if (LabApi.Loader.PluginLoader.Plugins.Any(x => x.Value == assembly))
+                menu.Name = LabApi.Loader.PluginLoader.Plugins.First(x => x.Value == assembly).Key.Name;
+#endif
 
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {
-                Log.Warning($"assembly {name} tried to register by compatibilisation menu {menu.Name} but a menu already exist with this name. using assembly name...");
+                Log.Warn($"assembly {name} tried to register by compatibilisation menu {menu.Name} but a menu already exist with this name. using assembly name...");
                 menu.Name = name;
             }
 
