@@ -44,7 +44,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 4);
+        public override Version Version => new(2, 0, 5);
 
 #if EXILED
         /// <inheritdoc/>

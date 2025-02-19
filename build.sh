@@ -38,7 +38,7 @@ fi
 if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "46s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "47s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed Plugin.cs line 37 for version $VERSION (EXILED)"
     fi
@@ -46,6 +46,10 @@ if [ -n "$version" ] && [ -z "$debug" ]; then
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed SSMenuSystem-EXILED.nuspec line 6 for version $VERSION (EXILED)"
+    fi
+    sed -i "6s/.*/        <version>$VERSION-LABAPI-Beta<\/version>/" SSMenuSystem-LABAPI.nuspec
+    if [ $verbosity == "all" ]; then
+        echo "[VERBOSE/ALL]: changed SSMenuSystem-LABAPI.nuspec line 6 for version $VERSION (LABAPI)"
     fi
 
     sed -i "34s/.*/[assembly: AssemblyVersion(\"$VERSION\")]/" Properties/AssemblyInfo.cs
