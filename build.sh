@@ -1,9 +1,9 @@
 #bin/bash
 CONFIGURATIONS=(
-    "Release EXILED"
-    "Release NWAPI"
+    "EXILED"
+    "LABAPI"
 )
-VALID_ARGS=("build" "pack" "--version" "push" "draft"  "--push_nuget" "--verbosity")
+VALID_ARGS=("build" "pack" "--version" "push" "draft"  "--push_nuget" "--verbosity" "server_exiled" "server_labapi" "debug")
 PASS_ARGUMENTS=()
 
 verbosity="normal"
@@ -31,27 +31,21 @@ for ((i = 1; i < $# + 1; i++)); do
     fi
 done
 
-if [ -n "$version" ]; then
+if [ -n "$debug" ]; then
+    echo -e "DEBUG version activated. --version, --push_nuget, push, and draft is locked."
+fi
+
+if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "37s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "46s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed Plugin.cs line 37 for version $VERSION (EXILED)"
-    fi
-
-    sed -i "104s/.*/        [PluginAPI.Core.Attributes.PluginEntryPoint(\"SSMenuSystem\", \"$VERSION\", \"sync all plugins to one server specific with menus.\", \"sky\")]/" Plugin.cs
-    if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed Plugin.cs line 104 for version $VERSION (NWAPI)"
     fi
 
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed SSMenuSystem-EXILED.nuspec line 6 for version $VERSION (EXILED)"
-    fi
-
-    sed -i "6s/.*/        <version>$VERSION-NWAPI<\/version>/" SSMenuSystem-NWAPI.nuspec
-    if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed SSMenuSystem-NWAPI.nuspec line 6 for version $VERSION (NWAPI)"
     fi
 
     sed -i "34s/.*/[assembly: AssemblyVersion(\"$VERSION\")]/" Properties/AssemblyInfo.cs
@@ -64,6 +58,11 @@ fi
 
 if [ -n "$build" ]; then
     for CONFIG in "${CONFIGURATIONS[@]}"; do
+        if [ -n "$debug" ]; then
+            CONFIG="Debug $CONFIG"
+        else
+            CONFIG="Release $CONFIG"
+        fi
         if [ $verbosity == "all" ]; then
             msbuild "SSMenuSystem.csproj" /p:Configuration="$CONFIG"
         else
@@ -81,14 +80,39 @@ fi
 if [ -n "$pack" ]; then
     rm -rf "pack"
     mkdir "pack"
-    cp "bin/Release EXILED/SSMenuSystem-EXILED.dll" "pack/SSMenuSystem-EXILED.dll"
-    cp "bin/Release NWAPI/SSMenuSystem-NWAPI.dll" "pack/SSMenuSystem-NWAPI.dll"
+
+    if [ -z "$debug" ]; then
+        # copie des dépendances dans le dossier pack
+        cp "bin/Release EXILED/SSMenuSystem-EXILED.dll" "pack/SSMenuSystem-EXILED.dll"
+        cp "bin/Release LABAPI/SSMenuSystem-LABAPI.dll" "pack/SSMenuSystem-LABAPI.dll"
+    else
+        cp "bin/Debug EXILED/SSMenuSystem-EXILED.dll" "pack/SSMenuSystem-EXILED.dll"
+        cp "bin/Debug LABAPI/SSMenuSystem-LABAPI.dll" "pack/SSMenuSystem-LABAPI.dll"
+    fi
+
     cp "bin/Release EXILED/0Harmony.dll" "pack/0Harmony.dll"
-    nuget pack SSMenuSystem-EXILED.nuspec -Properties Configuration=Release -OutputDirectory "pack"
-    nuget pack SSMenuSystem-NWAPI.nuspec -Properties Configuration=Release -OutputDirectory "pack"
-    echo -e "\e[36m[INFO] Successfully packaged all packages into directory pack/.\e[0m"
+
+    # application des variables
+    cp "SSMenuSystem-EXILED.nuspec" "/tmp/SSMenuSystem-EXILED.nuspec"
+    cp "SSMenuSystem-LABAPI.nuspec" "/tmp/SSMenuSystem-LABAPI.nuspec"
+
+    sed -i "s#\$(PACKAGE_REF)#$EXILED_REFERENCES#g" SSMenuSystem-EXILED.nuspec
+    sed -i "s#\$(PACKAGE_REF)#$EXILED_REFERENCES#g" SSMenuSystem-LABAPI.nuspec
+
+    if [ -z "$debug" ]; then
+        nuget pack SSMenuSystem-EXILED.nuspec -Properties Configuration=Release -OutputDirectory "pack"
+        nuget pack SSMenuSystem-LABAPI.nuspec -Properties Configuration=Release -OutputDirectory "pack"
+    fi
+
+    cp "/tmp/SSMenuSystem-EXILED.nuspec" "SSMenuSystem-EXILED.nuspec"
+    cp "/tmp/SSMenuSystem-LABAPI.nuspec" "SSMenuSystem-LABAPI.nuspec"
+
+    rm "/tmp/SSMenuSystem-EXILED.nuspec"
+    rm "/tmp/SSMenuSystem-LABAPI.nuspec"
+
+    echo -e "\e[36m[INFO] Successfully packaged all dlls into directory pack/.\e[0m"
 fi
-if [ -n "$push" ]; then # push new version to github
+if [ -n "$push" ] && [ -z "$debug" ]; then # push new version to github
     if [ -z "$VERSION" ]; then
         echo -e "\e[31m[ERROR]: Version is not defined. You need to add \"--version\" \nExemple: ./build.sh push --version 3.0.0  \e[0m"
     else
@@ -105,7 +129,7 @@ if [ -n "$push" ]; then # push new version to github
         fi
     fi
 fi
-if [ -n "$draft" ]; then
+if [ -n "$draft" ] && [ -z "$debug" ]; then
     if [ -z "$VERSION" ]; then
         echo -e "\e[31m[ERROR]: Version is not defined. You need to add \"--version\" \nExemple: ./build.sh draft --version 3.0.0 \e[0m"
     else
@@ -116,14 +140,14 @@ if [ -n "$draft" ]; then
         #LATEST_VERSION=$(gh release view --json tagName -q ".tagName" --repo skyfr0676/SSMenuSystem)
         if [ ! "$LATEST_VERSION" == "v$VERSION" ]; then
             gh release create v2.0.4 --draft --title "v$VERSION" --notes """## What's changed
-**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...V$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-NWAPI.dll ./pack/0Harmony.dll
+**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...V$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
             echo -e "\e[36m[INFO]: successfully created a release\e[0m"
         else
             echo -e "\e[33m[WARNING]: A release with this version already exist. \e[0m"
         fi
     fi
 fi
-if [ -n "$push_nuget" ]; then # push new version into the nuget repo
+if [ -n "$push_nuget" ] && [ -z "$debug" ]; then # push new version into the nuget repo
     if [ -z "$VERSION" ]; then
         echo -e "\e[31m[ERROR]: Version is not defined. You need to add \"--version\" \nExemple: ./build.sh --push_nuget API_KEY --version 3.0.0 \e[0m"
     else
@@ -131,6 +155,39 @@ if [ -n "$push_nuget" ]; then # push new version into the nuget repo
             echo -e "[VERBOSE]: API Key found: $push_nuget"
         fi
         nuget push "./pack/SSMenuSystem.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
-        nuget push "./pack/SSMenuSystem.$VERSION-NWAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
+        nuget push "./pack/SSMenuSystem.$VERSION-LABAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
     fi
 fi
+
+if [ -n "$server_exiled" ]; then
+    cp "pack/SSMenuSystem-EXILED.dll" "$HOME/.config/EXILED/Plugins/SSMenuSystem-EXILED.dll"
+    sed -i "2s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
+    sed -i "1s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    echo -e "\e[36m[INFO]: Activated EXILED version!\e[0m"
+
+elif [ -n "$server_labapi" ]; then
+    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/plugins/SSMenuSystem-LABAPI.dll"
+    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/dependencies/0Harmony.dll"
+
+    sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
+    sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    echo -e "\e[36m[INFO]: Activated LABAPI version!\e[0m"
+fi
+
+_auto_completion()
+{
+    local cur prev opts
+    COMPREPLY=()
+    cur="${COMP_WORDS[COMP_CWORD]}"
+    prev="${COMP_WORDS[COMP_CWORD-1]}"
+
+    opts="${VALID_ARGS[*]}"
+
+    if [[ "$cur" == --* ]]; then
+        COMPREPLY=( $(compgen -W "$(echo "$opts" | grep -- '--')" -- "$cur") )
+    else
+        COMPREPLY=( $(compgen -W "$opts" -- "$cur") )
+    fi
+}
+
+complete -F _auto_completion ./build.sh

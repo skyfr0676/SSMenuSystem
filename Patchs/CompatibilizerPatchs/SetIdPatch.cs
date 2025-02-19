@@ -6,7 +6,7 @@ using UnityEngine;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace SSMenuSystem.Patchs.CompatibiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingBase), nameof(ServerSpecificSettingBase.SetId))]
     internal class SetIdPatch

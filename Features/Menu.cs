@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reflection;
 using MEC;
-using PluginAPI.Core;
 using SSMenuSystem.Examples;
 using SSMenuSystem.Features.Interfaces;
 using SSMenuSystem.Features.Wrappers;
@@ -103,7 +102,7 @@ namespace SSMenuSystem.Features
             }
             try
             {
-                Log.Debug($"loading assembly {assembly.GetName().Name}...", Plugin.StaticConfig.Debug);
+                Log.Debug($"loading assembly {assembly.GetName().Name}...");
                 List<Menu> loadedMenus = new();
                 foreach (Type type in assembly.GetTypes())
                 {
@@ -138,7 +137,7 @@ namespace SSMenuSystem.Features
                         Log.Error(e.ToString());
                         Log.Error("menu path: " + menu.GetType().FullName);
 #else
-                        Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
+                        Log.Debug(e.ToString());
 #endif
                     }
                 }
@@ -152,7 +151,7 @@ namespace SSMenuSystem.Features
 #if DEBUG
                 Log.Error(e.ToString());
 #else
-                Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
+                Log.Debug(e.ToString());
 #endif
             }
         }
@@ -169,7 +168,7 @@ namespace SSMenuSystem.Features
             if (menu.MenuRelated == typeof(MainExample) && !Plugin.StaticConfig.EnableExamples)
                 return;
 
-            Log.Debug($"loading Server Specific menu {menu.Name}...", Plugin.StaticConfig.Debug);
+            Log.Debug($"loading Server Specific menu {menu.Name}...");
             if (CheckSameId(menu))
                 throw new ArgumentException($"another menu with id {menu.Id} is already registered. can't load {menu.Name}.");
             if (menu.Id >= 0)
@@ -210,7 +209,7 @@ namespace SSMenuSystem.Features
 
             LoadedMenus.Add(menu);
             menu.OnRegistered();
-            Log.Debug($"Server Specific menu {menu.Name} is now registered!", Plugin.StaticConfig.Debug);
+            Log.Debug($"Server Specific menu {menu.Name} is now registered!");
         }
 
         private static bool CheckSameId(Menu menu)
@@ -307,14 +306,14 @@ namespace SSMenuSystem.Features
             return mainMenu.ToArray();
         }
 
-        private List<ServerSpecificSettingBase> GetSettings(ReferenceHub hub, bool isDefault)
+        private List<ServerSpecificSettingBase> GetSettings(ReferenceHub hub)
         {
             List<ServerSpecificSettingBase> settings = new();
 
             if (Plugin.StaticConfig.AllowPinnedContent)
                 settings.AddRange(Pinned.Values.SelectMany(pin => pin));
 
-            if (!isDefault)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
             {
                 if (MenuRelated != null)
                     settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
@@ -324,12 +323,19 @@ namespace SSMenuSystem.Features
                         Plugin.GetTranslation().ReturnToMenu.ButtonText));
             }
 
-            if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
-                settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle.Label, hint:Plugin.GetTranslation().SubMenuTitle.Hint));
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+                settings.Add(new SSGroupHeader(Name));
+            else
+            {
+                if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
+                    settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle.Label, hint: Plugin.GetTranslation().SubMenuTitle.Hint));
+            }
+
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
-            settings.Add(new SSGroupHeader(Name, false, Description));
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+                settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
                 assemblyMenu.ActuallySendedToClient.TryGetValue(hub, out ServerSpecificSettingBase[] overrideSettings) && overrideSettings != null)
@@ -425,37 +431,24 @@ namespace SSMenuSystem.Features
         internal static void LoadForPlayer(ReferenceHub hub, Menu menu)
         {
             GetCurrentPlayerMenu(hub)?.ProperlyDisable(hub);
-            Log.Debug("try loading " + (menu?.Name ?? "main menu") + " for player " + hub.nicknameSync.MyNick, Plugin.StaticConfig.Debug);
-
-            if (!menu?.CheckAccess(hub) ?? true)
+            Log.Debug("try loading " + (menu?.Name ?? "main menu") + " for player " + hub.nicknameSync.MyNick);
+            if (menu != null && !menu.CheckAccess(hub))
                 menu = null;
+
+            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            {
+                menu = Menus.First(x => x.CheckAccess(hub) && x.MenuRelated == null);
+                Log.Debug($"triggered The only menu registered: {menu.Name}.");
+            }
 
             if (menu == null)
             {
-                if (LoadedMenus.Count(x => x.CheckAccess(hub)) == 1 && !Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne
-#if RELEASE
-                                                                    && false
-#endif
-                                                                    )
-                {
-                    Menu m = LoadedMenus.First(x => x.CheckAccess(hub));
-                    List<ServerSpecificSettingBase> s = m.GetSettings(hub, true);
-                    s.AddRange(GetGlobalKeybindings(hub, m));
-                    MenuSync[hub] = m;
-                    if (!m.SettingsSync.ContainsKey(hub))
-                    {
-                        Timing.RunCoroutine(Parameters.Sync(hub, m, s.ToArray()));
-                    }
-                    m.ProperlyEnable(hub);
-                    return;
-                }
-
                 Utils.SendToPlayer(hub, null, GetMainMenu(hub));
                 MenuSync[hub] = null;
                 return;
             }
 
-            List<ServerSpecificSettingBase> settings = menu.GetSettings(hub, false);
+            List<ServerSpecificSettingBase> settings = menu.GetSettings(hub);
             settings.AddRange(GetGlobalKeybindings(hub, menu));
             MenuSync[hub] = menu;
 

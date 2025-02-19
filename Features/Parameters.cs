@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using MEC;
-using PluginAPI.Core;
 using SSMenuSystem.Features.Interfaces;
 using UserSettings.ServerSpecific;
 
@@ -59,11 +58,11 @@ namespace SSMenuSystem.Features
             {
                 if (!menu.CheckAccess(hub))
                 {
-                    Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.", Plugin.StaticConfig.Debug);
+                    Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.");
                     continue;
                 }
 
-                Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name} {(menu.MenuRelated != null ? $"SubMenu of {Menu.GetMenu(menu.MenuRelated).Name} ({menu.MenuRelated.Name})" : string.Empty)}.", Plugin.StaticConfig.Debug);
+                Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name} {(menu.MenuRelated != null ? $"SubMenu of {Menu.GetMenu(menu.MenuRelated).Name} ({menu.MenuRelated.Name})" : string.Empty)}.");
                 foreach (ServerSpecificSettingBase t in menu.Settings)
                 {
                     if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
@@ -108,24 +107,20 @@ namespace SSMenuSystem.Features
                 sendSettings.Clear();
                 SyncCache[hub].Clear();
                 Log.Debug(
-                    $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.", Plugin.StaticConfig.Debug);
+                    $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
             }
             SyncCache.Remove(hub);
 
             Log.Debug("Hub Synced parameters. Stat of his cache: " +
-                      (SyncCache.ContainsKey(hub) ? "active" : "disabled"), Plugin.StaticConfig.Debug);
+                      (SyncCache.ContainsKey(hub) ? "active" : "disabled"));
 
             if (Menu.Menus.Where(x => x.CheckAccess(hub)).IsEmpty())
             {
-                Log.Warning("no valid menu found for " + hub.nicknameSync.MyNick + ".");
+                Log.Warn("no valid menu found for " + hub.nicknameSync.MyNick + ".");
                 yield break;
             }
 
-            // ReSharper disable once ConditionIsAlwaysTrueOrFalse // TODO: remove false
-            if ((Plugin.StaticConfig.ForceMainMenuEventIfOnlyOne && false) || Menu.Menus.Count(x => x.CheckAccess(hub)) > 1)
-                Menu.LoadForPlayer(hub, null);
-            else
-                Menu.LoadForPlayer(hub, Menu.Menus.First());
+            Menu.LoadForPlayer(hub, null);
         }
 
         /// <summary>
@@ -175,11 +170,11 @@ namespace SSMenuSystem.Features
 
             if (!menu.CheckAccess(hub))
             {
-                Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.", Plugin.StaticConfig.Debug);
+                Log.Debug(hub.nicknameSync.MyNick + " don't have access to " + menu.Name + ". Skipping.");
                 yield break;
             }
 
-            Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name}", Plugin.StaticConfig.Debug);
+            Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name}");
             foreach (ServerSpecificSettingBase t in menu.Settings)
             {
                 if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
@@ -223,7 +218,7 @@ namespace SSMenuSystem.Features
             sendSettings.Clear();
             SyncCache.Remove(hub);
             Log.Debug(
-                $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.", Plugin.StaticConfig.Debug);
+                $"synced settings for {hub.nicknameSync.MyNick} to the menu {menu.Name}. {menu.InternalSettingsSync[hub].Count} settings have been synced.");
             Utils.SendToPlayer(hub, menu, toSendWhenEnded);
         }
     }

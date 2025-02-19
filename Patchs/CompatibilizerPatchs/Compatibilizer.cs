@@ -11,7 +11,7 @@ using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 using Log = SSMenuSystem.Features.Log;
 
-namespace SSMenuSystem.Patchs.CompatibiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Setter)]
     internal static class Compatibilizer
@@ -77,16 +77,10 @@ namespace SSMenuSystem.Patchs.CompatibiliserPatchs
                 menu.Name = menu.OverrideSettings.First().Label;
                 menu.OverrideSettings = menu.OverrideSettings.Skip(1).ToArray();
             }
-
-#if EXILED || NWAPI
-            else if (PluginAPI.Loader.AssemblyLoader.Plugins.Any(x => x.Value.Any(x => x.Value.PluginName == "Exiled Loader")) && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
-                menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
-            else if (PluginAPI.Loader.AssemblyLoader.Plugins.TryGetValue(assembly, out Dictionary<Type, PluginAPI.Core.PluginHandler> plugin))
-                menu.Name = plugin.First().Value.PluginName;
-#else
             else if (LabApi.Loader.PluginLoader.Plugins.Any(x => x.Value == assembly))
                 menu.Name = LabApi.Loader.PluginLoader.Plugins.First(x => x.Value == assembly).Key.Name;
-#endif
+            else if (LabApi.Loader.PluginLoader.Plugins.Any(x => x.Key.Name == "Exiled Loader") && Exiled.Loader.Loader.Plugins.Any(x => x.Assembly == assembly))
+                menu.Name = Exiled.Loader.Loader.Plugins.First(x => x.Assembly == assembly).Name;
 
             if (Menu.Menus.Any(x => x.Name == menu.Name))
             {

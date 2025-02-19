@@ -3,14 +3,14 @@
     <metadata>
         <id>SSMenuSystem</id>
         <title>SS Menu System</title>
-        <version>2.0.4-NWAPI</version>
+        <version>2.0.4-LABAPI-BETA</version>
         <authors>Sky</authors>
         <owners>Sky</owners>
         <copyright>Copyright © Sky 2025</copyright>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <repository type="Git" url="https://github.com/skyfr0676/SSMenuSystem" />
         <projectUrl>https://github.com/skyfr0676/SSMenuSystem</projectUrl>
-        <description>An api that add a menu system into SCP: Secret Laboratory. Builded with EXILED and NWAPI separated.</description>
+        <description>An api that add a menu system into SCP: Secret Laboratory. Builded with EXILED, NWAPI and LABAPI separated.</description>
         <readme>docs\README.md</readme>
 
         <dependencies>
@@ -24,8 +24,8 @@
         <file src="$(PACKAGE_REF)/Assembly-CSharp-Publicized.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/NorthwoodLib.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/PluginAPI.dll" target="lib\net48" />
-        <file src="bin/Release EXILED/SSMenuSystem-EXILED.dll" target="lib\net48" />
-        <file src="bin/Release EXILED/SSMenuSystem-EXILED.xml" target="lib\net48" />
+        <file src="bin/Release LABAPI/SSMenuSystem-LABAPI.dll" target="lib\net48" />
+        <file src="bin/Release LABAPI/SSMenuSystem-LABAPI.xml" target="lib\net48" />
         <file src="$(PACKAGE_REF)/Unity.TextMeshPro.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/UnityEngine.CoreModule.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/Mirror.dll" target="lib\net48" />

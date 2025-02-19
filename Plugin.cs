@@ -1,13 +1,20 @@
+using System.Linq;
+using System.Reflection;
 using HarmonyLib;
+using LabApi.Events.CustomHandlers;
 using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
-#if EXILED
+using Log = SSMenuSystem.Features.Log;
+#if EXILED || LABAPI
 using System;
+#endif
+#if EXILED
 using Exiled.API.Features;
 #elif NWAPI
 using PluginAPI.Core;
+#elif LABAPI
+using LabApi.Loader.Features.Plugins;
 #endif
-using Log = PluginAPI.Core.Log;
 
 namespace SSMenuSystem
 {
@@ -16,11 +23,14 @@ namespace SSMenuSystem
     /// </summary>
     // ReSharper disable once ClassNeverInstantiated.Global
     public class Plugin
+#if EXILED || LABAPI
+        : Plugin<Config
 #if EXILED
-        : Plugin<Config, Translation>
+        , Translation
+#endif
+        >
 #endif
     {
-#if EXILED
         /// <summary>
         /// Gets the author of the plugin.
         /// </summary>
@@ -36,6 +46,7 @@ namespace SSMenuSystem
         /// </summary>
         public override Version Version => new(2, 0, 4);
 
+#if EXILED
         /// <inheritdoc/>
         public override Version RequiredExiledVersion => new(9, 5, 0);
 
@@ -43,7 +54,13 @@ namespace SSMenuSystem
         /// Gets the prefix used for configs.
         /// </summary>
         public override string Prefix => "ss_menu_system";
+#elif LABAPI
 
+        /// <inheritdoc />
+        public override string Description => "Convert all Server-Specifics Settings created by plugins into menu. Help for multi-plugin comptability and organization.";
+
+        /// <inheritdoc />
+        public override Version RequiredApiVersion => new(1, 0, 0);
 #endif
 
         private static Config _staticConfig;
@@ -90,19 +107,10 @@ namespace SSMenuSystem
             base.OnDisabled();
         }
 
-#elif NWAPI
+#elif LABAPI
 
-        /// <summary>
-        /// Plugin configuration.
-        /// </summary>
-        [PluginAPI.Core.Attributes.PluginConfig("config.yml")]
-        public Config Config;
-
-        /// <summary>
-        /// Declared when plugin is started.
-        /// </summary>
-        [PluginAPI.Core.Attributes.PluginEntryPoint("SSMenuSystem", "2.0.4", "sync all plugins to one server specific with menus.", "sky")]
-        public void OnEnabled()
+        /// <inheritdoc />
+        public override void Enable()
         {
             if (Config == null)
             {
@@ -113,9 +121,15 @@ namespace SSMenuSystem
             if (!Config.IsEnabled)
                 return;
 
-            PluginAPI.Events.EventManager.RegisterEvents<EventHandler>(this);
+            CustomHandlersManager.RegisterEventsHandler(new EventHandler());
             GenericEnable();
-            Log.Info("ServerSpecificSyncer@1.0.0 has been enabled!");
+            Log.Info($"{Name}@{Version} has been enabled!");
+        }
+
+        /// <inheritdoc />
+        public override void Disable()
+        {
+
         }
 #endif
         private void GenericEnable()
@@ -127,7 +141,7 @@ namespace SSMenuSystem
             Menu.RegisterAll();
 
 #if DEBUG
-            Log.Warning("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
+            Log.Warn("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
             Menu.RegisterPin(new[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
             StaticConfig.Debug = true;
 #endif
@@ -143,7 +157,7 @@ namespace SSMenuSystem
         {
 #if EXILED
             return Instance?.Translation;
-#elif NWAPI
+#else
             return StaticConfig?.Translation;
 #endif
         }

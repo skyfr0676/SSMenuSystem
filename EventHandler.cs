@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using PluginAPI.Core;
+using LabApi.Events.Arguments.PlayerEvents;
+using LabApi.Events.CustomHandlers;
 using SSMenuSystem.Features;
 using SSMenuSystem.Features.Wrappers;
 using UserSettings.ServerSpecific;
 using MEC;
-#if EXILED
 using Exiled.Events.EventArgs.Player;
-#elif NWAPI
-using PluginAPI.Core.Attributes;
-using PluginAPI.Enums;
-#endif
-using MEC;
+using Log = SSMenuSystem.Features.Log;
 
 namespace SSMenuSystem
 {
+    // ReSharper disable once ClassNeverInstantiated.Global
     internal class EventHandler
+    #if LABAPI
+     : CustomEventsHandler
+    #endif
     {
 #if EXILED
         internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
@@ -29,17 +29,14 @@ namespace SSMenuSystem
                 Menu.LoadForPlayer(hub, Menu.GetCurrentPlayerMenu(hub));
         }
 
-#elif NWAPI
-        [PluginEvent(ServerEventType.PlayerJoined)]
-        public void Verified(Player player) => Timing.RunCoroutine(Parameters.SyncAll(player.ReferenceHub));
-
-        [PluginEvent(ServerEventType.PlayerLeft)]
-        public void Left(Player player) => Menu.DeletePlayer(player.ReferenceHub);
+#else
+        public override void OnPlayerJoined(PlayerJoinedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
+        public override void OnPlayerLeft(PlayerLeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
+        public override void OnPlayerGroupChanged(PlayerGroupChangedEventArgs ev) =>
+            SyncChangedGroup(ev.Player.ReferenceHub);
 #endif
 
-
-        // ReSharper disable once MemberCanBePrivate.Global
-        internal static void SyncChangedGroup(ReferenceHub hub)
+        private static void SyncChangedGroup(ReferenceHub hub)
         {
             Timing.CallDelayed(0.1f, () =>
             {
@@ -60,7 +57,7 @@ namespace SSMenuSystem
                 if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
-                    Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.", Plugin.StaticConfig.Debug);
+                    Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.");
                     return;
                 }
 
@@ -84,7 +81,7 @@ namespace SSMenuSystem
                 Menu menu = Menu.GetCurrentPlayerMenu(hub);
                 if (!menu?.CheckAccess(hub) ?? false)
                 {
-                    Log.Warning($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} which is disabled for him.");
+                    Log.Warn($"{hub.nicknameSync.MyNick} tried to interact with menu {menu.Name} which is disabled for him.");
                     Menu.LoadForPlayer(hub, null);
                     return;
                 }
@@ -158,7 +155,7 @@ namespace SSMenuSystem
 #if DEBUG
                 Log.Error(e.ToString());
 #else
-                Log.Debug(e.ToString(), Plugin.StaticConfig.Debug);
+                Log.Debug(e.ToString());
 #endif
                 if (Plugin.StaticConfig.ShowErrorToClient)
                 {

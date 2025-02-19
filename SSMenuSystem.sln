@@ -4,19 +4,19 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SSMenuSystem", "SSMenuSyste
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Release NWAPI|Any CPU = Release NWAPI|Any CPU
 		Release EXILED|Any CPU = Release EXILED|Any CPU
 		Debug EXILED|Any CPU = Debug EXILED|Any CPU
-		Debug NWAPI|Any CPU = Debug NWAPI|Any CPU
+		Release LABAPI|Any CPU = Release LABAPI|Any CPU
+		Debug LABAPI|Any CPU = Debug LABAPI|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release NWAPI|Any CPU.ActiveCfg = Release NWAPI|Any CPU
-		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release NWAPI|Any CPU.Build.0 = Release NWAPI|Any CPU
 		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release EXILED|Any CPU.ActiveCfg = Release EXILED|Any CPU
 		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release EXILED|Any CPU.Build.0 = Release EXILED|Any CPU
 		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug EXILED|Any CPU.ActiveCfg = Debug EXILED|Any CPU
 		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug EXILED|Any CPU.Build.0 = Debug EXILED|Any CPU
-		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug NWAPI|Any CPU.ActiveCfg = Debug NWAPI|Any CPU
-		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug NWAPI|Any CPU.Build.0 = Debug NWAPI|Any CPU
+		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release LABAPI|Any CPU.ActiveCfg = Release LABAPI|Any CPU
+		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Release LABAPI|Any CPU.Build.0 = Release LABAPI|Any CPU
+		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug LABAPI|Any CPU.ActiveCfg = Debug LABAPI|Any CPU
+		{523A1ABE-6297-47F1-8075-32E523CA5FD0}.Debug LABAPI|Any CPU.Build.0 = Debug LABAPI|Any CPU
 	EndGlobalSection
 EndGlobal

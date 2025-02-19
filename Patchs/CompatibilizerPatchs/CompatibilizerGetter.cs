@@ -9,7 +9,7 @@ using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
 
-namespace SSMenuSystem.Patchs.CompatibiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 {
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.DefinedSettings), MethodType.Getter)]
     internal class CompatibilizerGetter
@@ -21,7 +21,7 @@ namespace SSMenuSystem.Patchs.CompatibiliserPatchs
 
             newInstructions.InsertRange(0, new CodeInstruction[]
             {
-                // ComptabilisaterGetter.Get(Assembly.GetCallingAssembly());
+                // CompatibilizerGetter.Get(Assembly.GetCallingAssembly());
                 new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
                 new(OpCodes.Call, Method(typeof(CompatibilizerGetter), nameof(Get))),
                 new(OpCodes.Ret),

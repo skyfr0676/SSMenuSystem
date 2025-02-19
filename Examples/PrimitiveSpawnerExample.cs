@@ -11,7 +11,7 @@ using SSMenuSystem.Features.Wrappers;
 using UnityEngine;
 using UserSettings.ServerSpecific;
 using Utils.NonAllocLINQ;
-using Log = PluginAPI.Core.Log;
+using Log = SSMenuSystem.Features.Log;
 
 namespace SSMenuSystem.Examples
 {

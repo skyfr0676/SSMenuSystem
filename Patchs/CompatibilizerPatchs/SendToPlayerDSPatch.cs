@@ -3,7 +3,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using UserSettings.ServerSpecific;
 
-namespace SSMenuSystem.Patchs.CompatibiliserPatchs
+namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 {
 
     [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), new[] { typeof(ReferenceHub) })]

@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Reflection;
-using PluginAPI.Core;
 using UserSettings.ServerSpecific;
 
 namespace SSMenuSystem.Features

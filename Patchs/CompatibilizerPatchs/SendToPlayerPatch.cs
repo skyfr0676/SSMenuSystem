@@ -1,7 +1,4 @@
-﻿#if NWAPI
-using PluginAPI.Core;
-#endif
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
@@ -105,7 +102,7 @@ namespace SSMenuSystem.Patchs.CompatibilizerPatchs
             if (menu == null)
             {
                 Log.Warn($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
-                Compabilisater.Load(Array.Empty<ServerSpecificSettingBase>());
+                Compatibilizer.Load(Array.Empty<ServerSpecificSettingBase>());
                 menu = Features.Utils.GetMenu(assembly);
             }
 
