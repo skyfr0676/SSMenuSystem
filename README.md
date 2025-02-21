@@ -8,9 +8,9 @@
 ![Forks](https://img.shields.io/github/forks/skyfr0676/SSMenuSystem.svg?style=for-the-badge)
 ![Stars](https://img.shields.io/github/stars/skyfr0676/SSMenuSystem?style=for-the-badge)
 ![](https://img.shields.io/badge/.NET-4.8-512BD4?logo=dotnet&logoColor=fff&style=for-the-badge)<br/>
-SSMenuSystem is a framework that add SS Plugin comptability and a menu system.
+SSMenuSystem is a framework that add SS Inter-Plugin comptability and a complete menu system.
 
-## how to use ServerSpecificSyncer as:
+## how to use SSMenuSystem as:
 ### Server Owner
 To install `SSMenuSystem` on your server, all you need is:
 - For **EXILED**:
