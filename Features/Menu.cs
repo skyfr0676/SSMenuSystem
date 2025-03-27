@@ -259,7 +259,13 @@ namespace SSMenuSystem.Features
         /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
-            /// <summary>
+        /// <summary>
+        /// Gets all settings sent to the refHub. (only in the case of one GetSettings is not null or empty)
+        ///
+        /// </summary>
+        internal readonly Dictionary<ReferenceHub, ServerSpecificSettingBase[]> SentSettings = new();
+
+        /// <summary>
         /// Gets the Hash of menu, based on <see cref="Name"/>. Mainly used to seperate menu settings for client.
         /// </summary>
         public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
@@ -346,13 +352,25 @@ namespace SSMenuSystem.Features
                 return settings;
             }
 
-            if (Settings == null || Settings.IsEmpty())
+            ServerSpecificSettingBase[] oSettings = GetSettingsFor(hub);
+
+            if ((Settings == null || Settings.IsEmpty()) && (oSettings == null || oSettings.IsEmpty()))
             {
                 settings.RemoveAt(settings.Count - 1);
                 return settings;
             }
 
-            ServerSpecificSettingBase[] oSettings = GetSettingsFor(hub);
+            if (Settings != null)
+            {
+                foreach (ServerSpecificSettingBase t in Settings)
+                {
+                    if (t is ISetting setting)
+                        settings.Add(setting.Base);
+                    else
+                        settings.Add(t);
+                }
+            }
+
             if (oSettings != null && !oSettings.IsEmpty())
             {
                 foreach (ServerSpecificSettingBase t in oSettings)
@@ -362,15 +380,12 @@ namespace SSMenuSystem.Features
                     else
                         settings.Add(t);
                 }
-            }
 
-            foreach (ServerSpecificSettingBase t in Settings)
-            {
-                if (t is ISetting setting)
-                    settings.Add(setting.Base);
-                else
-                    settings.Add(t);
+                SentSettings[hub] = settings.ToArray();
             }
+            else
+                SentSettings.Remove(hub);
+
             return settings;
         }
 

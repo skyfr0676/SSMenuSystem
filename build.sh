@@ -143,7 +143,8 @@ if [ -n "$draft" ] && [ -z "$debug" ]; then
         fi
         #LATEST_VERSION=$(gh release view --json tagName -q ".tagName" --repo skyfr0676/SSMenuSystem)
         if [ ! "$LATEST_VERSION" == "v$VERSION" ]; then
-            gh release create v2.0.4 --draft --title "v$VERSION" --notes """## What's changed
+            gh release create "v$VERSION" --draft --title "v$VERSION" --notes """## What's changed
+
 **Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...V$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
             echo -e "\e[36m[INFO]: successfully created a release\e[0m"
         else
@@ -159,7 +160,7 @@ if [ -n "$push_nuget" ] && [ -z "$debug" ]; then # push new version into the nug
             echo -e "[VERBOSE]: API Key found: $push_nuget"
         fi
         nuget push "./pack/SSMenuSystem.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
-        nuget push "./pack/SSMenuSystem.$VERSION-LABAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
+        nuget push "./pack/SSMenuSystem.$VERSION-LABAPI-Beta.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
     fi
 fi
 

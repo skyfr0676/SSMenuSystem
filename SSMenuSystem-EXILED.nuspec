@@ -15,7 +15,7 @@
 
         <dependencies>
             <group targetFramework="net48">
-                <dependency id="ExMod.Exiled" version="[9.5.0]" />
+                <dependency id="ExMod.Exiled" version="[9.6.0-beta3]" />
             </group>
         </dependencies>
 

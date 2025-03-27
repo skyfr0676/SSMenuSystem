@@ -111,11 +111,16 @@ namespace SSMenuSystem
                         Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
                     else
                     {
-                        ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
-                        if (menu.SettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
-                            menu.SettingsSync[hub][menu.SettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
+                        Log.Debug($"non mais aze => {ss}");
+
+                        if (menu.InternalSettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
+                            menu.InternalSettingsSync[hub][menu.InternalSettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
                         else
-                            menu.SettingsSync[hub].Add(ss);
+                            menu.InternalSettingsSync[hub].Add(ss);
+                        ServerSpecificSettingBase s =
+                            !menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings)
+                            ? menu.Settings.FirstOrDefault(b => b.SettingId == ss.SettingId)
+                            : customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId);
                         switch (s)
                         {
                             case Button wBtn:
