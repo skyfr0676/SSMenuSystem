@@ -73,7 +73,7 @@ namespace SSMenuSystem.Features
         /// </summary>
         public static void QueueOrRegister()
         {
-            if (Plugin.StaticConfig is null)
+            if (Plugin.Instance.Config is null)
             {
                 Assembly assembly = Assembly.GetCallingAssembly();
                 if (!_waitingAssemblies.Contains(assembly))
@@ -94,7 +94,7 @@ namespace SSMenuSystem.Features
         /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         private static void Register(Assembly assembly)
         {
-            if (Plugin.StaticConfig is null) // plugin is not loaded.
+            if (Plugin.Instance.Config is null) // plugin is not loaded.
             {
                 if (!_waitingAssemblies.Contains(assembly))
                     _waitingAssemblies.Enqueue(assembly);
@@ -109,7 +109,7 @@ namespace SSMenuSystem.Features
                     if (type == typeof(AssemblyMenu)) // only used for comptability (throw error when loaded)
                         continue;
 
-                    if (type == typeof(MainExample) && (!Plugin.StaticConfig.EnableExamples))
+                    if (type == typeof(MainExample) && (!Plugin.Instance.Config.EnableExamples))
                         continue;
 
                     if (type.IsAbstract || type.IsInterface)
@@ -165,7 +165,7 @@ namespace SSMenuSystem.Features
         {
             if (menu == null)
                 return;
-            if (menu.MenuRelated == typeof(MainExample) && !Plugin.StaticConfig.EnableExamples)
+            if (menu.MenuRelated == typeof(MainExample) && !Plugin.Instance.Config.EnableExamples)
                 return;
 
             Log.Debug($"loading Server Specific menu {menu.Name}...");
@@ -294,7 +294,7 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> mainMenu = new();
 
-            if (Plugin.StaticConfig.AllowPinnedContent)
+            if (Plugin.Instance.Config.AllowPinnedContent)
                 mainMenu.AddRange(Pinned.Values.SelectMany(pin => pin));
 
             if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
@@ -316,10 +316,10 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> settings = new();
 
-            if (Plugin.StaticConfig.AllowPinnedContent)
+            if (Plugin.Instance.Config.AllowPinnedContent)
                 settings.AddRange(Pinned.Values.SelectMany(pin => pin));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
             {
                 if (MenuRelated != null)
                     settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
@@ -329,7 +329,7 @@ namespace SSMenuSystem.Features
                         Plugin.GetTranslation().ReturnToMenu.ButtonText));
             }
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name));
             else
             {
@@ -340,7 +340,7 @@ namespace SSMenuSystem.Features
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
@@ -450,7 +450,7 @@ namespace SSMenuSystem.Features
             if (menu != null && !menu.CheckAccess(hub))
                 menu = null;
 
-            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
             {
                 menu = Menus.First(x => x.CheckAccess(hub) && x.MenuRelated == null);
                 Log.Debug($"triggered The only menu registered: {menu.Name}.");

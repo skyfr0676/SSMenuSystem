@@ -5,14 +5,10 @@ using LabApi.Events.CustomHandlers;
 using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using Log = SSMenuSystem.Features.Log;
-#if EXILED || LABAPI
 using System;
-#endif
 #if EXILED
 using Exiled.API.Features;
-#elif NWAPI
-using PluginAPI.Core;
-#elif LABAPI
+#else
 using LabApi.Loader.Features.Plugins;
 #endif
 
@@ -22,14 +18,11 @@ namespace SSMenuSystem
     /// Load the plugin to send datas to player
     /// </summary>
     // ReSharper disable once ClassNeverInstantiated.Global
-    public class Plugin
-#if EXILED || LABAPI
-        : Plugin<Config
+    public class Plugin : Plugin<Config
 #if EXILED
         , Translation
 #endif
         >
-#endif
     {
         /// <summary>
         /// Gets the author of the plugin.
@@ -54,7 +47,7 @@ namespace SSMenuSystem
         /// Gets the prefix used for configs.
         /// </summary>
         public override string Prefix => "ss_menu_system";
-#elif LABAPI
+#else
 
         /// <inheritdoc />
         public override string Description => "Convert all Server-Specifics Settings created by plugins into menu. Help for multi-plugin comptability and organization.";
@@ -62,13 +55,6 @@ namespace SSMenuSystem
         /// <inheritdoc />
         public override Version RequiredApiVersion => new(1, 0, 0);
 #endif
-
-        private static Config _staticConfig;
-
-        /// <summary>
-        /// Gets the <see cref="Config"/> instance. Can be null if the plugin is not enabled.
-        /// </summary>
-        public static Config StaticConfig => _staticConfig ??= Instance?.Config;
 
         /// <summary>
         /// Gets the <see cref="Plugin"/> instance. can be null if the plugin is not enabled.
@@ -107,7 +93,7 @@ namespace SSMenuSystem
             base.OnDisabled();
         }
 
-#elif LABAPI
+#else
 
         /// <inheritdoc />
         public override void Enable()
@@ -143,7 +129,7 @@ namespace SSMenuSystem
 #if DEBUG
             Log.Warn("EXPERIMENTAL VERSION IS ACTIVATED. BE AWARD OF BUGS CAN BE DONE. NOT STABLE VERSION.");
             Menu.RegisterPin(new[]{new SSTextArea(null, "this pinned content is related to the called assembly\nwith Menu.UnregisterPin() you just unregister ONLY pinned settings by the called assembly.", SSTextArea.FoldoutMode.CollapsedByDefault, "This is a pinned content.")});
-            StaticConfig.Debug = true;
+            Instance.Config!.Debug = true;
 #endif
 
             ServerSpecificSettingsSync.ServerOnSettingValueReceived += EventHandler.OnReceivingInput;
@@ -158,7 +144,7 @@ namespace SSMenuSystem
 #if EXILED
             return Instance?.Translation;
 #else
-            return StaticConfig?.Translation;
+            return Instance.Config?.Translation;
 #endif
         }
     }
