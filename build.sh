@@ -38,9 +38,9 @@ fi
 if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "47s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "40s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed Plugin.cs line 37 for version $VERSION (EXILED)"
+        echo "[VERBOSE/ALL]: changed Plugin.cs line 40 for version $VERSION."
     fi
 
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
@@ -137,7 +137,7 @@ if [ -n "$draft" ] && [ -z "$debug" ]; then
     if [ -z "$VERSION" ]; then
         echo -e "\e[31m[ERROR]: Version is not defined. You need to add \"--version\" \nExemple: ./build.sh draft --version 3.0.0 \e[0m"
     else
-        LATEST_VERSION=$(gh release list --repo skyfr0676/SSMenuSystem --json tagName,isDraft -q 'sort_by(.createdAt)[0].tagName')
+        LATEST_VERSION=$(gh api repos/skyfr0676/SSMenuSystem/releases --jq '[.[] | select(.draft == false)][0].tag_name')
         if [ -n "$VERBOSE" ]; then
             echo -e "[VERBOSE]: Latest version found: $LATEST_VERSION"
         fi
@@ -145,7 +145,7 @@ if [ -n "$draft" ] && [ -z "$debug" ]; then
         if [ ! "$LATEST_VERSION" == "v$VERSION" ]; then
             gh release create "v$VERSION" --draft --title "v$VERSION" --notes """## What's changed
 
-**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...V$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
+**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...v$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
             echo -e "\e[36m[INFO]: successfully created a release\e[0m"
         else
             echo -e "\e[33m[WARNING]: A release with this version already exist. \e[0m"
