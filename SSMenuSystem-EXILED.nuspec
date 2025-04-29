@@ -25,7 +25,7 @@
         <!-- Project files -->
         <file src="$(PACKAGE_REF)/Assembly-CSharp-Publicized.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/NorthwoodLib.dll" target="lib\net48" />
-        <file src="$(PACKAGE_REF)/PluginAPI.dll" target="lib\net48" />
+        <file src="$(PACKAGE_REF)/LabApi.dll" target="lib\net48" />
         <file src="bin/Release EXILED/SSMenuSystem-EXILED.dll" target="lib\net48" />
         <file src="bin/Release EXILED/SSMenuSystem-EXILED.xml" target="lib\net48" />
         <file src="$(PACKAGE_REF)/Unity.TextMeshPro.dll" target="lib\net48" />
