@@ -47,7 +47,7 @@ if [ -n "$version" ] && [ -z "$debug" ]; then
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed SSMenuSystem-EXILED.nuspec line 6 for version $VERSION (EXILED)"
     fi
-    sed -i "6s/.*/        <version>$VERSION-LABAPI-Beta<\/version>/" SSMenuSystem-LABAPI.nuspec
+    sed -i "6s/.*/        <version>$VERSION-LABAPI<\/version>/" SSMenuSystem-LABAPI.nuspec
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed SSMenuSystem-LABAPI.nuspec line 6 for version $VERSION (LABAPI)"
     fi
@@ -160,22 +160,22 @@ if [ -n "$push_nuget" ] && [ -z "$debug" ]; then # push new version into the nug
             echo -e "[VERBOSE]: API Key found: $push_nuget"
         fi
         nuget push "./pack/SSMenuSystem.$VERSION-EXILED.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
-        nuget push "./pack/SSMenuSystem.$VERSION-LABAPI-Beta.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
+        nuget push "./pack/SSMenuSystem.$VERSION-LABAPI.nupkg" -Source https://api.nuget.org/v3/index.json -ApiKey "$push_nuget"
     fi
 fi
 
 if [ -n "$server_exiled" ]; then
     cp "pack/SSMenuSystem-EXILED.dll" "$HOME/.config/EXILED/Plugins/SSMenuSystem-EXILED.dll"
-    sed -i "2s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
-    sed -i "1s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    sed -i "2s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
+    sed -i "1s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
     echo -e "\e[36m[INFO]: Activated EXILED version!\e[0m"
 
 elif [ -n "$server_labapi" ]; then
-    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/plugins/SSMenuSystem-LABAPI.dll"
-    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/dependencies/0Harmony.dll"
+    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/plugins/SSMenuSystem-LABAPI.dll"
+    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/dependencies/0Harmony.dll"
 
-    sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
-    sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
+    sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
     echo -e "\e[36m[INFO]: Activated LABAPI version!\e[0m"
 fi
 
