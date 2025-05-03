@@ -3,7 +3,7 @@
     <metadata>
         <id>SSMenuSystem</id>
         <title>SS Menu System</title>
-        <version>2.0.4-LABAPI-BETA</version>
+        <version>2.0.6-LABAPI-Beta</version>
         <authors>Sky</authors>
         <owners>Sky</owners>
         <copyright>Copyright © Sky 2025</copyright>
@@ -23,7 +23,7 @@
         <!-- Project files -->
         <file src="$(PACKAGE_REF)/Assembly-CSharp-Publicized.dll" target="lib\net48" />
         <file src="$(PACKAGE_REF)/NorthwoodLib.dll" target="lib\net48" />
-        <file src="$(PACKAGE_REF)/PluginAPI.dll" target="lib\net48" />
+        <file src="$(PACKAGE_REF)/LabApi.dll" target="lib\net48" />
         <file src="bin/Release LABAPI/SSMenuSystem-LABAPI.dll" target="lib\net48" />
         <file src="bin/Release LABAPI/SSMenuSystem-LABAPI.xml" target="lib\net48" />
         <file src="$(PACKAGE_REF)/Unity.TextMeshPro.dll" target="lib\net48" />

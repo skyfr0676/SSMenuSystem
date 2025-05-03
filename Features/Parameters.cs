@@ -26,7 +26,7 @@ namespace SSMenuSystem.Features
             if (typeof(TSs).BaseType == typeof(ISetting))
             {
                 Log.Error(nameof(TSs) + " need to be of base type (example: Plaintext became SSPlaintextSetting).");
-                return default;
+                return null;
             }
 
             foreach (Menu menu in Menu.Menus.Where(x => x is TMenu))
@@ -38,7 +38,7 @@ namespace SSMenuSystem.Features
                 return t as TSs;
             }
 
-            return default;
+            return null;
         }
 
 

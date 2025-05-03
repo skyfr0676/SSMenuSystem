@@ -111,11 +111,14 @@ namespace SSMenuSystem
                         Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
                     else
                     {
-                        ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
-                        if (menu.SettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
-                            menu.SettingsSync[hub][menu.SettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
+                        if (menu.InternalSettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
+                            menu.InternalSettingsSync[hub][menu.InternalSettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
                         else
-                            menu.SettingsSync[hub].Add(ss);
+                            menu.InternalSettingsSync[hub].Add(ss);
+                        ServerSpecificSettingBase s =
+                            !menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings)
+                            ? menu.Settings.FirstOrDefault(b => b.SettingId == ss.SettingId)
+                            : customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId);
                         switch (s)
                         {
                             case Button wBtn:
@@ -157,11 +160,11 @@ namespace SSMenuSystem
 #else
                 Log.Debug(e.ToString());
 #endif
-                if (Plugin.StaticConfig.ShowErrorToClient)
+                if (Plugin.Instance.Config.ShowErrorToClient)
                 {
                     Features.Utils.SendToPlayer(hub, null, new ServerSpecificSettingBase[]
                     {
-                        new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.StaticConfig.ShowFullErrorToClient) && Plugin.StaticConfig.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
+                        new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.Instance.Config.ShowFullErrorToClient) && Plugin.Instance.Config.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
                         new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)
                     });
                 }
