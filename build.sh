@@ -38,9 +38,9 @@ fi
 if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "40s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "41s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed Plugin.cs line 40 for version $VERSION."
+        echo "[VERBOSE/ALL]: changed Plugin.cs line 41 for version $VERSION."
     fi
 
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec

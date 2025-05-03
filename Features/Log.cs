@@ -30,7 +30,7 @@ namespace SSMenuSystem.Features
         /// <param name="message">The message to be sent.</param>
         internal static void Debug(object message)
         {
-            if (Plugin.Instance.Config?.Debug ?? false)
+            if (Plugin.Instance?.Config?.Debug ?? false)
                 Send($"[SSMenuSystem] {message}", LogLevel.Debug, ConsoleColor.Green);
         }
 
@@ -41,7 +41,7 @@ namespace SSMenuSystem.Features
         /// <param name="message">The message to be sent.</param>
         internal static void Debug(string message)
         {
-            if (Plugin.Instance.Config?.Debug ?? false)
+            if (Plugin.Instance?.Config?.Debug ?? false)
                 Send($"[SSMenuSystem] {message}", LogLevel.Debug, ConsoleColor.Green);
         }
 

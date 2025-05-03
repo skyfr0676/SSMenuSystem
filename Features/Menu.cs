@@ -69,11 +69,11 @@ namespace SSMenuSystem.Features
         }
 
         /// <summary>
-        /// Calling assembly will be, loaded if SSSyncer is already initialized, or queued if not, and loaded when the plugin is initialized.
+        /// Calling assembly will be, loaded if SSMenuSystem is already initialized, or queued if not, and loaded when the plugin is initialized.
         /// </summary>
         public static void QueueOrRegister()
         {
-            if (Plugin.Instance.Config is null)
+            if (Plugin.Instance?.Config is null)
             {
                 Assembly assembly = Assembly.GetCallingAssembly();
                 if (!_waitingAssemblies.Contains(assembly))
@@ -94,7 +94,7 @@ namespace SSMenuSystem.Features
         /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         private static void Register(Assembly assembly)
         {
-            if (Plugin.Instance.Config is null) // plugin is not loaded.
+            if (Plugin.Instance?.Config is null) // plugin is not loaded.
             {
                 if (!_waitingAssemblies.Contains(assembly))
                     _waitingAssemblies.Enqueue(assembly);
@@ -450,7 +450,7 @@ namespace SSMenuSystem.Features
             if (menu != null && !menu.CheckAccess(hub))
                 menu = null;
 
-            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
+            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.Instance!.Config!.ForceMainMenuEvenIfOnlyOne)
             {
                 menu = Menus.First(x => x.CheckAccess(hub) && x.MenuRelated == null);
                 Log.Debug($"triggered The only menu registered: {menu.Name}.");

@@ -6,6 +6,7 @@ using SSMenuSystem.Features;
 using UserSettings.ServerSpecific;
 using Log = SSMenuSystem.Features.Log;
 using System;
+using JetBrains.Annotations;
 #if EXILED
 using Exiled.API.Features;
 #else
@@ -59,6 +60,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the <see cref="Plugin"/> instance. can be null if the plugin is not enabled.
         /// </summary>
+        [CanBeNull]
         public static Plugin Instance { get; private set; }
 
         private Harmony _harmony;
