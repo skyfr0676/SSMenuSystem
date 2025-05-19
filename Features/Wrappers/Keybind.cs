@@ -28,7 +28,7 @@ namespace SSMenuSystem.Features.Wrappers
             IsGlobal = isGlobal;
             Action = onUsed;
             Base = new SSKeybindSetting(id + Increment, label, suggestedKey, preventInteractionOnGui, hint);
-;        }
+        }
 
         /// <summary>
         /// Gets or Sets whether the <see cref="SSKeybindSetting"/> would be shown and enabled on all pages or not.

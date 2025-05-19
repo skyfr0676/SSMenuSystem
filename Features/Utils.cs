@@ -12,12 +12,13 @@ namespace SSMenuSystem.Features
             {
                 foreach (ServerSpecificSettingBase c in collection)
                 {
-                    if (c is SSGroupHeader && c.Label == Plugin.GetTranslation().GlobalKeybindingTitle.Label && c.HintDescription == Plugin.GetTranslation().GlobalKeybindingTitle.Hint)
+                    if (c is SSGroupHeader && c.Label == Plugin.Instance.Translation.GlobalKeybindingTitle.Label && c.HintDescription == Plugin.Instance.Translation.GlobalKeybindingTitle.Hint)
                         break;
                     if (c.SettingId < relatedMenu.Hash)
                         c.SetId(c.SettingId + relatedMenu.Hash, c.Label);
                 }
             }
+
             hub.connectionToClient.Send(new SSSEntriesPack(collection, versionOverride ?? ServerSpecificSettingsSync.Version));
         }
 

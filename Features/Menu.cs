@@ -304,7 +304,7 @@ namespace SSMenuSystem.Features
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
-                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
+                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, menu.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
 
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
@@ -322,11 +322,11 @@ namespace SSMenuSystem.Features
             if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
             {
                 if (MenuRelated != null)
-                    settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
-                        Plugin.GetTranslation().ReturnTo.ButtonText));
+                    settings.Add(new SSButton(0, string.Format(Plugin.Instance.Translation.ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
+                        Plugin.Instance.Translation.ReturnTo.ButtonText));
                 else
-                    settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
-                        Plugin.GetTranslation().ReturnToMenu.ButtonText));
+                    settings.Add(new SSButton(0, Plugin.Instance.Translation.ReturnToMenu.Label,
+                        Plugin.Instance.Translation.ReturnToMenu.ButtonText));
             }
 
             if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
@@ -334,11 +334,11 @@ namespace SSMenuSystem.Features
             else
             {
                 if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
-                    settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle.Label, hint: Plugin.GetTranslation().SubMenuTitle.Hint));
+                    settings.Add(new SSGroupHeader(Plugin.Instance.Translation.SubMenuTitle.Label, hint: Plugin.Instance.Translation.SubMenuTitle.Hint));
             }
 
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
-                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
+                settings.Add(new SSButton(s.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, s.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
             if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name, false, Description));
@@ -380,11 +380,9 @@ namespace SSMenuSystem.Features
                     else
                         settings.Add(t);
                 }
-
-                SentSettings[hub] = settings.ToArray();
             }
-            else
-                SentSettings.Remove(hub);
+
+            SentSettings[hub] = settings.ToArray();
 
             return settings;
         }
@@ -401,7 +399,7 @@ namespace SSMenuSystem.Features
 
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu && x.Value.Any()))
             {
-                keybindings.Add(new SSGroupHeader(Plugin.GetTranslation().GlobalKeybindingTitle.Label, hint:Plugin.GetTranslation().GlobalKeybindingTitle.Hint));
+                keybindings.Add(new SSGroupHeader(Plugin.Instance.Translation.GlobalKeybindingTitle.Label, hint:Plugin.Instance.Translation.GlobalKeybindingTitle.Hint));
                 foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
