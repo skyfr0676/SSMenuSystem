@@ -51,7 +51,7 @@ namespace SSMenuSystem
         public override string Prefix => "ss_menu_system";
 #else
 
-        public static Translation Translation { get; private set; }
+        public Translation Translation { get; private set; }
 
         /// <inheritdoc />
         public override string Description => "Convert all Server-Specifics Settings created by plugins into menu. Help for multi-plugin comptability and organization.";
