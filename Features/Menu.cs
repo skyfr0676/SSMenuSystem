@@ -360,10 +360,12 @@ namespace SSMenuSystem.Features
                 return settings;
             }
 
+            List<ServerSpecificSettingBase> sentSettings = new();
             if (Settings != null)
             {
                 foreach (ServerSpecificSettingBase t in Settings)
                 {
+                    sentSettings.Add(t);
                     if (t is ISetting setting)
                         settings.Add(setting.Base);
                     else
@@ -375,6 +377,7 @@ namespace SSMenuSystem.Features
             {
                 foreach (ServerSpecificSettingBase t in oSettings)
                 {
+                    sentSettings.Add(t);
                     if (t is ISetting setting)
                         settings.Add(setting.Base);
                     else
@@ -382,7 +385,7 @@ namespace SSMenuSystem.Features
                 }
             }
 
-            SentSettings[hub] = settings.ToArray();
+            SentSettings[hub] = sentSettings.ToArray();
 
             return settings;
         }

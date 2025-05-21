@@ -38,8 +38,8 @@ namespace SSMenuSystem
 
         /// <summary>
         /// Gets the version of the plugin.
-        /// </summary>
-        public override Version Version => new(2, 0, 6);
+        // </summary>
+        public override Version Version => new(2, 0, 7);
 
 #if EXILED
         /// <inheritdoc/>
@@ -51,6 +51,9 @@ namespace SSMenuSystem
         public override string Prefix => "ss_menu_system";
 #else
 
+        /// <summary>
+        /// Gets the plugin translations.
+        /// </summary>
         public Translation Translation { get; private set; }
 
         /// <inheritdoc />

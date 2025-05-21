@@ -99,9 +99,11 @@ namespace SSMenuSystem
                             menu.InternalSettingsSync[hub][menu.InternalSettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
                         else
                             menu.InternalSettingsSync[hub].Add(ss);
+
                         ServerSpecificSettingBase s = menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings) ? customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId) : null;
                         if (s == null)
                             throw new Exception("Failed to find the sent setting.");
+
                         switch (s)
                         {
                             case Button wBtn:
@@ -117,7 +119,7 @@ namespace SSMenuSystem
                                 wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, (SSSliderSetting)ss);
                                 break;
                             case YesNoButton wYesNo:
-                                wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
+                                wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsA, (SSTwoButtonsSetting)ss);
                                 break;
                         }
 
