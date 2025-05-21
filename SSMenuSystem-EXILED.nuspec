@@ -10,12 +10,12 @@
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <repository type="Git" url="https://github.com/skyfr0676/SSMenuSystem" />
         <projectUrl>https://github.com/skyfr0676/SSMenuSystem</projectUrl>
-        <description>An api that add a menu system into SCP: Secret Laboratory. Builded for EXILED 9.5.0.</description>
+        <description>An api that add a menu system into SCP: Secret Laboratory. Builded for EXILED 9.6.0.</description>
         <readme>docs\README.md</readme>
 
         <dependencies>
             <group targetFramework="net48">
-                <dependency id="ExMod.Exiled" version="[9.6.0-beta3]" />
+                <dependency id="ExMod.Exiled" version="[9.6.0,)" />
             </group>
         </dependencies>
 
