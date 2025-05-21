@@ -38,9 +38,9 @@ fi
 if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "41s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "42s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed Plugin.cs line 41 for version $VERSION."
+        echo "[VERBOSE/ALL]: changed Plugin.cs line 42 for version $VERSION."
     fi
 
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
@@ -171,11 +171,11 @@ if [ -n "$server_exiled" ]; then
     echo -e "\e[36m[INFO]: Activated EXILED version!\e[0m"
 
 elif [ -n "$server_labapi" ]; then
-    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/plugins/SSMenuSystem-LABAPI.dll"
-    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/dependencies/0Harmony.dll"
+    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/plugins/7777/SSMenuSystem-LABAPI.dll"
+    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/dependencies/7777/0Harmony.dll"
 
-    sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
-    sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
+    #sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
+    #sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
     echo -e "\e[36m[INFO]: Activated LABAPI version!\e[0m"
 fi
 
