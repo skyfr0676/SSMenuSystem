@@ -38,14 +38,18 @@ fi
 if [ -n "$version" ] && [ -z "$debug" ]; then
     VERSION="$version"
 
-    sed -i "46s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
+    sed -i "42s/.*/        public override Version Version => new($(echo "$VERSION" | sed 's/\./, /g'));/" Plugin.cs
     if [ $verbosity == "all" ]; then
-        echo "[VERBOSE/ALL]: changed Plugin.cs line 37 for version $VERSION (EXILED)"
+        echo "[VERBOSE/ALL]: changed Plugin.cs line 42 for version $VERSION."
     fi
 
     sed -i "6s/.*/        <version>$VERSION-EXILED<\/version>/" SSMenuSystem-EXILED.nuspec
     if [ $verbosity == "all" ]; then
         echo "[VERBOSE/ALL]: changed SSMenuSystem-EXILED.nuspec line 6 for version $VERSION (EXILED)"
+    fi
+    sed -i "6s/.*/        <version>$VERSION-LABAPI<\/version>/" SSMenuSystem-LABAPI.nuspec
+    if [ $verbosity == "all" ]; then
+        echo "[VERBOSE/ALL]: changed SSMenuSystem-LABAPI.nuspec line 6 for version $VERSION (LABAPI)"
     fi
 
     sed -i "34s/.*/[assembly: AssemblyVersion(\"$VERSION\")]/" Properties/AssemblyInfo.cs
@@ -133,14 +137,15 @@ if [ -n "$draft" ] && [ -z "$debug" ]; then
     if [ -z "$VERSION" ]; then
         echo -e "\e[31m[ERROR]: Version is not defined. You need to add \"--version\" \nExemple: ./build.sh draft --version 3.0.0 \e[0m"
     else
-        LATEST_VERSION=$(gh release list --repo skyfr0676/SSMenuSystem --json tagName,isDraft -q 'sort_by(.createdAt)[0].tagName')
+        LATEST_VERSION=$(gh api repos/skyfr0676/SSMenuSystem/releases --jq '[.[] | select(.draft == false)][0].tag_name')
         if [ -n "$VERBOSE" ]; then
             echo -e "[VERBOSE]: Latest version found: $LATEST_VERSION"
         fi
         #LATEST_VERSION=$(gh release view --json tagName -q ".tagName" --repo skyfr0676/SSMenuSystem)
         if [ ! "$LATEST_VERSION" == "v$VERSION" ]; then
-            gh release create v2.0.4 --draft --title "v$VERSION" --notes """## What's changed
-**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...V$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
+            gh release create "v$VERSION" --draft --title "v$VERSION" --notes """## What's changed
+
+**Full Changelog**: https://github.com/skyfr0676/SSMenuSystem/compare/$LATEST_VERSION...v$VERSION""" --repo skyfr0676/SSMenuSystem ./pack/SSMenuSystem-EXILED.dll ./pack/SSMenuSystem-LABAPI.dll ./pack/0Harmony.dll
             echo -e "\e[36m[INFO]: successfully created a release\e[0m"
         else
             echo -e "\e[33m[WARNING]: A release with this version already exist. \e[0m"
@@ -161,16 +166,16 @@ fi
 
 if [ -n "$server_exiled" ]; then
     cp "pack/SSMenuSystem-EXILED.dll" "$HOME/.config/EXILED/Plugins/SSMenuSystem-EXILED.dll"
-    sed -i "2s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
-    sed -i "1s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    sed -i "2s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
+    sed -i "1s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
     echo -e "\e[36m[INFO]: Activated EXILED version!\e[0m"
 
 elif [ -n "$server_labapi" ]; then
-    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/plugins/SSMenuSystem-LABAPI.dll"
-    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI-Beta/dependencies/0Harmony.dll"
+    cp "pack/SSMenuSystem-LABAPI.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/plugins/7777/SSMenuSystem-LABAPI.dll"
+    cp "pack/0Harmony.dll" "$HOME/.config/SCP Secret Laboratory/LabAPI/dependencies/7777/0Harmony.dll"
 
-    sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/Exiled Loader/config.yml"
-    sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI-Beta/configs/SS-Menu System/config.yml"
+    #sed -i "2s/.*/is_enabled: false/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/Exiled Loader/config.yml"
+    #sed -i "1s/.*/is_enabled: true/" "/home/sky/.config/SCP Secret Laboratory/LabAPI/configs/SS-Menu System/config.yml"
     echo -e "\e[36m[INFO]: Activated LABAPI version!\e[0m"
 fi
 

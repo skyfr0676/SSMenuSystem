@@ -38,7 +38,7 @@ namespace SSMenuSystem.Patchs.CompatibilizerPatchs
 
         internal static void Load(ServerSpecificSettingBase[] settings)
         {
-            if (!Plugin.StaticConfig.ComptabilitySystem.ComptabilityEnabled)
+            if (!Plugin.Instance.Config.ComptabilitySystem.ComptabilityEnabled)
                 return;
             Assembly assembly = Assembly.GetCallingAssembly();
             Log.Debug(assembly.GetName().Name + " tried to set " + nameof(ServerSpecificSettingsSync.DefinedSettings) + ". Game Assembly: " + typeof(ReferenceHub).Assembly.GetName().Name);

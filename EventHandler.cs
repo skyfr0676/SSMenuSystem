@@ -13,28 +13,12 @@ using Log = SSMenuSystem.Features.Log;
 namespace SSMenuSystem
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    internal class EventHandler
-    #if LABAPI
-     : CustomEventsHandler
-    #endif
+    internal class EventHandler : CustomEventsHandler
     {
-#if EXILED
-        internal static void Verified(VerifiedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
-        internal static void Left(LeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
-        internal static void ChangingGroup(ChangingGroupEventArgs ev) => SyncChangedGroup(ev.Player.ReferenceHub);
-        internal static void ReloadedConfigs()
-        {
-            Log.Info("reloaded configs.");
-            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
-                Menu.LoadForPlayer(hub, Menu.GetCurrentPlayerMenu(hub));
-        }
-
-#else
         public override void OnPlayerJoined(PlayerJoinedEventArgs ev) => Timing.RunCoroutine(Parameters.SyncAll(ev.Player.ReferenceHub));
         public override void OnPlayerLeft(PlayerLeftEventArgs ev) => Menu.DeletePlayer(ev.Player.ReferenceHub);
         public override void OnPlayerGroupChanged(PlayerGroupChangedEventArgs ev) =>
             SyncChangedGroup(ev.Player.ReferenceHub);
-#endif
 
         private static void SyncChangedGroup(ReferenceHub hub)
         {
@@ -111,11 +95,15 @@ namespace SSMenuSystem
                         Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
                     else
                     {
-                        ServerSpecificSettingBase s = menu.Settings.FirstOrDefault(s => s.SettingId == ss.SettingId);
-                        if (menu.SettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
-                            menu.SettingsSync[hub][menu.SettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
+                        if (menu.InternalSettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
+                            menu.InternalSettingsSync[hub][menu.InternalSettingsSync[hub].FindIndex(x => x.SettingId == ss.SettingId)] = ss;
                         else
-                            menu.SettingsSync[hub].Add(ss);
+                            menu.InternalSettingsSync[hub].Add(ss);
+
+                        ServerSpecificSettingBase s = menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings) ? customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId) : null;
+                        if (s == null)
+                            throw new Exception("Failed to find the sent setting.");
+
                         switch (s)
                         {
                             case Button wBtn:
@@ -131,7 +119,7 @@ namespace SSMenuSystem
                                 wSlider.Action?.Invoke(hub, ((SSSliderSetting)ss).SyncFloatValue, (SSSliderSetting)ss);
                                 break;
                             case YesNoButton wYesNo:
-                                wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsB, (SSTwoButtonsSetting)ss);
+                                wYesNo.Action?.Invoke(hub, ((SSTwoButtonsSetting)ss).SyncIsA, (SSTwoButtonsSetting)ss);
                                 break;
                         }
 
@@ -157,12 +145,12 @@ namespace SSMenuSystem
 #else
                 Log.Debug(e.ToString());
 #endif
-                if (Plugin.StaticConfig.ShowErrorToClient)
+                if (Plugin.Instance.Config.ShowErrorToClient)
                 {
                     Features.Utils.SendToPlayer(hub, null, new ServerSpecificSettingBase[]
                     {
-                        new SSTextArea(-5, $"<color=red><b>{Plugin.GetTranslation().ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.StaticConfig.ShowFullErrorToClient) && Plugin.StaticConfig.ShowFullErrorToModerators ? e.ToString() : Plugin.GetTranslation().NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.GetTranslation().ServerError),
-                        new SSButton(-999, Plugin.GetTranslation().ReloadButton.Label, Plugin.GetTranslation().ReloadButton.ButtonText)
+                        new SSTextArea(-5, $"<color=red><b>{Plugin.Instance.Translation.ServerError}\n{((hub.serverRoles.RemoteAdmin || Plugin.Instance.Config.ShowFullErrorToClient) && Plugin.Instance.Config.ShowFullErrorToModerators ? e.ToString() : Plugin.Instance.Translation.NoPermission)}</b></color>", SSTextArea.FoldoutMode.CollapsedByDefault, Plugin.Instance.Translation.ServerError),
+                        new SSButton(-999, Plugin.Instance.Translation.ReloadButton.Label, Plugin.Instance.Translation.ReloadButton.ButtonText)
                     });
                 }
             }

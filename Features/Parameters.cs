@@ -26,7 +26,7 @@ namespace SSMenuSystem.Features
             if (typeof(TSs).BaseType == typeof(ISetting))
             {
                 Log.Error(nameof(TSs) + " need to be of base type (example: Plaintext became SSPlaintextSetting).");
-                return default;
+                return null;
             }
 
             foreach (Menu menu in Menu.Menus.Where(x => x is TMenu))
@@ -38,7 +38,7 @@ namespace SSMenuSystem.Features
                 return t as TSs;
             }
 
-            return default;
+            return null;
         }
 
 
@@ -63,7 +63,7 @@ namespace SSMenuSystem.Features
                 }
 
                 Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name} {(menu.MenuRelated != null ? $"SubMenu of {Menu.GetMenu(menu.MenuRelated).Name} ({menu.MenuRelated.Name})" : string.Empty)}.");
-                foreach (ServerSpecificSettingBase t in menu.Settings)
+                foreach (ServerSpecificSettingBase t in menu.Settings.Concat(menu.GetSettingsFor(hub)))
                 {
                     if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
                         continue;

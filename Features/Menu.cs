@@ -69,11 +69,11 @@ namespace SSMenuSystem.Features
         }
 
         /// <summary>
-        /// Calling assembly will be, loaded if SSSyncer is already initialized, or queued if not, and loaded when the plugin is initialized.
+        /// Calling assembly will be, loaded if SSMenuSystem is already initialized, or queued if not, and loaded when the plugin is initialized.
         /// </summary>
         public static void QueueOrRegister()
         {
-            if (Plugin.StaticConfig is null)
+            if (Plugin.Instance?.Config is null)
             {
                 Assembly assembly = Assembly.GetCallingAssembly();
                 if (!_waitingAssemblies.Contains(assembly))
@@ -94,7 +94,7 @@ namespace SSMenuSystem.Features
         /// <param name="assembly">The target <see cref="Assembly"/>.</param>
         private static void Register(Assembly assembly)
         {
-            if (Plugin.StaticConfig is null) // plugin is not loaded.
+            if (Plugin.Instance?.Config is null) // plugin is not loaded.
             {
                 if (!_waitingAssemblies.Contains(assembly))
                     _waitingAssemblies.Enqueue(assembly);
@@ -109,7 +109,7 @@ namespace SSMenuSystem.Features
                     if (type == typeof(AssemblyMenu)) // only used for comptability (throw error when loaded)
                         continue;
 
-                    if (type == typeof(MainExample) && (!Plugin.StaticConfig.EnableExamples))
+                    if (type == typeof(MainExample) && (!Plugin.Instance.Config.EnableExamples))
                         continue;
 
                     if (type.IsAbstract || type.IsInterface)
@@ -165,7 +165,7 @@ namespace SSMenuSystem.Features
         {
             if (menu == null)
                 return;
-            if (menu.MenuRelated == typeof(MainExample) && !Plugin.StaticConfig.EnableExamples)
+            if (menu.MenuRelated == typeof(MainExample) && !Plugin.Instance.Config.EnableExamples)
                 return;
 
             Log.Debug($"loading Server Specific menu {menu.Name}...");
@@ -259,7 +259,13 @@ namespace SSMenuSystem.Features
         /// </summary>
         public abstract ServerSpecificSettingBase[] Settings { get; }
 
-            /// <summary>
+        /// <summary>
+        /// Gets all settings sent to the refHub. (only in the case of one GetSettings is not null or empty)
+        ///
+        /// </summary>
+        internal readonly Dictionary<ReferenceHub, ServerSpecificSettingBase[]> SentSettings = new();
+
+        /// <summary>
         /// Gets the Hash of menu, based on <see cref="Name"/>. Mainly used to seperate menu settings for client.
         /// </summary>
         public int Hash => Mathf.Abs(Name.GetHashCode() % 100000);
@@ -288,7 +294,7 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> mainMenu = new();
 
-            if (Plugin.StaticConfig.AllowPinnedContent)
+            if (Plugin.Instance.Config.AllowPinnedContent)
                 mainMenu.AddRange(Pinned.Values.SelectMany(pin => pin));
 
             if (LoadedMenus.Where(x => x.CheckAccess(hub)).IsEmpty())
@@ -298,7 +304,7 @@ namespace SSMenuSystem.Features
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
             {
                 if (menu.MenuRelated == null)
-                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, menu.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
+                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, menu.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
 
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
@@ -310,31 +316,31 @@ namespace SSMenuSystem.Features
         {
             List<ServerSpecificSettingBase> settings = new();
 
-            if (Plugin.StaticConfig.AllowPinnedContent)
+            if (Plugin.Instance.Config.AllowPinnedContent)
                 settings.AddRange(Pinned.Values.SelectMany(pin => pin));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
             {
                 if (MenuRelated != null)
-                    settings.Add(new SSButton(0, string.Format(Plugin.GetTranslation().ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
-                        Plugin.GetTranslation().ReturnTo.ButtonText));
+                    settings.Add(new SSButton(0, string.Format(Plugin.Instance.Translation.ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
+                        Plugin.Instance.Translation.ReturnTo.ButtonText));
                 else
-                    settings.Add(new SSButton(0, Plugin.GetTranslation().ReturnToMenu.Label,
-                        Plugin.GetTranslation().ReturnToMenu.ButtonText));
+                    settings.Add(new SSButton(0, Plugin.Instance.Translation.ReturnToMenu.Label,
+                        Plugin.Instance.Translation.ReturnToMenu.ButtonText));
             }
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name));
             else
             {
                 if (LoadedMenus.Count(x => x.MenuRelated == GetType() && x != this) > 0)
-                    settings.Add(new SSGroupHeader(Plugin.GetTranslation().SubMenuTitle.Label, hint: Plugin.GetTranslation().SubMenuTitle.Hint));
+                    settings.Add(new SSGroupHeader(Plugin.Instance.Translation.SubMenuTitle.Label, hint: Plugin.Instance.Translation.SubMenuTitle.Hint));
             }
 
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
-                settings.Add(new SSButton(s.Id, string.Format(Plugin.GetTranslation().OpenMenu.Label, s.Name), Plugin.GetTranslation().OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
+                settings.Add(new SSButton(s.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, s.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
@@ -346,17 +352,20 @@ namespace SSMenuSystem.Features
                 return settings;
             }
 
-            if (Settings == null || Settings.IsEmpty())
+            ServerSpecificSettingBase[] oSettings = GetSettingsFor(hub);
+
+            if ((Settings == null || Settings.IsEmpty()) && (oSettings == null || oSettings.IsEmpty()))
             {
                 settings.RemoveAt(settings.Count - 1);
                 return settings;
             }
 
-            ServerSpecificSettingBase[] oSettings = GetSettingsFor(hub);
-            if (oSettings != null && !oSettings.IsEmpty())
+            List<ServerSpecificSettingBase> sentSettings = new();
+            if (Settings != null)
             {
-                foreach (ServerSpecificSettingBase t in oSettings)
+                foreach (ServerSpecificSettingBase t in Settings)
                 {
+                    sentSettings.Add(t);
                     if (t is ISetting setting)
                         settings.Add(setting.Base);
                     else
@@ -364,13 +373,20 @@ namespace SSMenuSystem.Features
                 }
             }
 
-            foreach (ServerSpecificSettingBase t in Settings)
+            if (oSettings != null && !oSettings.IsEmpty())
             {
-                if (t is ISetting setting)
-                    settings.Add(setting.Base);
-                else
-                    settings.Add(t);
+                foreach (ServerSpecificSettingBase t in oSettings)
+                {
+                    sentSettings.Add(t);
+                    if (t is ISetting setting)
+                        settings.Add(setting.Base);
+                    else
+                        settings.Add(t);
+                }
             }
+
+            SentSettings[hub] = sentSettings.ToArray();
+
             return settings;
         }
 
@@ -386,7 +402,7 @@ namespace SSMenuSystem.Features
 
             if (GlobalKeybindingSync.Any(x => x.Key.CheckAccess(hub) && x.Key != menu && x.Value.Any()))
             {
-                keybindings.Add(new SSGroupHeader(Plugin.GetTranslation().GlobalKeybindingTitle.Label, hint:Plugin.GetTranslation().GlobalKeybindingTitle.Hint));
+                keybindings.Add(new SSGroupHeader(Plugin.Instance.Translation.GlobalKeybindingTitle.Label, hint:Plugin.Instance.Translation.GlobalKeybindingTitle.Hint));
                 foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
@@ -435,7 +451,7 @@ namespace SSMenuSystem.Features
             if (menu != null && !menu.CheckAccess(hub))
                 menu = null;
 
-            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.StaticConfig.ForceMainMenuEvenIfOnlyOne)
+            if (menu == null && LoadedMenus.Count(x => x.CheckAccess(hub) && x.MenuRelated == null) == 1 && !Plugin.Instance!.Config!.ForceMainMenuEvenIfOnlyOne)
             {
                 menu = Menus.First(x => x.CheckAccess(hub) && x.MenuRelated == null);
                 Log.Debug($"triggered The only menu registered: {menu.Name}.");
