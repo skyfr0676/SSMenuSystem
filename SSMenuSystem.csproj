@@ -1,153 +1,94 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"
-            Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"/>
-    <Import Project="SSMenuSystem.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-        <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+        <TargetFramework>net481</TargetFramework>
         <ProjectGuid>{523A1ABE-6297-47F1-8075-32E523CA5FD0}</ProjectGuid>
-        <OutputType>Library</OutputType>
-        <AppDesignerFolder>Properties</AppDesignerFolder>
-        <RootNamespace>SSMenuSystem</RootNamespace>
-        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <AssemblyTitle>SSMenuSystem</AssemblyTitle>
         <AssemblyName>SSMenuSystem</AssemblyName>
-        <FileAlignment>512</FileAlignment>
-        <LangVersion>latest</LangVersion>
+        <Product>SSMenuSystem</Product>
+        <Copyright>Copyright © 2025</Copyright>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <DebugSymbols>true</DebugSymbols>
+        <OutputPath>bin\$(Platform)\$(Configuration)\</OutputPath>
+        <DebugType>embedded</DebugType>
+        <Nullable>enable</Nullable>
+        <LangVersion>preview</LangVersion>
+        <RestoreAdditionalProjectSources>
+            https://api.nuget.org/v3/index.json;
+            https://nuget.bepinex.dev/v3/index.json
+        </RestoreAdditionalProjectSources>
+        <Platforms>AnyCPU</Platforms>
+        <Configurations>Debug EXILED;Debug LABAPI;Release LABAPI;Release EXILED</Configurations>
+        <DocumentationFile>$(OutputPath)$(AssemblyName).xml</DocumentationFile>
+        <CodeAnalysisRuleSet>$(MSBuildThisFileDirectory)SSMenuSystem.ruleset</CodeAnalysisRuleSet>
+        <NoWarn>$(NoWarn),1573,1591,1712</NoWarn>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+        <FileAlignment>512</FileAlignment>
+        <AppDesignerFolder>Properties</AppDesignerFolder>
+        <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+        <ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>None</ResolveAssemblyWarnOrErrorOnTargetArchitectureMismatch>
     </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release EXILED|AnyCPU' ">
-        <AssemblyName>SSMenuSystem-EXILED</AssemblyName>
-        <OutputPath>bin\Release EXILED\</OutputPath>
-        <DefineConstants>TRACE;EXILED</DefineConstants>
-        <Optimize>true</Optimize>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DebugType>pdbonly</DebugType>
-        <DocumentationFile>bin\Release EXILED\SSMenuSystem-EXILED.xml</DocumentationFile>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug EXILED' ">
+      <DefineConstants>TRACE; DEBUG; EXILED;</DefineConstants>
     </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug EXILED|AnyCPU' ">
-        <AssemblyName>SSMenuSystem-EXILED</AssemblyName>
-        <OutputPath>bin\Debug EXILED\</OutputPath>
-        <DefineConstants>DEBUG;TRACE;EXILED</DefineConstants>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Debug EXILED\SSMenuSystem-EXILED.xml</DocumentationFile>
-        <WarningLevel>0</WarningLevel>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug LABAPI' ">
+      <DefineConstants>TRACE; DEBUG; LABAPI;</DefineConstants>
     </PropertyGroup>
-
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release LABAPI|AnyCPU' ">
-        <AssemblyName>SSMenuSystem-LABAPI</AssemblyName>
-        <OutputPath>bin\Release LABAPI\</OutputPath>
-        <DefineConstants>TRACE;LABAPI</DefineConstants>
-        <Optimize>true</Optimize>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DebugType>pdbonly</DebugType>
-        <DocumentationFile>bin\Release LABAPI\SSMenuSystem-LABAPI.xml</DocumentationFile>
-        <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release EXILED' ">
+      <DefineConstants>TRACE; EXILED;</DefineConstants>
     </PropertyGroup>
-
-    <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug LABAPI|AnyCPU' ">
-        <AssemblyName>SSMenuSystem-LABAPI</AssemblyName>
-        <OutputPath>bin\Debug LABAPI\</OutputPath>
-        <DefineConstants>DEBUG;TRACE;LABAPI</DefineConstants>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <DocumentationFile>bin\Debug LABAPI\SSMenuSystem-LABAPI.xml</DocumentationFile>
-        <WarningLevel>0</WarningLevel>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release LABAPI' ">
+      <DefineConstants>TRACE; LABAPI;</DefineConstants>
     </PropertyGroup>
-
     <ItemGroup>
-        <Reference Include="Assembly-CSharp-firstpass">
-            <HintPath>$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll</HintPath>
-        </Reference>
-        <Reference Include="Mirror">
-            <HintPath>$(EXILED_REFERENCES)\Mirror.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll</HintPath>
-        </Reference>
-        <Reference Include="Unity.TextMeshPro">
-            <HintPath>$(EXILED_REFERENCES)\Unity.TextMeshPro.dll</HintPath>
-        </Reference>
-        <Reference Include="System"/>
-        <Reference Include="System.Core"/>
-        <Reference Include="System.Data"/>
-        <Reference Include="System.Xml"/>
-        <Reference Include="0Harmony">
-            <HintPath>$(EXILED_REFERENCES)\0Harmony.dll</HintPath>
-        </Reference>
-        <Reference Include="Pooling">
-            <HintPath>$(EXILED_REFERENCES)\Pooling.dll</HintPath>
-        </Reference>
-        <Reference Include="LabApi">
-            <HintPath>$(EXILED_REFERENCES)\LabApi.dll</HintPath>
-        </Reference>
-        <Reference Include="UnityEngine.PhysicsModule">
-            <HintPath>$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll</HintPath>
-        </Reference>
+        <Reference Include="Assembly-CSharp" HintPath="$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll" Private="False" Publicize="True"/>
+        <Reference Include="Assembly-CSharp-firstpass" HintPath="$(EXILED_REFERENCES)\Assembly-CSharp-firstpass.dll" Private="False"/>
+        <Reference Include="Mirror" HintPath="$(EXILED_REFERENCES)\Mirror.dll" Private="False" />
+        <Reference Include="Pooling" HintPath="$(EXILED_REFERENCES)\Pooling.dll" Private="False" />
+        <Reference Include="Unity.TextMeshPro" HintPath="$(EXILED_REFERENCES)\Unity.TextMeshPro.dll" Private="False" />
+        <Reference Include="UnityEngine.CoreModule" HintPath="$(EXILED_REFERENCES)\UnityEngine.CoreModule.dll" Private="False" />
+        <Reference Include="UnityEngine.PhysicsModule" HintPath="$(EXILED_REFERENCES)\UnityEngine.PhysicsModule.dll" Private="False" />
     </ItemGroup>
     <ItemGroup>
-        <Compile Include="Config.cs" />
-        <Compile Include="Configs\GroupHeader.cs" />
-        <Compile Include="Configs\LabelButton.cs" />
-        <Compile Include="EventHandler.cs" />
-        <Compile Include="Examples\AbilitiesExample.cs" />
-        <Compile Include="Examples\LightSpawnerExample.cs" />
-        <Compile Include="Examples\MainExample.cs" />
-        <Compile Include="Examples\PrimitiveSpawnerExample.cs" />
-        <Compile Include="Examples\DemoExample.cs" />
-        <Compile Include="Examples\TextAreaExample.cs" />
-        <Compile Include="Features\AssemblyMenu.cs" />
-        <Compile Include="Features\ComptabilityConfig.cs" />
-        <Compile Include="Features\Interfaces\ISetting.cs" />
-        <Compile Include="Features\Log.cs" />
-        <Compile Include="Features\Menu.cs" />
-        <Compile Include="Features\Parameters.cs" />
-        <Compile Include="Features\Utils.cs" />
-        <Compile Include="Features\Wrappers\Button.cs" />
-        <Compile Include="Features\Wrappers\Dropdown.cs" />
-        <Compile Include="Features\Wrappers\Keybind.cs" />
-        <Compile Include="Features\Wrappers\Plaintext.cs" />
-        <Compile Include="Features\Wrappers\Slider.cs" />
-        <Compile Include="Features\Wrappers\YesNoButton.cs" />
-        <Compile Include="Patchs\CompatibilizerPatchs\Compatibilizer.cs" />
-        <Compile Include="Patchs\CompatibilizerPatchs\CompatibilizerGetter.cs" />
-        <Compile Include="Patchs\CompatibilizerPatchs\SendToPlayerDSPatch.cs" />
-        <Compile Include="Patchs\CompatibilizerPatchs\SendToPlayerPatch.cs" />
-        <Compile Include="Patchs\CompatibilizerPatchs\SetIdPatch.cs" />
-        <Compile Include="Patchs\ExiledPatch.cs" />
-        <Compile Include="Patchs\OriginalDefinitionPatch.cs" />
-        <Compile Include="Patchs\PrevalidateResponsePatch.cs" />
-        <Compile Include="Plugin.cs" />
-        <Compile Include="Properties\AssemblyInfo.cs"/>
-        <Compile Include="Translation.cs" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer" Version="0.5.0-beta.1" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.5.0-beta.1" ExcludeAssets="RUNTIME" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+        <PackageReference Include="HarmonyX" Version="2.14.0" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="MonoMod.Backports" Version="1.1.2" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="Northwood.LabAPI" Version="1.0.2" Publicize="True" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="System.Buffers" Version="4.5.1" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="System.Memory" Version="4.5.5" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.3" ExcludeAssets="RUNTIME" />
+        <PackageReference Include="ExMod.Exiled" Version="9.6.0" ExcludeAssets="RUNTIME" />
     </ItemGroup>
     <ItemGroup>
       <None Include="App.config" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include=".editorconfig" />
-      <Content Include="build.sh" />
-      <Content Include="Directory.Build.props" />
-      <Content Include="SSMenuSystem-EXILED.nuspec" />
-      <Content Include="SSMenuSystem-LABAPI.nuspec" />
-      <Content Include="SSMenuSystem.props" />
-      <Content Include="SSMenuSystem.ruleset" />
+        <None Remove=".editorconfig" />
+        <None Include=".editorconfig" Link="Resources/.editorconfig" />
+        <None Remove="NuGet.config" />
+        <None Include="NuGet.config" Link="Resources/NuGet.config" />
+        <None Remove=".gitignore" />
+        <None Include=".gitignore" Link="Resources/.gitignore" />
+        <None Remove=".gitattributes" />
+        <None Include=".gitattributes" Link="Resources/.gitattributes" />
+        <None Remove="README.md" />
+        <None Include="README.md" Link="Resources/README.md" />
+        <None Remove="qodana.yaml" />
+        <None Include="qodana.yaml" Link="Resources/qodana.yaml" />
+        <AdditionalFiles Include="stylecop.json" Link="Resources/stylecop.json" />
+        <!--Content Include="build.sh" /-->
+        <!--Content Include="Directory.Build.props" /-->
+        <None Remove="SSMenuSystem-EXILED.nuspec" />
+        <Content Include="SSMenuSystem-EXILED.nuspec" Link="Resources/SSMenuSystem-EXILED.nuspec" />
+        <None Remove="SSMenuSystem-LABAPI.nuspec" />
+        <Content Include="SSMenuSystem-LABAPI.nuspec" Link="Resources/SSMenuSystem-LABAPI.nuspec" />
+        <None Remove="SSMenuSystem.props" />
+        <Content Include="SSMenuSystem.props" Link="Resources/SSMenuSystem.props" />
+        <None Remove="SSMenuSystem.ruleset" />
+        <Content Include="SSMenuSystem.ruleset" Link="Resources/SSMenuSystem.ruleset" />
     </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="ExMod.Exiled" Version="9.6.0-beta8" />
-    </ItemGroup>
-    <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
-    <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
-         Other similar extension points exist, see Microsoft.Common.targets.
-    <Target Name="BeforeBuild">
-    </Target>
-    <Target Name="AfterBuild">
-    </Target>
-    -->
 
 </Project>

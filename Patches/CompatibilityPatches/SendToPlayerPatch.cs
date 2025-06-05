@@ -1,36 +1,44 @@
-﻿using System;
+﻿// -----------------------------------------------------------------------
+// <copyright file="SendToPlayerPatch.cs" company="Skyfr0676 and Redforce04">
+// Copyright (c) Skyfr0676 and Redforce04. All rights reserved.
+// Licensed under the Undetermined license.
+// </copyright>
+// -----------------------------------------------------------------------
+
+// ReSharper disable UnusedMember.Local UnusedParameter.Local
+namespace SSMenuSystem.Patches.CompatibilityPatches;
+
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using NorthwoodLib.Pools;
-using SSMenuSystem.Features;
+using Features;
 using UserSettings.ServerSpecific;
 using static HarmonyLib.AccessTools;
-using Log = SSMenuSystem.Features.Log;
 
-namespace SSMenuSystem.Patchs.CompatibilizerPatchs
+using Log = Features.Log;
+
+/// <summary>
+/// Send to players patch.
+/// </summary>
+[HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer), typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(int?))]
+internal static class SendToPlayerPatch
 {
-    [HarmonyPatch(typeof(ServerSpecificSettingsSync), nameof(ServerSpecificSettingsSync.SendToPlayer))]
-    [HarmonyPatch(new[] { typeof(ReferenceHub), typeof(ServerSpecificSettingBase[]), typeof(int?) })]
-    internal class SendToPlayerPatch
+    private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler, ILGenerator generator)
     {
-        private static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> transpiler,
-            ILGenerator generator)
-        {
-            List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
+        List<CodeInstruction> newInstructions = ListPool<CodeInstruction>.Shared.Rent();
 
-            newInstructions.AddRange(new CodeInstruction[]
-            {
-                new(OpCodes.Ldarg_0),
-                new(OpCodes.Ldarg_1),
-                new(OpCodes.Ldarg_2),
-                new(OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
-                new(OpCodes.Call, Method(typeof(SendToPlayerPatch), nameof(SendToPlayer))),
-                new(OpCodes.Ret)
-            });
+        newInstructions.AddRange([
+            new (OpCodes.Ldarg_0),
+            new (OpCodes.Ldarg_1),
+            new (OpCodes.Ldarg_2),
+            new (OpCodes.Call, Method(typeof(Assembly), nameof(Assembly.GetCallingAssembly))),
+            new (OpCodes.Call, Method(typeof(SendToPlayerPatch), nameof(SendToPlayer))),
+            new (OpCodes.Ret),
+        ]);
 
-#if false
+    #if false
             Label continueLabel = generator.DefineLabel();
             Label removePlayerLabel = generator.DefineLabel();
 
@@ -65,7 +73,7 @@ namespace SSMenuSystem.Patchs.CompatibilizerPatchs
                 new(OpCodes.Ldnull),
                 new(OpCodes.Call, Method(typeof(Log), nameof(Log.Warning))),
 
-                // Comptabilisater.Load(assembly);
+                // Compatibility.Load(assembly);
                 new(OpCodes.Ldloc_S, assembly.LocalIndex),
                 new(OpCodes.Ldarg_1),
                 new(OpCodes.Call, Method(typeof(Comptabilisater), nameof(Comptabilisater.Load))),
@@ -88,30 +96,35 @@ namespace SSMenuSystem.Patchs.CompatibilizerPatchs
                 new(OpCodes.Callvirt, Method(typeof(HashSet<ReferenceHub>), nameof(HashSet<ReferenceHub>.Remove))),
                 new(OpCodes.Ret),
             });
-#endif
+    #endif
 
-            foreach (CodeInstruction z in newInstructions)
-                yield return z;
-
-            ListPool<CodeInstruction>.Shared.Return(newInstructions);
+        foreach (CodeInstruction z in newInstructions)
+        {
+            yield return z;
         }
 
-        private static void SendToPlayer(ReferenceHub hub, ServerSpecificSettingBase[] settings, int? versionOverride, Assembly assembly)
+        ListPool<CodeInstruction>.Shared.Return(newInstructions);
+    }
+
+    private static void SendToPlayer(ReferenceHub hub, ServerSpecificSettingBase[] settings, int? versionOverride, Assembly assembly)
+    {
+        AssemblyMenu? menu = Utils.GetMenu(assembly);
+        if (menu is null)
         {
-            AssemblyMenu menu = Features.Utils.GetMenu(assembly);
-            if (menu == null)
-            {
-                Log.Warn($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
-                Compatibilizer.Load(Array.Empty<ServerSpecificSettingBase>());
-                menu = Features.Utils.GetMenu(assembly);
-            }
+            Log.Warn($"assembly {assembly.GetName().Name} tried to send a couple of {settings.Length} settings but doesn't have a valid/registered menu! creating new one...");
+            Compatibility.Load([]);
+            menu = Utils.GetMenu(assembly);
+        }
 
-            menu.ActuallySendedToClient[hub] = settings;
+        menu!.ActuallySentToClient[hub] = settings;
 
-            if (Menu.GetCurrentPlayerMenu(hub) == menu)
-                menu.Reload(hub);
-            else
-                Menu.LoadForPlayer(hub, null);
+        if (Menu.GetCurrentPlayerMenu(hub) == menu)
+        {
+            menu.Reload(hub);
+        }
+        else
+        {
+            Menu.LoadForPlayer(hub, null);
         }
     }
 }
