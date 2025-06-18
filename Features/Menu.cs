@@ -304,10 +304,7 @@ namespace SSMenuSystem.Features
 
             mainMenu.Add(new SSGroupHeader("Main Menu"));
             foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub) && x.MenuRelated == null))
-            {
-                Log.Info("creating for main menu button with id " + menu.Id);
                 mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, menu.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
-            }
 
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
 
