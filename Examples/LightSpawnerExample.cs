@@ -9,6 +9,7 @@ using UnityEngine;
 using SSMenuSystem.Features;
 using SSMenuSystem.Features.Wrappers;
 using UserSettings.ServerSpecific;
+using Log = SSMenuSystem.Features.Log;
 
 namespace SSMenuSystem.Examples
 {

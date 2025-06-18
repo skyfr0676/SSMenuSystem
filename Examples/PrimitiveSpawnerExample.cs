@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using AdminToys;
-using Exiled.Events.Commands.Hub;
 using GameCore;
 using Mirror;
 using SSMenuSystem.Features;

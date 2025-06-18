@@ -20,16 +20,16 @@ namespace SSMenuSystem.Features.Wrappers
          /// <param name="onUsed">Triggered when the player press or release the keybind.</param>
          /// <param name="suggestedKey">The key server will suggest to the client (displayed with a star). Does not mean the default value.</param>
          /// <param name="preventInteractionOnGui">If false, the keybind won't work when any gui (like Main menu, Inventory, RA, etc...) is opened.</param>
+         /// <param name="allowSpectatorTrigger"></param>
          /// <param name="hint">The hint (located in "?"). If null, no hint will be displayed.</param>
-         /// <param name="isGlobal"><inheritdoc cref="IsGlobal"/></param>
-         public Keybind(int? id, string label, Action<ReferenceHub, bool> onUsed = null, KeyCode suggestedKey = KeyCode.None, bool preventInteractionOnGui = true,
-            string hint = null, bool isGlobal = true) : base(id+Increment, label, suggestedKey, preventInteractionOnGui, hint)
+         /// <param name="isGlobal"><inheritdoc cref="IsGlobal"/>Define if the keybind would be visible in the entire menus system</param>
+         public Keybind(int? id, string label, Action<ReferenceHub, bool> onUsed = null, KeyCode suggestedKey = KeyCode.None, bool preventInteractionOnGui = true, bool allowSpectatorTrigger = true,
+            string hint = null, bool isGlobal = true) : base(id+Increment, label, suggestedKey, preventInteractionOnGui, allowSpectatorTrigger, hint)
         {
             IsGlobal = isGlobal;
             Action = onUsed;
-            Base = new SSKeybindSetting(id + Increment, label, suggestedKey, preventInteractionOnGui, hint);
+            Base = new SSKeybindSetting(id + Increment, label, suggestedKey, preventInteractionOnGui, allowSpectatorTrigger, hint);
         }
-
         /// <summary>
         /// Gets or Sets whether the <see cref="SSKeybindSetting"/> would be shown and enabled on all pages or not.
         /// </summary>

@@ -36,12 +36,20 @@ namespace SSMenuSystem
 
         public static void OnReceivingInput(ReferenceHub hub, ServerSpecificSettingBase ss)
         {
+            Log.Debug("Received input for hub " + hub.nicknameSync.MyNick + ": " + ss.Label + " - " + ss.SettingId + "(" + ss.GetType().Name + ")");
             try
             {
                 if (Parameters.SyncCache.TryGetValue(hub, out List<ServerSpecificSettingBase> value))
                 {
                     value.Add(ss);
                     Log.Debug("received value that been flagged as \"SyncCached\". Redirected values to Cache.");
+                    return;
+                }
+
+                // return to menu
+                if (ss.SettingId == -999)
+                {
+                    Menu.LoadForPlayer(hub, null);
                     return;
                 }
 
@@ -54,12 +62,7 @@ namespace SSMenuSystem
                 else // is a pin or header
                     ss.SettingId -= Menu.GetCurrentPlayerMenu(hub)?.Hash ?? 0;
 
-                // return to menu
-                if (ss.SettingId == -999)
-                {
-                    Menu.LoadForPlayer(hub, null);
-                    return;
-                }
+                Log.Debug("Values after Originial definition: " + ss.Label + " - " + ss.SettingId + "(" + ss.GetType().Name + ")");
 
                 // check permissions
                 Menu menu = Menu.GetCurrentPlayerMenu(hub);
@@ -91,8 +94,9 @@ namespace SSMenuSystem
                 // load method when input is used on specific menu.
                 else if (menu != null)
                 {
-                    if (ss.SettingId < 0)
-                        Menu.LoadForPlayer(hub, menu.TryGetSubMenu(ss.SettingId));
+                    //if (ss.SettingId < 0)
+                    if (menu.TryGetSubMenu(ss.SettingId, out Menu subMenu))
+                        Menu.LoadForPlayer(hub, subMenu);
                     else
                     {
                         if (menu.InternalSettingsSync[hub].Any(x => x.SettingId == ss.SettingId))
@@ -100,9 +104,28 @@ namespace SSMenuSystem
                         else
                             menu.InternalSettingsSync[hub].Add(ss);
 
-                        ServerSpecificSettingBase s = menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings) ? customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId) : null;
+                        ServerSpecificSettingBase s = menu.SentSettings.TryGetValue(hub, out ServerSpecificSettingBase[] customSettings)
+                            ? customSettings.FirstOrDefault(b => b.SettingId == ss.SettingId)
+                            : null;
+
+                        s ??= customSettings?.FirstOrDefault(b => b.SettingId == ss.SettingId - menu.Hash);
+
+                        s ??= customSettings?.First(b => b.SettingId - menu.Hash == ss.SettingId);
+
+                        if (customSettings != null)
+                        {
+                            foreach (ServerSpecificSettingBase tkt in customSettings)
+                            {
+                                Log.Debug("Values found in sent settings for target hub: " + tkt.Label + " - " + tkt.SettingId + "(removed hash: " + (tkt.SettingId - menu.Hash) + ")" + "(" + tkt.GetType().Name + ")");
+                            }
+                        }
+                        else
+                            Log.Error("No sent settings found.");
+
                         if (s == null)
                             throw new Exception("Failed to find the sent setting.");
+
+                        Log.Debug("Value found in sent settings " + s.Label + " - " + s.SettingId + "(" + s.GetType().Name + ")");
 
                         switch (s)
                         {

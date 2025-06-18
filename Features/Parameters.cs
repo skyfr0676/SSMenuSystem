@@ -63,7 +63,8 @@ namespace SSMenuSystem.Features
                 }
 
                 Log.Debug($"syncing {hub.nicknameSync.MyNick} registered parameters for menu {menu.Name} {(menu.MenuRelated != null ? $"SubMenu of {Menu.GetMenu(menu.MenuRelated).Name} ({menu.MenuRelated.Name})" : string.Empty)}.");
-                foreach (ServerSpecificSettingBase t in menu.Settings.Concat(menu.GetSettingsFor(hub)))
+                ServerSpecificSettingBase[] settingsPerHub = menu.GetSettingsFor(hub);
+                foreach (ServerSpecificSettingBase t in settingsPerHub is { Length: > 0 } ? menu.Settings.Concat(settingsPerHub) : menu.Settings)
                 {
                     if (t.ResponseMode != ServerSpecificSettingBase.UserResponseMode.AcquisitionAndChange)
                         continue;
