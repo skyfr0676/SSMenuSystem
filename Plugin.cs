@@ -39,7 +39,7 @@ namespace SSMenuSystem
         /// <summary>
         /// Gets the version of the plugin.
         /// </summary>
-        public override Version Version => new(2, 0, 7);
+        public override Version Version => new(2, 0, 8);
 
 #if EXILED
         /// <inheritdoc/>
@@ -102,6 +102,17 @@ namespace SSMenuSystem
                 return;
 
             _handler = new EventHandler();
+
+            CustomHandlersManager.RegisterEventsHandler(_handler);
+            GenericEnable();
+            Log.Info($"{Name}@{Version} has been enabled!");
+        }
+
+        /// <summary>
+        /// <inheritdoc />
+        /// </summary>
+        public override void LoadConfigs()
+        {
             if (!this.TryLoadConfig("translation.yml", out Translation translation))
             {
                 Log.Error("There is an error while loading translation. Using default one.");
@@ -109,10 +120,7 @@ namespace SSMenuSystem
             }
 
             Translation = translation;
-
-            CustomHandlersManager.RegisterEventsHandler(_handler);
-            GenericEnable();
-            Log.Info($"{Name}@{Version} has been enabled!");
+            base.LoadConfigs();
         }
 
         /// <inheritdoc />

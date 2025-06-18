@@ -171,8 +171,10 @@ namespace SSMenuSystem.Features
             Log.Debug($"loading Server Specific menu {menu.Name}...");
             if (CheckSameId(menu))
                 throw new ArgumentException($"another menu with id {menu.Id} is already registered. can't load {menu.Name}.");
-            if (menu.Id >= 0)
-                throw new ArgumentException($"menus ids must be < 0  (to let space for parameters and 0 is only for Main Menu).");
+            if (menu.Id == 0)
+                throw new ArgumentException("Menus id must not be equal to 0. 0 is reserved for Main Menu.");
+            /*if (menu.Id >= 0)
+                //throw new ArgumentException($"menus ids must be < 0  (to let space for parameters and 0 is only for Main Menu).");*/
             if (string.IsNullOrEmpty(menu.Name))
                 throw new ArgumentException($"menus name cannot be null or empty.");
             if (Menus.Any(x => x.Name == menu.Name))
@@ -301,10 +303,10 @@ namespace SSMenuSystem.Features
                 return mainMenu.ToArray();
 
             mainMenu.Add(new SSGroupHeader("Main Menu"));
-            foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub)))
+            foreach (Menu menu in LoadedMenus.Where(x => x.CheckAccess(hub) && x.MenuRelated == null))
             {
-                if (menu.MenuRelated == null)
-                    mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, menu.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
+                Log.Info("creating for main menu button with id " + menu.Id);
+                mainMenu.Add(new SSButton(menu.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, menu.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(menu.Description) ? null : menu.Description));
             }
 
             mainMenu.AddRange(GetGlobalKeybindings(hub, null));
@@ -406,7 +408,7 @@ namespace SSMenuSystem.Features
                 foreach (KeyValuePair<Menu, List<Keybind>> menuKeybinds in GlobalKeybindingSync.Where(x => x.Key.CheckAccess(hub) && x.Key != menu))
                 {
                     foreach (Keybind keybind in menuKeybinds.Value)
-                        keybindings.Add(new SSKeybindSetting(keybind.SettingId + menuKeybinds.Key.Hash, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.HintDescription));
+                        keybindings.Add(new SSKeybindSetting(keybind.SettingId + menuKeybinds.Key.Hash, keybind.Label, keybind.SuggestedKey, keybind.PreventInteractionOnGUI, keybind.AllowSpectatorTrigger, keybind.HintDescription));
                 }
             }
 
@@ -493,7 +495,15 @@ namespace SSMenuSystem.Features
         /// </summary>
         /// <param name="id">The sub menu id.</param>
         /// <returns>the sub-<see cref="Menu"/> if found.</returns>
+        [Obsolete("Use TryGetSubMenu(int, out Menu) instead", true)]
         public Menu TryGetSubMenu(int id) => LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == GetType() && x != this);
+
+        /// <summary>
+        /// Try get sub menu related to this menu.
+        /// </summary>
+        /// <param name="id">The sub menu id.</param>
+        /// <returns>the sub-<see cref="Menu"/> if found.</returns>
+        public bool TryGetSubMenu(int id, out Menu menu) => (menu = LoadedMenus.FirstOrDefault(x => x.Id == id && x.MenuRelated == GetType() && x != this)) != null;
 
         /// <summary>
         /// Gets the first keybind linked to <see cref="ServerSpecificSettingBase"/>.
@@ -546,6 +556,22 @@ namespace SSMenuSystem.Features
                 LoadForPlayer(hub, this);
         }
 
+
+        /// <summary>
+        /// Reload all <see cref="ReferenceHub"/> for all <see cref="Menu"/>
+        /// </summary>
+        public static void ReloadAllPlayers()
+        {
+            foreach (ReferenceHub hub in ReferenceHub.AllHubs)
+                LoadForPlayer(hub, GetCurrentPlayerMenu(hub));
+        }
+
+        /// <summary>
+        /// Reload the menu of the specified <see cref="ReferenceHub"/>.
+        /// </summary>
+        /// <param name="hub">The target hub.</param>
+        public static void ReloadPlayer(ReferenceHub hub) => LoadForPlayer(hub, GetCurrentPlayerMenu(hub));
+
         /// <summary>
         /// Register <see cref="ServerSpecificSettingBase"/> that will be displayed on the top of all pages.
         /// </summary>
@@ -572,5 +598,6 @@ namespace SSMenuSystem.Features
         {
             return null;
         }
+
     }
 }
