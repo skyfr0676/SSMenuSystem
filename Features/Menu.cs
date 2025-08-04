@@ -318,17 +318,35 @@ namespace SSMenuSystem.Features
             if (Plugin.Instance.Config.AllowPinnedContent)
                 settings.AddRange(Pinned.Values.SelectMany(pin => pin));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
+            List<Menu> availableMainMenus = LoadedMenus
+                .Where(x => x.CheckAccess(hub) && x.MenuRelated == null)
+                .ToList();
+
+            int availableMainMenusCount = availableMainMenus.Count;
+            Menu firstMainMenu = availableMainMenus.FirstOrDefault();
+
+            bool isActualRootMenu = Id == 0;
+            bool shouldAddBackButton = !isActualRootMenu &&
+                (MenuRelated != null ||
+                 availableMainMenusCount > 1 ||
+                 Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne);
+
+            if (shouldAddBackButton)
             {
                 if (MenuRelated != null)
-                    settings.Add(new SSButton(0, string.Format(Plugin.Instance.Translation.ReturnTo.Label, Menu.GetMenu(MenuRelated)?.Name ?? "Unknown"),
+                {
+                    Menu parentMenu = GetMenu(MenuRelated);
+                    settings.Add(new SSButton(0, string.Format(Plugin.Instance.Translation.ReturnTo.Label, parentMenu?.Name ?? "Unknown"),
                         Plugin.Instance.Translation.ReturnTo.ButtonText));
+                }
                 else
+                {
                     settings.Add(new SSButton(0, Plugin.Instance.Translation.ReturnToMenu.Label,
                         Plugin.Instance.Translation.ReturnToMenu.ButtonText));
+                }
             }
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) == this && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
+            if (firstMainMenu == this && !Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name));
             else
             {
@@ -339,7 +357,7 @@ namespace SSMenuSystem.Features
             foreach (Menu s in LoadedMenus.Where(x => x.MenuRelated == GetType() && x != this))
                 settings.Add(new SSButton(s.Id, string.Format(Plugin.Instance.Translation.OpenMenu.Label, s.Name), Plugin.Instance.Translation.OpenMenu.ButtonText, null, string.IsNullOrEmpty(Description) ? null : Description));
 
-            if (LoadedMenus.First(x => x.CheckAccess(hub) && x.MenuRelated == null) != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
+            if (firstMainMenu != this || Plugin.Instance.Config.ForceMainMenuEvenIfOnlyOne)
                 settings.Add(new SSGroupHeader(Name, false, Description));
 
             if (this is AssemblyMenu assemblyMenu &&
