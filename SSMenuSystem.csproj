@@ -140,7 +140,7 @@
       <Content Include="SSMenuSystem.ruleset" />
     </ItemGroup>
     <ItemGroup>
-        <PackageReference Include="ExMod.Exiled" Version="9.6.1" />
+        <PackageReference Include="ExMod.Exiled" Version="9.7.0" />
     </ItemGroup>
     <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets"/>
     <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
